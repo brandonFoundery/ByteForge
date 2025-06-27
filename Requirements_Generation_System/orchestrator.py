@@ -279,20 +279,31 @@ class RequirementsOrchestrator:
         self.config_manager = ConfigManager(self.base_path / "Requirements_Generation_System")
 
         # Load configuration to get proper paths
-        config = self.config_manager.load_config()
+        config = self.config_manager._load_config()
 
-        # Use config-based paths instead of hardcoded ones
-        self.output_path = Path(config.get('paths', {}).get('output_dir', base_path / "generated_documents"))
-        self.prompts_path = Path(config.get('paths', {}).get('prompts_dir', base_path / "Requirements_Generation_Prompts"))
-        self.requirements_path = Path(config.get('paths', {}).get('requirements_dir', base_path / "Requirements"))
+        # Use config-based paths with fallbacks if config is None
+        if config and 'paths' in config:
+            self.output_path = Path(config['paths'].get('output_dir', base_path / "generated_documents"))
+            self.prompts_path = Path(config['paths'].get('prompts_dir', base_path / "Requirements_Generation_Prompts"))
+            self.requirements_path = Path(config['paths'].get('requirements_dir', base_path / "Requirements"))
+        else:
+            # Fallback to default paths if config loading fails
+            self.output_path = base_path / "generated_documents"
+            self.prompts_path = base_path / "Requirements_Generation_Prompts"
+            self.requirements_path = base_path / "Requirements"
 
         # Make paths absolute if they're relative
+        script_dir = Path(__file__).parent  # Requirements_Generation_System directory
+        byteforge_root = script_dir.parent   # ByteForge directory
+
         if not self.output_path.is_absolute():
-            self.output_path = (self.base_path / "Requirements_Generation_System" / self.output_path).resolve()
+            self.output_path = (script_dir / self.output_path).resolve()
         if not self.prompts_path.is_absolute():
-            self.prompts_path = (self.base_path / "Requirements_Generation_System" / self.prompts_path).resolve()
+            # Prompts are at ByteForge root level, not relative to script_dir
+            self.prompts_path = (byteforge_root / "Requirements_Generation_Prompts").resolve()
         if not self.requirements_path.is_absolute():
-            self.requirements_path = (self.base_path / "Requirements_Generation_System" / self.requirements_path).resolve()
+            self.requirements_path = (script_dir / self.requirements_path).resolve()
+
 
         # Initialize artifact processor
         self.artifact_processor = ArtifactProcessor(self.base_path)

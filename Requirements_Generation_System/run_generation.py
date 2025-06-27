@@ -901,6 +901,18 @@ def main():
             return 1
 
     elif choice == "1":
+        # Full generation workflow: Requirements -> AI Agent Design -> Development Plan
+        console.print("\n[bold cyan]Full Generation Workflow[/bold cyan]")
+        console.print("This will run the complete end-to-end generation process:")
+        console.print("  [cyan]1. Generate all requirements documents (BRD, PRD, FRD, etc.)[/cyan]")
+        console.print("  [cyan]2. Generate AI Agent Design Documents[/cyan]")
+        console.print("  [cyan]3. Generate Development Plan[/cyan]")
+
+        confirm = Prompt.ask("\nProceed with full generation workflow?", choices=["y", "n"], default="y")
+        if confirm.lower() != "y":
+            console.print("[yellow]Full generation cancelled.[/yellow]")
+            return 0
+
         # Start monitor if enabled
         if config['monitoring']['enabled']:
             run_monitor(config['paths']['output_dir'])
@@ -908,8 +920,66 @@ def main():
         # Launch dashboard in browser
         launch_dashboard()
 
-        # Run full generation with selected model
-        run_orchestrator(config_path, model_provider)
+        try:
+            # Step 1: Generate all requirements documents
+            console.print("\n[bold]Step 1/3: Generating Requirements Documents[/bold]")
+            run_orchestrator(config_path, model_provider)
+            console.print("[green][OK] Requirements documents generated successfully![/green]")
+
+            # Step 2: Generate AI Agent Design Documents
+            console.print("\n[bold]Step 2/3: Generating AI Agent Design Documents[/bold]")
+
+            # Get API key and set environment
+            key_info = get_api_key_info(model_provider)
+            api_key = get_api_key(model_provider)
+
+            if not api_key:
+                console.print(f"[bold red]Error: No API key available for {key_info['name']}[/bold red]")
+                return 1
+
+            import os
+            os.environ[key_info["env_var"]] = api_key
+
+            from design_document_generator import DesignDocumentGenerator
+            base_path = Path(config['paths']['base_dir'])
+            design_generator = DesignDocumentGenerator(config['project']['name'], base_path, model_provider)
+
+            import asyncio
+            result = asyncio.run(design_generator.generate_all_agent_designs())
+
+            if result.success:
+                console.print(f"[green][OK] AI Agent Design Documents generated successfully![/green]")
+                console.print(f"[green]Generated {len(result.generated_documents)} design documents in {result.total_execution_time:.2f} seconds[/green]")
+            else:
+                console.print(f"[red][ERROR] Design document generation failed: {result.error_summary}[/red]")
+                return 1
+
+            # Step 3: Generate Development Plan
+            console.print("\n[bold]Step 3/3: Generating Development Plan[/bold]")
+
+            from orchestrator import RequirementsOrchestrator, DocumentType
+            orchestrator = RequirementsOrchestrator(config['project']['name'], base_path, config_path, model_provider=model_provider)
+
+            result = asyncio.run(orchestrator.generate_document(DocumentType.DEV_PLAN, model_provider))
+            validation_success = asyncio.run(orchestrator.validate_and_repair_document(DocumentType.DEV_PLAN))
+
+            if validation_success:
+                console.print("[green][OK] Development Plan generated and validated successfully![/green]")
+            else:
+                console.print("[yellow][WARNING] Development Plan generated but validation failed.[/yellow]")
+
+            # Final success message
+            console.print(f"\n[bold green]🎉 Full Generation Workflow Completed Successfully! 🎉[/bold green]")
+            console.print("[green]All documents have been generated in the correct order:[/green]")
+            console.print("[green]  ✅ Requirements Documents[/green]")
+            console.print("[green]  ✅ AI Agent Design Documents[/green]")
+            console.print("[green]  ✅ Development Plan[/green]")
+
+        except Exception as e:
+            console.print(f"[red]Error in full generation workflow: {e}[/red]")
+            import traceback
+            traceback.print_exc()
+            return 1
         
     elif choice == "2":
         # Resume from last checkpoint

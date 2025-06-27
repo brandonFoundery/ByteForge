@@ -3992,9 +3992,12 @@ async def main():
     
     args = parser.parse_args()
     
-    # Configuration
+    # Configuration - Use project folder instead of hardcoded client path
     project_name = "FY.WB.Midway"
-    base_path = Path("d:/Repository/@Clients/FY.WB.Midway")
+    # Get the current script directory and navigate to project folder
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent / "project"
+    base_path = project_root
 
     # Create orchestrator with optional config
     config_path = Path(args.config) if args.config else None

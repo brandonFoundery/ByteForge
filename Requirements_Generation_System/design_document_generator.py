@@ -38,8 +38,8 @@ class DesignDocumentGenerator:
         self.project_name = project_name
         self.base_path = base_path
         self.model_provider = model_provider
-        self.output_path = base_path / "generated_documents" / "design"
-        self.requirements_path = base_path / "generated_documents"
+        self.output_path = base_path / "design"
+        self.requirements_path = base_path / "requirements"
         
         # Ensure output directory exists
         self.output_path.mkdir(parents=True, exist_ok=True)
@@ -120,12 +120,12 @@ class DesignDocumentGenerator:
                         f.write(document_content)
                     
                     generated_documents.append(filename)
-                    console.print(f"[green]✅ Generated: {filename}[/green]")
+                    console.print(f"[green][OK] Generated: {filename}[/green]")
                     
                 except Exception as e:
                     error_msg = f"Failed to generate {agent_info['name']} design: {str(e)}"
                     errors.append(error_msg)
-                    console.print(f"[red]❌ {error_msg}[/red]")
+                    console.print(f"[red][ERROR] {error_msg}[/red]")
                 
                 progress.remove_task(task)
         
@@ -136,7 +136,7 @@ class DesignDocumentGenerator:
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(readme_content)
             generated_documents.append("README.md")
-            console.print(f"[green]✅ Generated: README.md[/green]")
+            console.print(f"[green][OK] Generated: README.md[/green]")
         except Exception as e:
             errors.append(f"Failed to generate README.md: {str(e)}")
         
@@ -236,7 +236,7 @@ agent_type: {agent_info['name']}
 branch_pattern: {agent_info['branch_pattern']}
 technology_stack: {agent_info['technology_stack']}
 dependencies: [list of other agents this depends on]
-generated_at: '{time.strftime("%Y-%m-%dT%H:%M:%S.%f")}'
+generated_at: '{time.strftime("%Y-%m-%dT%H:%M:%S")}'
 id: {agent_id.upper()}_AGENT_DESIGN
 version: '1.0'
 ---
@@ -337,15 +337,17 @@ The design documents provide comprehensive context including:
 
 async def main():
     """Test the design document generator"""
-    base_path = Path("d:/Repository/@Clients/FY.WB.Midway")
+    # Use project folder instead of hardcoded client path
+    script_dir = Path(__file__).parent
+    base_path = script_dir.parent / "project"
     generator = DesignDocumentGenerator("FY.WB.Midway", base_path, "openai")
     
     result = await generator.generate_all_agent_designs()
     
     if result.success:
-        console.print(f"[green]✅ Successfully generated {len(result.generated_documents)} design documents[/green]")
+        console.print(f"[green][OK] Successfully generated {len(result.generated_documents)} design documents[/green]")
     else:
-        console.print(f"[red]❌ Generation failed: {result.error_summary}[/red]")
+        console.print(f"[red][ERROR] Generation failed: {result.error_summary}[/red]")
 
 
 if __name__ == "__main__":

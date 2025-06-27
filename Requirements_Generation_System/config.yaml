@@ -10,20 +10,20 @@ project:
 
 # Input/Output Paths
 paths:
-  # Base directory of the project
-  base_dir: "d:/Repository/@Clients/FY.WB.Midway"
+  # Base directory of the project - now uses project folder
+  base_dir: "../project"
 
   # Source requirements directory
-  requirements_dir: "d:/Repository/@Clients/FY.WB.Midway/generated_documents"
+  requirements_dir: "../project/requirements"
 
   # Prompt templates directory
-  prompts_dir: "d:/Repository/@Clients/FY.WB.Midway/Requirements_Generation_Prompts"
+  prompts_dir: "../Requirements_Generation_Prompts"
 
   # Output directory for generated documents
-  output_dir: "d:/Repository/@Clients/FY.WB.Midway/generated_documents"
+  output_dir: "../project/requirements"
 
   # Status tracking directory
-  status_dir: "d:/Repository/@Clients/FY.WB.Midway/generation_status"
+  status_dir: "../project/generation_status"
 
   # Source code directories for full regeneration
   frontend_dir: "FrontEnd"

@@ -62,8 +62,22 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Initialize rich console for beautiful output
-console = Console()
+# Initialize rich console for beautiful output with Windows encoding fix
+import sys
+import platform
+
+# Fix Windows console encoding issues
+if platform.system() == "Windows":
+    try:
+        # Try to set UTF-8 encoding for Windows
+        import os
+        os.system("chcp 65001 > nul")
+        console = Console(force_terminal=True, legacy_windows=False)
+    except:
+        # Fallback for older Windows systems
+        console = Console(force_terminal=True, legacy_windows=True)
+else:
+    console = Console()
 
 # Import split document generators
 try:
@@ -177,7 +191,7 @@ class ConfigManager:
             try:
                 from dotenv import load_dotenv
                 load_dotenv(self.env_file)
-                console.print(f"[green]✓ Loaded configuration from {self.env_file}[/green]")
+                console.print(f"[green][OK] Loaded configuration from {self.env_file}[/green]")
             except ImportError:
                 console.print(f"[yellow]Warning: python-dotenv not installed. Install with: pip install python-dotenv[/yellow]")
         else:
@@ -200,13 +214,13 @@ class ConfigManager:
 
         api_key = os.getenv(env_var)
         if not api_key:
-            console.print(f"[red]❌ {env_var} not found in environment variables[/red]")
+            console.print(f"[red][ERROR] {env_var} not found in environment variables[/red]")
             console.print(f"[yellow]Please set it in your .env file or environment[/yellow]")
             return None
 
         # Don't log the full key for security
         masked_key = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
-        console.print(f"[green]✓ Found {env_var}: {masked_key}[/green]")
+        console.print(f"[green][OK] Found {env_var}: {masked_key}[/green]")
         return api_key
 
     def get_setting(self, key: str, default: Any = None) -> Any:
@@ -220,7 +234,7 @@ class ConfigManager:
             if example_file.exists():
                 console.print(f"[yellow]Creating .env file from example...[/yellow]")
                 self.env_file.write_text(example_file.read_text())
-                console.print(f"[green]✓ Created {self.env_file}[/green]")
+                console.print(f"[green][OK] Created {self.env_file}[/green]")
                 console.print(f"[yellow]Please edit {self.env_file} and add your API keys[/yellow]")
                 return True
         return False
@@ -229,7 +243,7 @@ class ConfigManager:
         """Validate that required API keys are present"""
         api_key = self.get_api_key(provider)
         if not api_key:
-            console.print(f"[red]❌ Missing API key for {provider}[/red]")
+            console.print(f"[red][ERROR] Missing API key for {provider}[/red]")
             self._show_setup_instructions(provider)
             return False
         return True
@@ -796,7 +810,7 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
         # Enhance prompt with artifacts if available
         if artifacts_context["artifacts_summary"]["detailed_specs_count"] > 0:
             main_prompt = create_artifact_enhanced_prompt(main_prompt, artifacts_context)
-            console.print(f"[green]✅ Enhanced prompt with {artifacts_context['artifacts_summary']['detailed_specs_count']} detailed specs and {artifacts_context['artifacts_summary']['json_blueprints_count']} UI blueprints[/green]")
+            console.print(f"[green][OK] Enhanced prompt with {artifacts_context['artifacts_summary']['detailed_specs_count']} detailed specs and {artifacts_context['artifacts_summary']['json_blueprints_count']} UI blueprints[/green]")
         
         # Build the full prompt
         full_prompt = f"""
@@ -933,7 +947,7 @@ IMPORTANT REFINEMENT INSTRUCTIONS:
             # Save the updated document
             await self.save_document(doc_type)
 
-            console.print(f"[green]✓ Reviewed {doc_type.value} successfully[/green]")
+            console.print(f"[green][OK] Reviewed {doc_type.value} successfully[/green]")
             return True
 
         except Exception as e:
@@ -1132,7 +1146,7 @@ Please provide the improved version of the document. Make only necessary improve
             success = await self._process_code_analysis_response(response, cumulative_docs_dir, batch_id)
 
             if success:
-                console.print(f"[green]✓ Successfully generated requirements from batch {batch_id}[/green]")
+                console.print(f"[green][OK] Successfully generated requirements from batch {batch_id}[/green]")
             else:
                 console.print(f"[yellow]⚠ Partial success for batch {batch_id}[/yellow]")
 
@@ -1140,7 +1154,7 @@ Please provide the improved version of the document. Make only necessary improve
 
         except Exception as e:
             logger.error(f"Error generating requirements from code batch {batch_id}: {e}")
-            console.print(f"[red]✗ Failed to generate requirements from batch {batch_id}: {e}[/red]")
+            console.print(f"[red][FAIL] Failed to generate requirements from batch {batch_id}: {e}[/red]")
             return False
 
     def _build_code_analysis_prompt(self, code_files: List[dict], cumulative_context: str, batch_id: str) -> str:
@@ -1423,7 +1437,7 @@ This log tracks the batch processing of code files for requirements generation.
             if validation_result.is_valid:
                 doc.status = DocumentStatus.VALIDATED
                 await self.save_status_file(doc_type)
-                console.print(f"[green]✓ {doc_type.value} validated successfully[/green]")
+                console.print(f"[green][OK] {doc_type.value} validated successfully[/green]")
                 return True
 
             # Attempt auto-repair
@@ -1443,7 +1457,7 @@ This log tracks the batch processing of code files for requirements generation.
         doc.validation_errors = validation_result.errors
         await self.save_status_file(doc_type)
 
-        console.print(f"[red]✗ Validation failed for {doc_type.value} after {repair_attempts} repair attempts:[/red]")
+        console.print(f"[red][FAIL] Validation failed for {doc_type.value} after {repair_attempts} repair attempts:[/red]")
         for error in validation_result.errors:
             console.print(f"  [red]- {error}[/red]")
 
@@ -3650,12 +3664,12 @@ This document defines the carrier management view specifications following the U
         ))
 
         if not self.review_config.get('enabled', False):
-            console.print("[red]❌ Review system is disabled. Cannot run review-only mode.[/red]")
+            console.print("[red][ERROR] Review system is disabled. Cannot run review-only mode.[/red]")
             console.print("[yellow]Enable review system in config.yaml or remove --no-review flag[/yellow]")
             return
 
         if not self.reviewer_llm_client:
-            console.print("[red]❌ Reviewer LLM client not available. Check API keys.[/red]")
+            console.print("[red][ERROR] Reviewer LLM client not available. Check API keys.[/red]")
             return
 
         # Load existing documents
@@ -3668,7 +3682,7 @@ This document defines the carrier management view specifications following the U
                 reviewable_docs.append(doc_type)
 
         if not reviewable_docs:
-            console.print("[yellow]⚠️  No existing documents found that can be reviewed.[/yellow]")
+            console.print("[yellow][WARNING]  No existing documents found that can be reviewed.[/yellow]")
             console.print("[cyan]Documents must be in GENERATED, REFINED, or VALIDATED status to be reviewed.[/cyan]")
             return
 
@@ -3691,10 +3705,10 @@ This document defines the carrier management view specifications following the U
                 review_success = await self.review_document(doc_type)
 
                 if review_success:
-                    console.print(f"[green]✓ {doc_type.value} reviewed and improved[/green]")
+                    console.print(f"[green][OK] {doc_type.value} reviewed and improved[/green]")
                     reviewed_count += 1
                 else:
-                    console.print(f"[red]✗ Review failed for {doc_type.value}[/red]")
+                    console.print(f"[red][FAIL] Review failed for {doc_type.value}[/red]")
                     failed_count += 1
 
             except Exception as e:
@@ -3785,7 +3799,7 @@ This document defines the carrier management view specifications following the U
                     validation_success = await self.validate_and_repair_document(doc_type, max_repair_attempts=3)
 
                     if not validation_success:
-                        console.print(f"[red]⚠️  {doc_type.value} failed validation after auto-repair attempts[/red]")
+                        console.print(f"[red][WARNING]  {doc_type.value} failed validation after auto-repair attempts[/red]")
                         console.print(f"[yellow]Document saved but may have issues. Manual review recommended.[/yellow]")
                 else:
                     # Use basic validation without auto-repair
@@ -3794,9 +3808,9 @@ This document defines the carrier management view specifications following the U
                 # Review document with reviewer LLM (if enabled)
                 review_success = await self.review_document(doc_type)
                 if review_success:
-                    console.print(f"[green]✓ {doc_type.value} reviewed and improved[/green]")
+                    console.print(f"[green][OK] {doc_type.value} reviewed and improved[/green]")
                 else:
-                    console.print(f"[yellow]⚠️  Review step failed for {doc_type.value}, using original version[/yellow]")
+                    console.print(f"[yellow][WARNING]  Review step failed for {doc_type.value}, using original version[/yellow]")
 
                 # Update visualization after each document
                 self.visualize_dependencies(f"state_after_{doc_type.name.lower()}.png")

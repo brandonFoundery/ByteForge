@@ -36,7 +36,17 @@ except ImportError:
         console.print("[red]UI Style System not available. Please ensure ui_style_system module is properly installed.[/red]")
         return False
 
-console = Console()
+# Initialize console with Windows encoding fix
+import platform
+if platform.system() == "Windows":
+    try:
+        import os
+        os.system("chcp 65001 > nul")
+        console = Console(force_terminal=True, legacy_windows=False)
+    except:
+        console = Console(force_terminal=True, legacy_windows=True)
+else:
+    console = Console()
 
 
 def load_config(config_path: Path) -> dict:
@@ -114,7 +124,7 @@ def check_environment(config: dict, model_provider: str = None, prompt_for_keys:
     if issues:
         console.print("\n[red]Environment issues found:[/red]")
         for issue in issues:
-            console.print(f"  ❌ {issue}")
+            console.print(f"  [ERROR] {issue}")
         return False
     else:
         console.print("[green]Environment check passed![/green]")
@@ -305,9 +315,9 @@ def run_orchestrator(config_path: Path, model_provider: str = "openai"):
         process.wait()
         
         if process.returncode == 0:
-            console.print("\n[bold green]✨ Generation completed successfully![/bold green]")
+            console.print("\n[bold green][COMPLETE] Generation completed successfully![/bold green]")
         else:
-            console.print(f"\n[bold red]❌ Generation failed with code {process.returncode}[/bold red]")
+            console.print(f"\n[bold red][ERROR] Generation failed with code {process.returncode}[/bold red]")
             
     except KeyboardInterrupt:
         console.print("\n[yellow]Generation interrupted by user[/yellow]")
@@ -358,9 +368,9 @@ def run_orchestrator_resume(config_path: Path, model_provider: str = "openai"):
         process.wait()
 
         if process.returncode == 0:
-            console.print("\n[bold green]✨ Resume completed successfully![/bold green]")
+            console.print("\n[bold green][COMPLETE] Resume completed successfully![/bold green]")
         else:
-            console.print(f"\n[bold red]❌ Resume failed with code {process.returncode}[/bold red]")
+            console.print(f"\n[bold red][ERROR] Resume failed with code {process.returncode}[/bold red]")
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Resume interrupted by user[/yellow]")
@@ -427,7 +437,7 @@ def launch_dashboard():
         else:  # Linux
             subprocess.Popen(["xdg-open", dashboard_url])
 
-        console.print(f"[green]✅ Dashboard opened in browser: {dashboard_url}[/green]")
+        console.print(f"[green][OK] Dashboard opened in browser: {dashboard_url}[/green]")
 
     except Exception as e:
         console.print(f"[yellow]Warning: Could not start dashboard: {str(e)}[/yellow]")
@@ -484,7 +494,7 @@ def manage_api_keys():
         if update:
             api_key = get_api_key(provider, force_prompt=True)
             if api_key:
-                console.print(f"[green]✅ {key_info['name']} API key updated[/green]")
+                console.print(f"[green][OK] {key_info['name']} API key updated[/green]")
             else:
                 console.print(f"[yellow]No key provided for {key_info['name']}[/yellow]")
 
@@ -563,7 +573,7 @@ async def full_regeneration_workflow(config_path: Path, model_provider: str = "o
         cumulative_docs_dir = output_dir / "code_generated_requirements"
         cumulative_docs_dir.mkdir(parents=True, exist_ok=True)
 
-        console.print(f"[green]✓ Purged old outputs and recreated directories[/green]")
+        console.print(f"[green][OK] Purged old outputs and recreated directories[/green]")
 
         console.print(f"\n[cyan]Step B: Discovering code files...[/cyan]")
 
@@ -581,14 +591,14 @@ async def full_regeneration_workflow(config_path: Path, model_provider: str = "o
         tree_path = output_dir / "code_tree.json"
         scanner.save_code_tree(code_tree, tree_path)
 
-        console.print(f"[green]✓ Discovered {code_tree.total_files} code files[/green]")
+        console.print(f"[green][OK] Discovered {code_tree.total_files} code files[/green]")
         console.print(f"[dim]Code tree saved to: {tree_path}[/dim]")
 
         console.print(f"\n[cyan]Step C: Creating file batches...[/cyan]")
 
         # Step C: Create batches
         batches = scanner.create_batches(code_tree)
-        console.print(f"[green]✓ Created {len(batches)} batches for processing[/green]")
+        console.print(f"[green][OK] Created {len(batches)} batches for processing[/green]")
 
         # Display batch summary
         for i, batch in enumerate(batches[:5], 1):  # Show first 5 batches
@@ -657,10 +667,10 @@ async def full_regeneration_workflow(config_path: Path, model_provider: str = "o
 
                 if success:
                     successful_batches += 1
-                    console.print(f"[green]✓ Batch {i} completed successfully[/green]")
+                    console.print(f"[green][OK] Batch {i} completed successfully[/green]")
                 else:
                     failed_batches += 1
-                    console.print(f"[red]✗ Batch {i} failed[/red]")
+                    console.print(f"[red][FAIL] Batch {i} failed[/red]")
 
                 # Save batch status
                 status_file = status_dir / f"status_batch_{batch.batch_id}.json"
@@ -717,7 +727,7 @@ async def full_regeneration_workflow(config_path: Path, model_provider: str = "o
 
             except Exception as e:
                 failed_batches += 1
-                console.print(f"[red]✗ Batch {i} failed with error: {e}[/red]")
+                console.print(f"[red][FAIL] Batch {i} failed with error: {e}[/red]")
 
                 # Save error status
                 status_file = status_dir / f"status_batch_{batch.batch_id}.json"
@@ -738,13 +748,13 @@ async def full_regeneration_workflow(config_path: Path, model_provider: str = "o
                 continue
 
         console.print(f"\n[cyan]Step E: Processing complete![/cyan]")
-        console.print(f"[green]✓ Successful batches: {successful_batches}[/green]")
-        console.print(f"[red]✗ Failed batches: {failed_batches}[/red]")
+        console.print(f"[green][OK] Successful batches: {successful_batches}[/green]")
+        console.print(f"[red][FAIL] Failed batches: {failed_batches}[/red]")
         if skipped_batches > 0:
-            console.print(f"[dim]⏭ Skipped batches (already processed): {skipped_batches}[/dim]")
+            console.print(f"[dim][SKIP] Skipped batches (already processed): {skipped_batches}[/dim]")
 
         if successful_batches > 0:
-            console.print(f"\n[green]🎉 Requirements regeneration completed![/green]")
+            console.print(f"\n[green][SUCCESS] Requirements regeneration completed![/green]")
             console.print(f"[green]Generated requirements saved to: {cumulative_docs_dir}[/green]")
             console.print(f"[green]Processing status saved to: {status_dir}[/green]")
 
@@ -754,7 +764,7 @@ async def full_regeneration_workflow(config_path: Path, model_provider: str = "o
 
             return True
         else:
-            console.print(f"\n[red]❌ No batches were processed successfully[/red]")
+            console.print(f"\n[red][ERROR] No batches were processed successfully[/red]")
             return False
 
     except Exception as e:
@@ -868,7 +878,7 @@ def main():
         console.print("  [cyan]3. Feed code files to LLM in coherent batches[/cyan]")
         console.print("  [cyan]4. Iteratively rebuild BRD/PRD/FRD/NFRD documents[/cyan]")
 
-        confirm = Prompt.ask("\n[bold red]⚠️ This will DELETE all existing generated requirements. Continue?[/bold red]", choices=["y", "n"], default="n")
+        confirm = Prompt.ask("\n[bold red][WARNING] This will DELETE all existing generated requirements. Continue?[/bold red]", choices=["y", "n"], default="n")
         if confirm.lower() != "y":
             console.print("[yellow]Full regeneration cancelled.[/yellow]")
             return 0
@@ -878,10 +888,10 @@ def main():
             success = asyncio.run(full_regeneration_workflow(config_path, model_provider))
 
             if success:
-                console.print("\n[bold green]🎉 Full regeneration completed successfully![/bold green]")
+                console.print("\n[bold green][SUCCESS] Full regeneration completed successfully![/bold green]")
                 console.print("[green]You can now run other options to validate or further process the generated requirements.[/green]")
             else:
-                console.print("\n[bold red]❌ Full regeneration failed[/bold red]")
+                console.print("\n[bold red][ERROR] Full regeneration failed[/bold red]")
                 return 1
 
         except Exception as e:
@@ -980,7 +990,7 @@ def main():
                 "graph", config['paths']['output_dir']
             ])
             
-        console.print("[green]✅ Traceability report generated![/green]")
+        console.print("[green][OK] Traceability report generated![/green]")
         
     elif choice == "6":
         # Manage API keys
@@ -1088,9 +1098,9 @@ def main():
             success = asyncio.run(run_downstream_resume(base_path, config_path, model_provider))
 
             if success:
-                console.print("\n[green]✅ Downstream document resume completed successfully![/green]")
+                console.print("\n[green][OK] Downstream document resume completed successfully![/green]")
             else:
-                console.print("\n[yellow]⚠️  Downstream document resume completed with some issues.[/yellow]")
+                console.print("\n[yellow][WARNING]  Downstream document resume completed with some issues.[/yellow]")
 
         except Exception as e:
             console.print(f"[red]Error running downstream resume: {e}[/red]")
@@ -1135,10 +1145,10 @@ def main():
             validation_success = asyncio.run(orchestrator.validate_and_repair_document(DocumentType.DEV_PLAN))
 
             if validation_success:
-                console.print("[green]✅ Development Plan generated and validated successfully![/green]")
-                console.print("[green]✅ Development Plan saved to generated_documents/dev_plan.md[/green]")
+                console.print("[green][OK] Development Plan generated and validated successfully![/green]")
+                console.print("[green][OK] Development Plan saved to generated_documents/dev_plan.md[/green]")
             else:
-                console.print("[yellow]⚠️ Development Plan generated but validation failed. Please review manually.[/yellow]")
+                console.print("[yellow][WARNING] Development Plan generated but validation failed. Please review manually.[/yellow]")
 
         except Exception as e:
             console.print(f"[red]Error generating development plan: {e}[/red]")
@@ -1162,7 +1172,7 @@ def main():
             console.print("[red]Please generate the development plan first (option 9)[/red]")
             return 1
 
-        console.print(f"\n[green]✅ Found development plan: {dev_plan_path}[/green]")
+        console.print(f"\n[green][OK] Found development plan: {dev_plan_path}[/green]")
 
         confirm = Prompt.ask("\nProceed with AI agent design document generation?", choices=["y", "n"], default="y")
         if confirm.lower() != "y":
@@ -1194,9 +1204,9 @@ def main():
             result = asyncio.run(design_generator.generate_all_agent_designs())
 
             if result.success:
-                console.print(f"\n[bold green]🎉 All AI agent design documents generated successfully![/bold green]")
-                console.print(f"[green]✅ Documents saved to: generated_documents/design/[/green]")
-                console.print(f"[green]✅ Total execution time: {result.total_execution_time:.2f} seconds[/green]")
+                console.print(f"\n[bold green][SUCCESS] All AI agent design documents generated successfully![/bold green]")
+                console.print(f"[green][OK] Documents saved to: generated_documents/design/[/green]")
+                console.print(f"[green][OK] Total execution time: {result.total_execution_time:.2f} seconds[/green]")
 
                 # List generated files
                 design_dir = base_path / "generated_documents" / "design"
@@ -1206,7 +1216,7 @@ def main():
                     for design_file in sorted(design_files):
                         console.print(f"  • {design_file.name}")
             else:
-                console.print(f"\n[bold red]❌ Design document generation failed[/bold red]")
+                console.print(f"\n[bold red][ERROR] Design document generation failed[/bold red]")
                 if result.error_summary:
                     console.print(f"[red]Error summary: {result.error_summary}[/red]")
 
@@ -1251,7 +1261,7 @@ def main():
                 console.print("[red]Please generate design documents first (option 10)[/red]")
                 return 1
 
-            console.print(f"\n[green]✅ Found {len(design_files)} agent design documents:[/green]")
+            console.print(f"\n[green][OK] Found {len(design_files)} agent design documents:[/green]")
             for design_file in sorted(design_files):
                 agent_name = design_file.stem.replace("-agent-design", "").replace("-", " ").title()
                 console.print(f"  • {agent_name} Agent")
@@ -1296,8 +1306,8 @@ def main():
                 result = asyncio.run(claude_executor.execute_implementation(agent_choice, phase_choice))
 
                 if result.success:
-                    console.print(f"\n[bold green]🎉 Claude Code implementation completed successfully![/bold green]")
-                    console.print(f"[green]✅ Total execution time: {result.total_execution_time:.2f} seconds[/green]")
+                    console.print(f"\n[bold green][SUCCESS] Claude Code implementation completed successfully![/bold green]")
+                    console.print(f"[green][OK] Total execution time: {result.total_execution_time:.2f} seconds[/green]")
 
                     # Display results for each agent
                     for agent_result in result.agent_results:
@@ -1308,7 +1318,7 @@ def main():
                         if agent_result.pr_url:
                             console.print(f"    [dim]PR: {agent_result.pr_url}[/dim]")
                 else:
-                    console.print(f"\n[bold red]❌ Claude Code implementation failed[/bold red]")
+                    console.print(f"\n[bold red][ERROR] Claude Code implementation failed[/bold red]")
                     if result.error_summary:
                         console.print(f"[red]Error summary: {result.error_summary}[/red]")
 
@@ -1344,7 +1354,7 @@ def main():
                 console.print("[red]Please generate design documents first (option 10)[/red]")
                 return 1
 
-            console.print(f"\n[green]✅ Found {len(design_files)} agent design documents[/green]")
+            console.print(f"\n[green][OK] Found {len(design_files)} agent design documents[/green]")
 
             # Agent selection for simulation
             console.print("\n[bold]Select agents to simulate:[/bold]")
@@ -1407,16 +1417,16 @@ def main():
 
                 # Show results
                 successful = [r for r in results if r.success]
-                console.print(f"\n[bold green]🎉 Simulation Complete![/bold green]")
-                console.print(f"[green]✅ Successful: {len(successful)}/{len(results)} agents[/green]")
+                console.print(f"\n[bold green][SUCCESS] Simulation Complete![/bold green]")
+                console.print(f"[green][OK] Successful: {len(successful)}/{len(results)} agents[/green]")
 
                 total_files = sum(len(r.files_created or []) + len(r.files_modified or []) for r in successful)
-                console.print(f"[green]📄 Total files that would be affected: {total_files}[/green]")
+                console.print(f"[green][FILE] Total files that would be affected: {total_files}[/green]")
 
                 # Show detailed results for first successful agent
                 if successful:
                     first_result = successful[0]
-                    console.print(f"\n[blue]📋 Sample Implementation Summary ({first_result.agent_name}):[/blue]")
+                    console.print(f"\n[blue][INFO] Sample Implementation Summary ({first_result.agent_name}):[/blue]")
                     if first_result.implementation_summary:
                         console.print(first_result.implementation_summary)
 
@@ -1443,7 +1453,7 @@ def main():
         console.print("  [cyan]Pass 3:[/cyan] Claude Sonnet 4 - Implementation (uses Pass 2 output + all technical docs)")
         console.print("  [cyan]Pass 4:[/cyan] Automated Build System - Code Generation & Compilation")
 
-        console.print("\n[yellow]⚠️  This will automatically build based on your existing requirements documents:[/yellow]")
+        console.print("\n[yellow][WARNING]  This will automatically build based on your existing requirements documents:[/yellow]")
         console.print("  • Create a new Git feature branch")
         console.print("  • Generate and modify code files")
         console.print("  • Run build and test commands")
@@ -1498,7 +1508,7 @@ def main():
             os.environ[key_info["env_var"]] = api_key
             api_keys[model] = api_key
 
-        console.print("[green]✅ All API keys configured successfully[/green]")
+        console.print("[green][OK] All API keys configured successfully[/green]")
 
         # Initialize ApplicationBuilder
         try:
@@ -1516,14 +1526,14 @@ def main():
 
             # Display results
             if result.success:
-                console.print(f"\n[bold green]🎉 Application build completed successfully![/bold green]")
+                console.print(f"\n[bold green][SUCCESS] Application build completed successfully![/bold green]")
                 if result.feature_branch:
-                    console.print(f"[green]✅ Feature branch: {result.feature_branch}[/green]")
+                    console.print(f"[green][OK] Feature branch: {result.feature_branch}[/green]")
                 if result.pr_url:
-                    console.print(f"[green]✅ Pull Request: {result.pr_url}[/green]")
-                console.print(f"[green]✅ Total execution time: {result.total_execution_time:.2f} seconds[/green]")
+                    console.print(f"[green][OK] Pull Request: {result.pr_url}[/green]")
+                console.print(f"[green][OK] Total execution time: {result.total_execution_time:.2f} seconds[/green]")
             else:
-                console.print(f"\n[bold red]❌ Application build failed[/bold red]")
+                console.print(f"\n[bold red][ERROR] Application build failed[/bold red]")
                 if result.error_summary:
                     console.print(f"[red]Error summary: {result.error_summary}[/red]")
                 console.print(f"[yellow]Check logs in {base_path}/logs/ for detailed error information[/yellow]")
@@ -1581,7 +1591,7 @@ def main():
             console.print("[red]Please generate design documents first (option 10)[/red]")
             return 1
 
-        console.print(f"\n[green]✅ Found {len(design_files)} agent design documents[/green]")
+        console.print(f"\n[green][OK] Found {len(design_files)} agent design documents[/green]")
 
         # Determine which phase to run
         target_phase = phase_map[choice]
@@ -1630,8 +1640,8 @@ def main():
             result = asyncio.run(claude_executor.execute_implementation("6", target_phase))
 
             if result.success:
-                console.print(f"\n[bold green]🎉 Phase {target_phase} implementation completed successfully![/bold green]")
-                console.print(f"[green]✅ Total execution time: {result.total_execution_time:.2f} seconds[/green]")
+                console.print(f"\n[bold green][SUCCESS] Phase {target_phase} implementation completed successfully![/bold green]")
+                console.print(f"[green][OK] Total execution time: {result.total_execution_time:.2f} seconds[/green]")
 
                 # Display results for each agent
                 for agent_result in result.agent_results:
@@ -1642,7 +1652,7 @@ def main():
                     if agent_result.pr_url:
                         console.print(f"    [dim]PR: {agent_result.pr_url}[/dim]")
             else:
-                console.print(f"\n[bold red]❌ Phase {target_phase} implementation failed[/bold red]")
+                console.print(f"\n[bold red][ERROR] Phase {target_phase} implementation failed[/bold red]")
                 if result.error_summary:
                     console.print(f"[red]Error summary: {result.error_summary}[/red]")
 
@@ -1668,9 +1678,9 @@ def main():
             success = handle_ui_style_menu_choice(choice, base_path)
 
             if success:
-                console.print("\n[bold green]✅ UI Style operation completed successfully![/bold green]")
+                console.print("\n[bold green][OK] UI Style operation completed successfully![/bold green]")
             else:
-                console.print("\n[bold red]❌ UI Style operation failed![/bold red]")
+                console.print("\n[bold red][ERROR] UI Style operation failed![/bold red]")
                 return 1
 
         except Exception as e:
@@ -1704,7 +1714,7 @@ def main():
 
             if choice == "20":
                 # Generate Frontend Test Plan
-                console.print("\n[bold red]📋 Generate Frontend Test Plan[/bold red]")
+                console.print("\n[bold red][INFO] Generate Frontend Test Plan[/bold red]")
                 console.print("This will analyze the frontend codebase and create a comprehensive test plan:")
                 console.print("  [cyan]• Scan all frontend pages and components[/cyan]")
                 console.print("  [cyan]• Identify interactive elements and controls[/cyan]")
@@ -1729,12 +1739,12 @@ def main():
                 result = asyncio.run(test_generator.generate_test_plan())
 
                 if result.success:
-                    console.print(f"\n[bold green]🎉 Frontend test plan generated successfully![/bold green]")
-                    console.print(f"[green]✅ Test plan saved to: {result.test_plan_path}[/green]")
-                    console.print(f"[green]✅ Total pages analyzed: {result.pages_analyzed}[/green]")
-                    console.print(f"[green]✅ Total test tasks created: {result.test_tasks_created}[/green]")
+                    console.print(f"\n[bold green][SUCCESS] Frontend test plan generated successfully![/bold green]")
+                    console.print(f"[green][OK] Test plan saved to: {result.test_plan_path}[/green]")
+                    console.print(f"[green][OK] Total pages analyzed: {result.pages_analyzed}[/green]")
+                    console.print(f"[green][OK] Total test tasks created: {result.test_tasks_created}[/green]")
                 else:
-                    console.print(f"\n[bold red]❌ Test plan generation failed[/bold red]")
+                    console.print(f"\n[bold red][ERROR] Test plan generation failed[/bold red]")
                     if result.error_summary:
                         console.print(f"[red]Error summary: {result.error_summary}[/red]")
 
@@ -1754,7 +1764,7 @@ def main():
                     console.print("[red]Please generate the test plan first (option 20)[/red]")
                     return 1
 
-                console.print(f"\n[green]✅ Found test plan: {test_plan_path}[/green]")
+                console.print(f"\n[green][OK] Found test plan: {test_plan_path}[/green]")
 
                 confirm = Prompt.ask("\nProceed with testRigor test generation?", choices=["y", "n"], default="y")
                 if confirm.lower() != "y":
@@ -1767,12 +1777,12 @@ def main():
                 result = asyncio.run(test_generator.generate_testrigor_tests())
 
                 if result.success:
-                    console.print(f"\n[bold green]🎉 testRigor tests generated successfully![/bold green]")
-                    console.print(f"[green]✅ Tests saved to: {result.tests_directory}[/green]")
-                    console.print(f"[green]✅ Total tests generated: {result.tests_generated}[/green]")
-                    console.print(f"[green]✅ Test execution time: {result.execution_time:.2f} seconds[/green]")
+                    console.print(f"\n[bold green][SUCCESS] testRigor tests generated successfully![/bold green]")
+                    console.print(f"[green][OK] Tests saved to: {result.tests_directory}[/green]")
+                    console.print(f"[green][OK] Total tests generated: {result.tests_generated}[/green]")
+                    console.print(f"[green][OK] Test execution time: {result.execution_time:.2f} seconds[/green]")
                 else:
-                    console.print(f"\n[bold red]❌ Test generation failed[/bold red]")
+                    console.print(f"\n[bold red][ERROR] Test generation failed[/bold red]")
                     if result.error_summary:
                         console.print(f"[red]Error summary: {result.error_summary}[/red]")
 
@@ -1795,20 +1805,20 @@ def main():
                 result = asyncio.run(test_generator.run_complete_workflow())
 
                 if result.success:
-                    console.print(f"\n[bold green]🎉 Complete testing workflow completed successfully![/bold green]")
-                    console.print(f"[green]✅ Test plan: {result.test_plan_path}[/green]")
-                    console.print(f"[green]✅ Tests directory: {result.tests_directory}[/green]")
-                    console.print(f"[green]✅ Total execution time: {result.total_execution_time:.2f} seconds[/green]")
-                    console.print(f"[green]✅ Pages analyzed: {result.pages_analyzed}[/green]")
-                    console.print(f"[green]✅ Tests generated: {result.tests_generated}[/green]")
+                    console.print(f"\n[bold green][SUCCESS] Complete testing workflow completed successfully![/bold green]")
+                    console.print(f"[green][OK] Test plan: {result.test_plan_path}[/green]")
+                    console.print(f"[green][OK] Tests directory: {result.tests_directory}[/green]")
+                    console.print(f"[green][OK] Total execution time: {result.total_execution_time:.2f} seconds[/green]")
+                    console.print(f"[green][OK] Pages analyzed: {result.pages_analyzed}[/green]")
+                    console.print(f"[green][OK] Tests generated: {result.tests_generated}[/green]")
                 else:
-                    console.print(f"\n[bold red]❌ Testing workflow failed[/bold red]")
+                    console.print(f"\n[bold red][ERROR] Testing workflow failed[/bold red]")
                     if result.error_summary:
                         console.print(f"[red]Error summary: {result.error_summary}[/red]")
 
             elif choice == "23":
                 # Fix E2E Test Issues with Claude Code
-                console.print("\n[bold red]🔧 Fix E2E Test Issues with Claude Code[/bold red]")
+                console.print("\n[bold red][TOOL] Fix E2E Test Issues with Claude Code[/bold red]")
                 console.print("This will use Claude Code to fix frontend issues identified by E2E test results:")
                 console.print("  [cyan]• Analyze current E2E test results and failures[/cyan]")
                 console.print("  [cyan]• Fix form field mapping issues[/cyan]")
@@ -1830,8 +1840,8 @@ def main():
                     console.print("[red]Instructions file should have been created automatically[/red]")
                     return 1
 
-                console.print(f"\n[green]✅ Found Claude Code instructions: {instructions_file}[/green]")
-                console.print(f"[green]✅ Found frontend directory: {frontend_dir}[/green]")
+                console.print(f"\n[green][OK] Found Claude Code instructions: {instructions_file}[/green]")
+                console.print(f"[green][OK] Found frontend directory: {frontend_dir}[/green]")
 
                 confirm = Prompt.ask("\nProceed with Claude Code E2E fixes?", choices=["y", "n"], default="y")
                 if confirm.lower() != "y":
@@ -1850,62 +1860,62 @@ def main():
 
                     # Create a temporary script file to avoid command line issues
                     diagnostic_script_content = '''#!/bin/bash
-echo "🔍 === Claude Code E2E Fixes Diagnostic ==="
+echo "[SEARCH] === Claude Code E2E Fixes Diagnostic ==="
 echo "📅 $(date)"
 echo ""
 
-echo "🔧 Step 1: Checking WSL environment..."
-echo "📁 Current directory: $(pwd)"
+echo "[TOOL] Step 1: Checking WSL environment..."
+echo "[FOLDER] Current directory: $(pwd)"
 echo "🐧 WSL Distribution: $(cat /etc/os-release | grep PRETTY_NAME)"
 echo ""
 
-echo "🔧 Step 2: Checking target directory..."
+echo "[TOOL] Step 2: Checking target directory..."
 TARGET_DIR="/mnt/d/Repository/@Clients/FY.WB.Midway/FrontEnd"
 if [ -d "$TARGET_DIR" ]; then
-    echo "✅ Target directory exists: $TARGET_DIR"
+    echo "[OK] Target directory exists: $TARGET_DIR"
     cd "$TARGET_DIR"
-    echo "📁 Changed to: $(pwd)"
+    echo "[FOLDER] Changed to: $(pwd)"
 else
-    echo "❌ Target directory not found: $TARGET_DIR"
+    echo "[ERROR] Target directory not found: $TARGET_DIR"
     echo "📂 Available directories in /mnt/d/Repository/@Clients/:"
-    ls -la /mnt/d/Repository/@Clients/ 2>/dev/null || echo "❌ Parent directory not accessible"
+    ls -la /mnt/d/Repository/@Clients/ 2>/dev/null || echo "[ERROR] Parent directory not accessible"
     echo ""
-    echo "⏸️  Press Enter to continue anyway or Ctrl+C to exit..."
+    echo "[PAUSE]  Press Enter to continue anyway or Ctrl+C to exit..."
     read
 fi
 
 echo ""
-echo "🔧 Step 3: Checking instruction file..."
+echo "[TOOL] Step 3: Checking instruction file..."
 INSTRUCTION_FILE="claude_code_instructions_e2e_fixes.md"
 if [ -f "$INSTRUCTION_FILE" ]; then
-    echo "✅ Instruction file found: $INSTRUCTION_FILE"
-    echo "📄 File size: $(wc -c < "$INSTRUCTION_FILE") bytes"
+    echo "[OK] Instruction file found: $INSTRUCTION_FILE"
+    echo "[FILE] File size: $(wc -c < "$INSTRUCTION_FILE") bytes"
     echo "📝 First few lines:"
     head -5 "$INSTRUCTION_FILE"
 else
-    echo "❌ Instruction file not found: $INSTRUCTION_FILE"
+    echo "[ERROR] Instruction file not found: $INSTRUCTION_FILE"
     echo "📂 Available files:"
-    ls -la *.md 2>/dev/null || echo "❌ No .md files found"
+    ls -la *.md 2>/dev/null || echo "[ERROR] No .md files found"
     echo ""
-    echo "⏸️  Press Enter to continue anyway or Ctrl+C to exit..."
+    echo "[PAUSE]  Press Enter to continue anyway or Ctrl+C to exit..."
     read
 fi
 
 echo ""
-echo "🔧 Step 4: Checking Claude Code installation..."
+echo "[TOOL] Step 4: Checking Claude Code installation..."
 if command -v claude >/dev/null 2>&1; then
-    echo "✅ Claude Code is installed"
-    echo "📋 Claude version: $(claude --version 2>/dev/null || echo 'Version check failed')"
+    echo "[OK] Claude Code is installed"
+    echo "[INFO] Claude version: $(claude --version 2>/dev/null || echo 'Version check failed')"
 else
-    echo "❌ Claude Code is not installed or not in PATH"
-    echo "🔍 Checking common installation locations..."
+    echo "[ERROR] Claude Code is not installed or not in PATH"
+    echo "[SEARCH] Checking common installation locations..."
     ls -la ~/.local/bin/claude 2>/dev/null && echo "Found in ~/.local/bin/" || echo "Not in ~/.local/bin/"
     ls -la /usr/local/bin/claude 2>/dev/null && echo "Found in /usr/local/bin/" || echo "Not in /usr/local/bin/"
     echo ""
-    echo "💡 To install Claude Code, run:"
+    echo "[TIP] To install Claude Code, run:"
     echo "   curl -sSL https://claude.ai/install.sh | bash"
     echo ""
-    echo "⏸️  Press Enter to continue anyway or Ctrl+C to exit..."
+    echo "[PAUSE]  Press Enter to continue anyway or Ctrl+C to exit..."
     read
 fi
 
@@ -1918,17 +1928,17 @@ if [ -f "$INSTRUCTION_FILE" ] && command -v claude >/dev/null 2>&1; then
     CLAUDE_EXIT_CODE=$?
     echo ""
     if [ $CLAUDE_EXIT_CODE -eq 0 ]; then
-        echo "✅ Claude Code completed successfully!"
+        echo "[OK] Claude Code completed successfully!"
     else
-        echo "❌ Claude Code failed with exit code: $CLAUDE_EXIT_CODE"
+        echo "[ERROR] Claude Code failed with exit code: $CLAUDE_EXIT_CODE"
     fi
 else
-    echo "⚠️  Skipping Claude Code execution due to missing requirements"
+    echo "[WARNING]  Skipping Claude Code execution due to missing requirements"
 fi
 
 echo ""
 echo "🏁 === Diagnostic Complete ==="
-echo "⏸️  Press Enter to close this window..."
+echo "[PAUSE]  Press Enter to close this window..."
 read
 '''
 
@@ -1949,7 +1959,7 @@ read
                             "wt", "new-tab", "--title", "Claude Code E2E Fixes - Diagnostic",
                             "wsl", "-d", "Ubuntu", "-e", "bash", wsl_script_path
                         ])
-                        console.print("[green]✅ Launched diagnostic terminal in Windows Terminal[/green]")
+                        console.print("[green][OK] Launched diagnostic terminal in Windows Terminal[/green]")
                         success = True
                     except FileNotFoundError:
                         # Method 2: Fall back to cmd if Windows Terminal not available
@@ -1958,7 +1968,7 @@ read
                                 "cmd", "/c", "start", "cmd", "/k",
                                 f'title Claude Code E2E Fixes - Diagnostic && wsl -d Ubuntu -e bash {wsl_script_path}'
                             ])
-                            console.print("[green]✅ Launched diagnostic terminal in Command Prompt[/green]")
+                            console.print("[green][OK] Launched diagnostic terminal in Command Prompt[/green]")
                             success = True
                         except Exception as cmd_error:
                             # Method 3: Try PowerShell as final fallback
@@ -1967,19 +1977,19 @@ read
                                     "powershell", "-Command",
                                     f'Start-Process cmd -ArgumentList "/k title Claude Code E2E Fixes - Diagnostic && wsl -d Ubuntu -e bash {wsl_script_path}"'
                                 ])
-                                console.print("[green]✅ Launched diagnostic terminal via PowerShell[/green]")
+                                console.print("[green][OK] Launched diagnostic terminal via PowerShell[/green]")
                                 success = True
                             except Exception as ps_error:
-                                console.print(f"[red]❌ All terminal launch methods failed[/red]")
+                                console.print(f"[red][ERROR] All terminal launch methods failed[/red]")
                                 console.print(f"[red]Windows Terminal error: FileNotFoundError[/red]")
                                 console.print(f"[red]CMD error: {cmd_error}[/red]")
                                 console.print(f"[red]PowerShell error: {ps_error}[/red]")
 
                     if success:
-                        console.print(f"\n[bold green]🎉 Claude Code diagnostic terminal launched successfully![/bold green]")
-                        console.print(f"[green]✅ A new terminal window should have opened with comprehensive diagnostics[/green]")
-                        console.print(f"[green]✅ The terminal will stay open so you can see exactly what's happening[/green]")
-                        console.print(f"\n[cyan]📺 In the diagnostic terminal window, you'll see:[/cyan]")
+                        console.print(f"\n[bold green][SUCCESS] Claude Code diagnostic terminal launched successfully![/bold green]")
+                        console.print(f"[green][OK] A new terminal window should have opened with comprehensive diagnostics[/green]")
+                        console.print(f"[green][OK] The terminal will stay open so you can see exactly what's happening[/green]")
+                        console.print(f"\n[cyan][DISPLAY] In the diagnostic terminal window, you'll see:[/cyan]")
                         console.print(f"  • WSL environment verification")
                         console.print(f"  • Directory and file existence checks")
                         console.print(f"  • Claude Code installation status")
@@ -1992,11 +2002,11 @@ read
                         import time
                         time.sleep(2)
 
-                        console.print(f"\n[yellow]⏱️  Diagnostic terminal is now running.[/yellow]")
+                        console.print(f"\n[yellow][TIME]  Diagnostic terminal is now running.[/yellow]")
                         console.print(f"[yellow]Check the terminal window to see what's happening![/yellow]")
                     else:
-                        console.print(f"\n[bold red]❌ Failed to launch visible terminal window[/bold red]")
-                        console.print(f"[yellow]💡 You can manually run the diagnostic script with:[/yellow]")
+                        console.print(f"\n[bold red][ERROR] Failed to launch visible terminal window[/bold red]")
+                        console.print(f"[yellow][TIP] You can manually run the diagnostic script with:[/yellow]")
                         console.print(f"[dim]wsl -d Ubuntu -e bash {wsl_script_path}[/dim]")
 
                     # Clean up temporary file after a delay (let the terminal start first)
@@ -2011,8 +2021,8 @@ read
                     threading.Thread(target=cleanup_temp_file, daemon=True).start()
 
                 except Exception as e:
-                    console.print(f"\n[bold red]❌ Error launching Claude Code: {e}[/bold red]")
-                    console.print(f"[yellow]💡 You can manually run Claude Code with:[/yellow]")
+                    console.print(f"\n[bold red][ERROR] Error launching Claude Code: {e}[/bold red]")
+                    console.print(f"[yellow][TIP] You can manually run Claude Code with:[/yellow]")
                     console.print(f"[dim]cd FrontEnd && claude --model sonnet -p \"$(cat claude_code_instructions_e2e_fixes.md)\"[/dim]")
 
                     # Clean up temp file on error
@@ -2042,7 +2052,7 @@ read
         from template_manager import create_new_project_interactive
         project_name = create_new_project_interactive(Path(config['paths']['base_dir']))
         if project_name:
-            console.print(f"\n[green]✅ Project '{project_name}' created successfully![/green]")
+            console.print(f"\n[green][OK] Project '{project_name}' created successfully![/green]")
             console.print("[dim]You can now navigate to the project directory and run the AI generation system.[/dim]")
 
     else:

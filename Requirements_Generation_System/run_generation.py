@@ -777,7 +777,7 @@ def main():
     """Main entry point"""
     # Banner
     console.print(Panel.fit(
-        "[bold]FY.WB.Midway Requirements Generation System[/bold]\n"
+        "[bold]ByteForge App Generation System[/bold]\n"
         "Automated Document Generation with Traceability",
         style="cyan"
     ))

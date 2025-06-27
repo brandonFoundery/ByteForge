@@ -1,12 +1,12 @@
-# Requirements Generation System Configuration
-# For FY.WB.Midway Project
+# ByteForge App Generation System Configuration
+# For ByteForge Project
 
 # Project Information
 project:
-  name: "FY.WB.Midway"
-  description: "Enterprise Logistics and Payment Platform"
+  name: "ByteForge"
+  description: "AI-Powered Application Generation System"
   version: "1.0.0"
-  client: "FY Corporation"
+  client: "ByteForge"
 
 # Input/Output Paths
 paths:

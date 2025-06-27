@@ -273,13 +273,26 @@ class RequirementsOrchestrator:
     def __init__(self, project_name: str, base_path: Path, config_path: Optional[Path] = None, model_provider: str = "openai"):
         self.project_name = project_name
         self.base_path = base_path
-        self.output_path = base_path / "generated_documents"
-        self.prompts_path = base_path / "Requirements_Generation_Prompts"
-        self.requirements_path = base_path / "Requirements"
         self.model_provider = model_provider
 
-        # Initialize configuration manager
+        # Initialize configuration manager first to get paths from config
         self.config_manager = ConfigManager(self.base_path / "Requirements_Generation_System")
+
+        # Load configuration to get proper paths
+        config = self.config_manager.load_config()
+
+        # Use config-based paths instead of hardcoded ones
+        self.output_path = Path(config.get('paths', {}).get('output_dir', base_path / "generated_documents"))
+        self.prompts_path = Path(config.get('paths', {}).get('prompts_dir', base_path / "Requirements_Generation_Prompts"))
+        self.requirements_path = Path(config.get('paths', {}).get('requirements_dir', base_path / "Requirements"))
+
+        # Make paths absolute if they're relative
+        if not self.output_path.is_absolute():
+            self.output_path = (self.base_path / "Requirements_Generation_System" / self.output_path).resolve()
+        if not self.prompts_path.is_absolute():
+            self.prompts_path = (self.base_path / "Requirements_Generation_System" / self.prompts_path).resolve()
+        if not self.requirements_path.is_absolute():
+            self.requirements_path = (self.base_path / "Requirements_Generation_System" / self.requirements_path).resolve()
 
         # Initialize artifact processor
         self.artifact_processor = ArtifactProcessor(self.base_path)
@@ -981,8 +994,8 @@ IMPORTANT REFINEMENT INSTRUCTIONS:
             # Fallback to generic review prompt
             return self._build_generic_review_prompt(doc_type, content, context)
 
-        # Load the reviewer prompt template
-        reviewer_prompt_path = self.base_path / "Requirements_Generation_Prompts" / "Review_Prompts" / reviewer_prompt_file
+        # Load the reviewer prompt template using config-based path
+        reviewer_prompt_path = self.prompts_path / "Review_Prompts" / reviewer_prompt_file
 
         if not reviewer_prompt_path.exists():
             console.print(f"[yellow]Reviewer prompt not found: {reviewer_prompt_path}, using generic review[/yellow]")

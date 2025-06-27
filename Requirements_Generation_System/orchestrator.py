@@ -281,28 +281,28 @@ class RequirementsOrchestrator:
         # Load configuration to get proper paths
         config = self.config_manager._load_config()
 
-        # Use config-based paths with fallbacks if config is None
-        if config and 'paths' in config:
-            self.output_path = Path(config['paths'].get('output_dir', base_path / "generated_documents"))
-            self.prompts_path = Path(config['paths'].get('prompts_dir', base_path / "Requirements_Generation_Prompts"))
-            self.requirements_path = Path(config['paths'].get('requirements_dir', base_path / "Requirements"))
-        else:
-            # Fallback to default paths if config loading fails
-            self.output_path = base_path / "generated_documents"
-            self.prompts_path = base_path / "Requirements_Generation_Prompts"
-            self.requirements_path = base_path / "Requirements"
-
-        # Make paths absolute if they're relative
+        # Establish ByteForge root directory as the base for all relative paths
         script_dir = Path(__file__).parent  # Requirements_Generation_System directory
         byteforge_root = script_dir.parent   # ByteForge directory
 
-        if not self.output_path.is_absolute():
-            self.output_path = (script_dir / self.output_path).resolve()
-        if not self.prompts_path.is_absolute():
-            # Prompts are at ByteForge root level, not relative to script_dir
-            self.prompts_path = (byteforge_root / "Requirements_Generation_Prompts").resolve()
-        if not self.requirements_path.is_absolute():
-            self.requirements_path = (script_dir / self.requirements_path).resolve()
+        # Use config-based paths with fallbacks, all relative to ByteForge root
+        if config and 'paths' in config:
+            # All paths in config are relative to ByteForge root
+            self.output_path = byteforge_root / config['paths'].get('output_dir', "project/requirements")
+            self.prompts_path = byteforge_root / config['paths'].get('prompts_dir', "Requirements_Generation_Prompts")
+            self.requirements_path = byteforge_root / config['paths'].get('requirements_dir', "project/requirements")
+        else:
+            # Fallback to default paths relative to ByteForge root
+            self.output_path = byteforge_root / "project" / "requirements"
+            self.prompts_path = byteforge_root / "Requirements_Generation_Prompts"
+            self.requirements_path = byteforge_root / "project" / "requirements"
+
+        # Resolve all paths to absolute paths
+        self.output_path = self.output_path.resolve()
+        self.prompts_path = self.prompts_path.resolve()
+        self.requirements_path = self.requirements_path.resolve()
+
+
 
 
         # Initialize artifact processor
@@ -660,7 +660,7 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
         for doc_type, deps, prompt_file in doc_configs:
             prompt_path = self.prompts_path / prompt_file
             prompt_template = prompt_path.read_text(encoding='utf-8', errors='ignore') if prompt_path.exists() else None
-            
+
             self.documents[doc_type] = Document(
                 doc_type=doc_type,
                 dependencies=deps,

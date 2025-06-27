@@ -82,14 +82,17 @@ def check_environment(config: dict, model_provider: str = None, prompt_for_keys:
             else:
                 issues.append(f"No API key found for {key_info['name']}")
     
-    # Check paths
+    # Check paths (resolve relative to ByteForge root)
+    script_dir = Path(__file__).parent  # Requirements_Generation_System directory
+    byteforge_root = script_dir.parent   # ByteForge directory
+
     paths_to_check = [
-        ('Requirements Directory', config['paths']['requirements_dir']),
-        ('Prompts Directory', config['paths']['prompts_dir'])
+        ('Requirements Directory', byteforge_root / config['paths']['requirements_dir']),
+        ('Prompts Directory', byteforge_root / config['paths']['prompts_dir'])
     ]
-    
+
     for name, path in paths_to_check:
-        if not Path(path).exists():
+        if not path.exists():
             issues.append(f"{name} not found: {path}")
     
     # Check Python packages
@@ -957,7 +960,7 @@ def main():
             # Step 3: Generate Development Plan
             console.print("\n[bold]Step 3/3: Generating Development Plan[/bold]")
 
-            from orchestrator import RequirementsOrchestrator, DocumentType
+            from orchestrator import DocumentType
             orchestrator = RequirementsOrchestrator(config['project']['name'], base_path, config_path, model_provider=model_provider)
 
             result = asyncio.run(orchestrator.generate_document(DocumentType.DEV_PLAN, model_provider))

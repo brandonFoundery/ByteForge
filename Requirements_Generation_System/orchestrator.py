@@ -212,16 +212,42 @@ class ConfigManager:
         if not env_var:
             return None
 
+        # First check environment variables
         api_key = os.getenv(env_var)
-        if not api_key:
-            console.print(f"[red][ERROR] {env_var} not found in environment variables[/red]")
-            console.print(f"[yellow]Please set it in your .env file or environment[/yellow]")
+        if api_key:
+            # Don't log the full key for security
+            masked_key = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
+            console.print(f"[green][OK] Found {env_var}: {masked_key}[/green]")
+            return api_key
+
+        # If not found in environment, check api_keys.json file
+        api_key = self._load_api_key_from_file(provider.lower())
+        if api_key:
+            # Set as environment variable for this session
+            os.environ[env_var] = api_key
+            # Don't log the full key for security
+            masked_key = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
+            console.print(f"[green][OK] Found {env_var}: {masked_key}[/green]")
+            return api_key
+
+        console.print(f"[red][ERROR] {env_var} not found in environment variables[/red]")
+        console.print(f"[yellow]Please set it in your .env file or environment[/yellow]")
+        return None
+
+    def _load_api_key_from_file(self, provider: str) -> Optional[str]:
+        """Load API key from api_keys.json file"""
+        api_keys_file = self.config_dir / "api_keys.json"
+        if not api_keys_file.exists():
             return None
 
-        # Don't log the full key for security
-        masked_key = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
-        console.print(f"[green][OK] Found {env_var}: {masked_key}[/green]")
-        return api_key
+        try:
+            import json
+            with open(api_keys_file, 'r') as f:
+                api_keys = json.load(f)
+            return api_keys.get(provider)
+        except Exception as e:
+            console.print(f"[yellow]Warning: Could not load API keys file: {str(e)}[/yellow]")
+            return None
 
     def get_setting(self, key: str, default: Any = None) -> Any:
         """Get a configuration setting"""
@@ -276,7 +302,9 @@ class RequirementsOrchestrator:
         self.model_provider = model_provider
 
         # Initialize configuration manager first to get paths from config
-        self.config_manager = ConfigManager(self.base_path / "Requirements_Generation_System")
+        # ConfigManager should look in the actual Requirements_Generation_System directory
+        script_dir = Path(__file__).parent  # Requirements_Generation_System directory
+        self.config_manager = ConfigManager(script_dir)
 
         # Load configuration to get proper paths
         config = self.config_manager._load_config()
@@ -316,7 +344,7 @@ class RequirementsOrchestrator:
 
         # Store model names (use config if available, otherwise defaults)
         default_models = {
-            "openai": "gpt-4o",
+            "openai": "o3-mini",
             "anthropic": "claude-3-opus-20240229",
             "gemini": "gemini-1.5-pro-latest"
         }
@@ -370,7 +398,20 @@ class RequirementsOrchestrator:
 
         if provider == "openai":
             base_url = self.config_manager.get_setting("OPENAI_BASE_URL")
-            timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+            default_timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+
+            # Check if using o3 model which needs longer timeout
+            model_name = self.model_names[provider]
+            if os.getenv("OPENAI_MODEL_OVERRIDE"):
+                model_name = os.getenv("OPENAI_MODEL_OVERRIDE")
+
+            # o3 models need much longer timeout due to reasoning time
+            if "o3" in model_name.lower():
+                timeout = int(self.config_manager.get_setting("llm.o3_timeout", 300))  # 5 minutes for o3
+                console.print(f"[yellow]Using extended timeout ({timeout}s) for o3 model[/yellow]")
+            else:
+                timeout = default_timeout
+
             return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
         elif provider == "anthropic":
             base_url = self.config_manager.get_setting("ANTHROPIC_BASE_URL")
@@ -409,7 +450,21 @@ class RequirementsOrchestrator:
 
         if provider == "openai":
             base_url = self.config_manager.get_setting("OPENAI_BASE_URL")
-            timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+            default_timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+
+            # Check if using o3 model which needs longer timeout
+            reviewer_config = self.review_config.get('reviewer_llm', {})
+            model_name = reviewer_config.get('model', 'gpt-4o')
+            if os.getenv("OPENAI_MODEL_OVERRIDE"):
+                model_name = os.getenv("OPENAI_MODEL_OVERRIDE")
+
+            # o3 models need much longer timeout due to reasoning time
+            if "o3" in model_name.lower():
+                timeout = int(self.config_manager.get_setting("llm.o3_timeout", 300))  # 5 minutes for o3
+                console.print(f"[yellow]Using extended timeout ({timeout}s) for o3 reviewer model[/yellow]")
+            else:
+                timeout = default_timeout
+
             return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
         elif provider == "anthropic":
             base_url = self.config_manager.get_setting("ANTHROPIC_BASE_URL")
@@ -439,6 +494,10 @@ class RequirementsOrchestrator:
         """Generate text using the configured LLM client."""
         provider = self.model_provider.lower()
         model_name = self.model_names[provider]
+
+        # Check for OpenAI model override (for o3 vs o3-mini selection)
+        if provider == "openai" and os.getenv("OPENAI_MODEL_OVERRIDE"):
+            model_name = os.getenv("OPENAI_MODEL_OVERRIDE")
         
         system_prompt = """You are an expert requirements analyst and technical writer specializing in creating comprehensive requirements documentation.
 
@@ -521,6 +580,10 @@ Think through this requirements analysis step by step, considering all dependenc
         reviewer_config = self.review_config.get('reviewer_llm', {})
         provider = reviewer_config.get('provider', 'gemini').lower()
         model_name = reviewer_config.get('model', 'gemini-2.5-pro-preview-06-05')
+
+        # Check for OpenAI model override (for o3 vs o3-mini selection)
+        if provider == "openai" and os.getenv("OPENAI_MODEL_OVERRIDE"):
+            model_name = os.getenv("OPENAI_MODEL_OVERRIDE")
 
         # Get review-specific settings
         temperature = reviewer_config.get('temperature', 0.5)

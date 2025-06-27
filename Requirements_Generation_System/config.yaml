@@ -34,7 +34,8 @@ llm:
   # Primary provider: openai or anthropic
   provider: "openai"
 
-  # Model selection
+  # Model selection (can be overridden at runtime)
+  # OpenAI options: "o3", "o3-mini", "gpt-4o", etc.
   openai_model: "o3-mini"
   anthropic_model: "claude-opus-4"
   gemini_model: "gemini-2.5-pro-preview-06-05"
@@ -47,6 +48,9 @@ llm:
 
   # Request timeout in seconds
   timeout: 180
+
+  # Extended timeout for o3 models (seconds) - o3 models need longer due to reasoning
+  o3_timeout: 300
 
   # Retry configuration
   max_retries: 3

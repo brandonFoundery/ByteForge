@@ -187,7 +187,6 @@ def save_api_keys(keys: dict):
         
         # Set restrictive permissions on the file
         if sys.platform != "win32":
-            import os
             os.chmod(keys_file, 0o600)  # Read/write for owner only
             
     except Exception as e:
@@ -621,7 +620,6 @@ async def full_regeneration_workflow(config_path: Path, model_provider: str = "o
             return False
 
         # Set environment variable
-        import os
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator
@@ -853,18 +851,23 @@ def main():
     model_provider = None
     if choice in ["1", "2", "3", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "21", "22", "23", "24"]:
         console.print("\n[bold]Select LLM provider:[/bold]")
+        console.print("  0. OpenAI o3 with reasoning")
         console.print("  1. OpenAI o3-mini with reasoning (Default)")
         console.print("  2. Anthropic Claude 4 Opus")
         console.print("  3. Google Gemini 2.5 Pro with thinking")
 
-        model_choice = input("\nEnter choice (1-3) or press Enter for default: ").strip()
+        model_choice = input("\nEnter choice (0-3) or press Enter for default: ").strip()
 
-        if model_choice == "2":
+        if model_choice == "0":
+            model_provider = "openai"
+            # Set specific model for o3
+            os.environ["OPENAI_MODEL_OVERRIDE"] = "o3"
+        elif model_choice == "2":
             model_provider = "anthropic"
         elif model_choice == "3":
             model_provider = "gemini"
         else:
-            model_provider = "openai"  # Default or explicit choice 1
+            model_provider = "openai"  # Default or explicit choice 1 (o3-mini)
 
         # Check environment for selected model
         if not check_environment(config, model_provider):
@@ -940,7 +943,6 @@ def main():
                 console.print(f"[bold red]Error: No API key available for {key_info['name']}[/bold red]")
                 return 1
 
-            import os
             os.environ[key_info["env_var"]] = api_key
 
             from design_document_generator import DesignDocumentGenerator
@@ -1085,7 +1087,6 @@ def main():
             return 1
         
         # Set environment variable
-        import os
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator and change manager
@@ -1130,7 +1131,6 @@ def main():
             return 1
 
         # Set environment variable
-        import os
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator and change manager
@@ -1159,7 +1159,6 @@ def main():
             return 1
 
         # Set environment variable
-        import os
         os.environ[key_info["env_var"]] = api_key
 
         # Run the downstream resume process
@@ -1198,7 +1197,6 @@ def main():
             return 1
 
         # Set environment variable
-        import os
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator
@@ -1261,7 +1259,6 @@ def main():
             return 1
 
         # Set environment variable
-        import os
         os.environ[key_info["env_var"]] = api_key
 
         try:
@@ -1577,7 +1574,6 @@ def main():
                 return 1
 
             # Set environment variable
-            import os
             os.environ[key_info["env_var"]] = api_key
             api_keys[model] = api_key
 
@@ -1780,7 +1776,6 @@ def main():
                 return 1
 
             # Set environment variable
-            import os
             os.environ[key_info["env_var"]] = api_key
 
             test_generator = FrontendTestGenerator(config['project']['name'], base_path, model_provider)
@@ -1925,7 +1920,6 @@ def main():
 
                 try:
                     import subprocess
-                    import os
                     import tempfile
 
                     console.print("[cyan]🚀 Launching Claude Code in a new visible terminal window...[/cyan]")

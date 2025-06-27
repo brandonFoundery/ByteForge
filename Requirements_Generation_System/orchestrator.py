@@ -789,68 +789,199 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
     
     async def gather_context(self, doc_type: DocumentType) -> Dict[str, str]:
         """Gather context from existing requirements and generated documents"""
+        logger.info(f"Starting context gathering for {doc_type.value}")
+
         context = {
             "project_name": self.project_name,
             "generation_date": datetime.now().strftime("%Y-%m-%d"),
         }
 
+        logger.info(f"Base context initialized: project_name={self.project_name}, generation_date={context['generation_date']}")
+
         # Load existing documents if not already loaded
         await self._ensure_documents_loaded()
 
         # Add dependency documents
+        logger.info(f"Checking dependencies for {doc_type.value}: {[dep.value for dep in self.documents[doc_type].dependencies]}")
+
         for dep_type in self.documents[doc_type].dependencies:
             dep_doc = self.documents[dep_type]
+            logger.info(f"Processing dependency {dep_type.value} (status: {dep_doc.status.value})")
 
             # For requirements documents, try to load from the current docs location first
             if dep_type in [DocumentType.FRD, DocumentType.NFRD, DocumentType.DRD]:
                 current_docs_path = self.base_path / "Requirements_Generation_System" / "fy-wb-midway-docs" / "docs" / "requirements"
                 doc_filename = f"{dep_type.name.lower()}.md"
                 current_doc_file = current_docs_path / doc_filename
+                logger.info(f"Checking for existing {dep_type.value} at: {current_doc_file}")
 
                 if current_doc_file.exists():
                     try:
-                        current_content = current_doc_file.read_text(encoding='utf-8')
+                        # Try UTF-8 first, then fall back to other encodings
+                        try:
+                            current_content = current_doc_file.read_text(encoding='utf-8')
+                        except UnicodeDecodeError:
+                            # Fall back to latin-1 which can handle any byte sequence
+                            current_content = current_doc_file.read_text(encoding='latin-1')
+                            logger.warning(f"Used latin-1 encoding for {current_doc_file} due to encoding issues")
+
                         # Remove YAML front matter if present
                         if current_content.startswith("---"):
                             metadata_end = current_content.find("---", 3)
                             if metadata_end > 0:
                                 current_content = current_content[metadata_end + 3:].strip()
                         context[dep_type.name.lower()] = current_content
+                        logger.info(f"Loaded {dep_type.value} from docs folder (content length: {len(current_content)} chars)")
                         console.print(f"[dim]Loaded current {dep_type.name} from docs folder[/dim]")
                         continue
                     except Exception as e:
+                        logger.warning(f"Could not load current {dep_type.name}: {e}")
                         console.print(f"[yellow]Warning: Could not load current {dep_type.name}: {e}[/yellow]")
+                else:
+                    logger.info(f"No existing {dep_type.value} found at {current_doc_file}")
 
             # Fallback to in-memory content
             if dep_doc.status in [DocumentStatus.GENERATED, DocumentStatus.REFINED, DocumentStatus.VALIDATED]:
-                context[dep_type.name.lower()] = dep_doc.content
+                # Check if content is actually useful (not a placeholder response)
+                if self._is_valid_document_content(dep_doc.content):
+                    context[dep_type.name.lower()] = dep_doc.content
+                    logger.info(f"Added in-memory {dep_type.value} to context (content length: {len(dep_doc.content)} chars)")
+                else:
+                    logger.info(f"Skipped {dep_type.value} - contains placeholder/incomplete content")
             elif dep_doc.content:  # Fallback: use content even if status is not set correctly
-                context[dep_type.name.lower()] = dep_doc.content
+                # Check if content is actually useful (not a placeholder response)
+                if self._is_valid_document_content(dep_doc.content):
+                    context[dep_type.name.lower()] = dep_doc.content
+                    logger.info(f"Added fallback {dep_type.value} to context (content length: {len(dep_doc.content)} chars)")
+                else:
+                    logger.info(f"Skipped fallback {dep_type.value} - contains placeholder/incomplete content")
+            else:
+                logger.info(f"No content available for dependency {dep_type.value}")
         
         # Search for existing requirements files
         doc_type_name = doc_type.name
         existing_files = list(self.requirements_path.rglob(f"**/{doc_type_name}.md"))
         
         if existing_files:
-            context[f"existing_{doc_type_name.lower()}"] = existing_files[0].read_text()
-            console.print(f"[green]Found existing {doc_type_name} document: {existing_files[0]}[/green]")
+            try:
+                # Try UTF-8 first, then fall back to other encodings
+                try:
+                    context[f"existing_{doc_type_name.lower()}"] = existing_files[0].read_text(encoding='utf-8')
+                except UnicodeDecodeError:
+                    # Fall back to latin-1 which can handle any byte sequence
+                    context[f"existing_{doc_type_name.lower()}"] = existing_files[0].read_text(encoding='latin-1')
+                    logger.warning(f"Used latin-1 encoding for {existing_files[0]} due to encoding issues")
+
+                logger.info(f"Loaded existing {doc_type_name} document: {existing_files[0]} (content length: {len(context[f'existing_{doc_type_name.lower()}'])} chars)")
+                console.print(f"[green]Found existing {doc_type_name} document: {existing_files[0]}[/green]")
+            except Exception as e:
+                logger.error(f"Failed to read existing {doc_type_name} document {existing_files[0]}: {e}")
+                console.print(f"[yellow]Warning: Could not read existing {doc_type_name} document: {e}[/yellow]")
         
         # Add existing requirements based on document type
         if doc_type == DocumentType.BRD:
+            logger.info("Adding BRD-specific context")
+
             # Load master PRD and other business context
             master_prd_path = self.requirements_path / "consolidated-requirements" / "master-prd.md"
+            logger.info(f"Checking for master PRD at: {master_prd_path}")
             if master_prd_path.exists():
-                context["master_prd"] = master_prd_path.read_text()
-            
+                try:
+                    # Try UTF-8 first, then fall back to other encodings
+                    try:
+                        context["master_prd"] = master_prd_path.read_text(encoding='utf-8')
+                    except UnicodeDecodeError:
+                        context["master_prd"] = master_prd_path.read_text(encoding='latin-1')
+                        logger.warning(f"Used latin-1 encoding for {master_prd_path} due to encoding issues")
+                    logger.info(f"Loaded master PRD (content length: {len(context['master_prd'])} chars)")
+                except Exception as e:
+                    logger.error(f"Failed to read master PRD: {e}")
+            else:
+                logger.info("No master PRD found")
+
             # Load video annotations
             video_path = self.requirements_path / "Video Annotations"
+            logger.info(f"Checking for video annotations at: {video_path}")
             if video_path.exists():
                 annotations = []
                 for file in video_path.glob("*.markdown"):
-                    annotations.append(f"## {file.stem}\n{file.read_text()}")
+                    try:
+                        # Try UTF-8 first, then fall back to other encodings
+                        try:
+                            content = file.read_text(encoding='utf-8')
+                        except UnicodeDecodeError:
+                            content = file.read_text(encoding='latin-1')
+                            logger.warning(f"Used latin-1 encoding for {file} due to encoding issues")
+                        annotations.append(f"## {file.stem}\n{content}")
+                    except Exception as e:
+                        logger.error(f"Failed to read video annotation {file}: {e}")
+                        continue
                 context["video_annotations"] = "\n\n".join(annotations)
-        
+                logger.info(f"Loaded video annotations (content length: {len(context['video_annotations'])} chars)")
+            else:
+                logger.info("No video annotations found")
+
+            # Provide default business context if no existing requirements found
+            if not context.get("master_prd") and not context.get("video_annotations"):
+                logger.info("No existing business context found, providing default context")
+                context["business_context"] = f"""
+**Company Background**: {self.project_name} is a software development project requiring comprehensive requirements documentation.
+
+**Current Challenges**:
+- Need for structured requirements documentation
+- Alignment between business needs and technical implementation
+- Clear traceability between requirements and deliverables
+
+**Strategic Objectives**:
+- Deliver high-quality software that meets business needs
+- Ensure clear communication between stakeholders
+- Maintain traceability throughout the development lifecycle
+
+**Market Analysis**: Enterprise software development with focus on requirements management and documentation.
+
+**Constraints**:
+- Timeline: Standard development lifecycle
+- Budget: Enterprise-level project
+- Regulatory: Standard software development compliance requirements
+"""
+                logger.info(f"Added default business context (content length: {len(context['business_context'])} chars)")
+            else:
+                logger.info("Using existing business context from master PRD or video annotations")
+
+        # Log final context summary
+        logger.info(f"Context gathering complete for {doc_type.value}:")
+        for key, value in context.items():
+            if isinstance(value, str):
+                logger.info(f"  - {key}: {len(value)} characters")
+            else:
+                logger.info(f"  - {key}: {type(value).__name__}")
+
         return context
+
+    def _is_valid_document_content(self, content: str) -> bool:
+        """Check if document content is valid and not a placeholder response"""
+        if not content or len(content.strip()) < 100:
+            return False
+
+        # Check for common placeholder phrases that indicate incomplete generation
+        placeholder_phrases = [
+            "I'm ready to refine",
+            "I still need the current version",
+            "Please provide the existing",
+            "I don't have access to",
+            "Please copy-and-paste",
+            "Once you provide the complete",
+            "I need the exact",
+            "Please upload",
+            "I'll need the full"
+        ]
+
+        content_lower = content.lower()
+        for phrase in placeholder_phrases:
+            if phrase.lower() in content_lower:
+                return False
+
+        return True
 
     async def _ensure_documents_loaded(self):
         """Ensure existing documents are loaded from disk if not already in memory"""
@@ -882,10 +1013,12 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
         console.print(f"\n[yellow]Generating {doc_type.value} using {self.model_provider.upper()}...[/yellow]")
         
         # Gather context
+        logger.info(f"Starting document generation for {doc_type.value}")
         context = await self.gather_context(doc_type)
 
         # Load and process artifacts
         artifacts_context = self.artifact_processor.load_all_artifacts()
+        logger.info(f"Loaded artifacts: {artifacts_context['artifacts_summary']['detailed_specs_count']} detailed specs, {artifacts_context['artifacts_summary']['json_blueprints_count']} UI blueprints")
 
         # Extract the main prompt from template
         prompt_parts = doc.prompt_template.split("```markdown")
@@ -893,6 +1026,15 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
             main_prompt = prompt_parts[1].split("```")[0]
         else:
             main_prompt = doc.prompt_template
+
+        logger.info(f"Extracted main prompt (length: {len(main_prompt)} chars)")
+
+        # Replace placeholders in the prompt
+        original_prompt_length = len(main_prompt)
+        main_prompt = main_prompt.replace("[PROJECT NAME]", context.get('project_name', 'Unknown Project'))
+        main_prompt = main_prompt.replace("[COMPANY NAME]", context.get('project_name', 'Unknown Company'))
+        main_prompt = main_prompt.replace("[APP NAME]", context.get('project_name', 'Unknown App'))
+        logger.info(f"Replaced placeholders in prompt (length changed from {original_prompt_length} to {len(main_prompt)} chars)")
 
         # Enhance prompt with artifacts if available
         if artifacts_context["artifacts_summary"]["detailed_specs_count"] > 0:
@@ -918,6 +1060,9 @@ Generation Date: {context.get('generation_date', 'Unknown')}
 """
         
         # Add dependency documents
+        logger.info(f"Adding context documents to prompt for {doc_type.value}")
+        context_docs_added = 0
+
         for key, value in context.items():
             if key not in ['project_name', 'generation_date'] and value:
                 # Use larger context limit for UI/UX generation to include all requirements
@@ -925,11 +1070,18 @@ Generation Date: {context.get('generation_date', 'Unknown')}
                 content_preview = value[:context_limit]
                 if len(value) > context_limit:
                     content_preview += "...\n(content truncated for brevity)"
+                    logger.info(f"Added context document '{key}' (truncated from {len(value)} to {len(content_preview)} chars)")
+                else:
+                    logger.info(f"Added context document '{key}' ({len(value)} chars)")
 
                 full_prompt += f"\n### {key.upper().replace('_', ' ')} DOCUMENT:\n"
                 full_prompt += f"{content_preview}\n"
-        
+                context_docs_added += 1
+
+        logger.info(f"Final prompt constructed for {doc_type.value}: {len(full_prompt)} total characters, {context_docs_added} context documents included")
+
         try:
+            logger.info(f"Sending prompt to LLM for {doc_type.value} generation")
             response = await self._generate_text(full_prompt)
             
             doc.content = response

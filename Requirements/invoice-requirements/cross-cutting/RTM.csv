@@ -1,0 +1,49 @@
+ID,Parent_ID,Title,Description,Source_Doc,Verification_Method,Status,Created_Date,Modified_Date
+DB-SCHEMA-1,,Performance Considerations,- Indexes on frequently queried columns,Database Schema,Review,Active,2025-06-02,2025-06-02
+DB-SCHEMA-2,,Security Features,- Password hashing (assumed in seed data),Database Schema,Review,Active,2025-06-02,2025-06-02
+DB-SCHEMA-3,,2. Features,- UUID primary keys for security and scalability,Database Schema,Review,Active,2025-06-02,2025-06-02
+DB-SCHEMA-4,,3. Performance Considerations,- Indexes on frequently queried columns,Database Schema,Review,Active,2025-06-02,2025-06-02
+DB-SCHEMA-5,,4. Security Features,- Password hashing (assumed in seed data),Database Schema,Review,Active,2025-06-02,2025-06-02
+FRD-1,,2.1 Administrator Stories,"Epic: System Configuration
+
+As an administrator
+I want to configure system settings and user access
+...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-10,,Description,Define user data structure and relationships,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-11,,Description,Rules for automatic task assignment,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-12,,Description,External authentication service integration,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-13,,Success Criteria,1. User can log in with valid credentials,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-14,,Test Scenarios,- Valid login succeeds,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-2,,2.2 Business User Stories,"Epic: Workflow Management
+
+As a business user
+I want to manage and track business processes
+So that ...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-3,,Business Application Platform,"Version 1.0 | June 2, 2025",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-4,,Description,System must authenticate users via username/password or SSO,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-5,,Specifications,- Support multiple authentication methods,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-6,,Description,Implement role-based permissions system,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-7,,Specifications,- Define hierarchical roles,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-8,,Description,Implement consistent top-level navigation,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-9,,Requirements,- Responsive header menu,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-1,,Business Application Platform, Executive Summary (PRD-1),Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-2,,Pain Points,"Complex setup, security management",Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-3,,Key Requirements,- Role-based access control,Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-4,,Pain Points,"Data entry, process tracking",Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-5,,Key Requirements,- Intuitive interface,Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-6,,4. Scalable Architecture, Competitive Differentiation,Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-7,,1. User Engagement,- Daily Active Users (DAU),Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-8,,2. Business Impact,- Process completion time,Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-9,,3. Infrastructure availability,This PRD serves as the foundation for detailed technical specifications and design documents. All im...,Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-1,,Performance Requirements,"| Requirement | Target |
+|------------|---------|
+| Initial Load | < 2s |
+| State Updates | < 100ms ...",React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-2,,Description,Implement Redux Toolkit as the primary state management solution,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-3,,Description,Organize store modules by business domain features,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-4,,Description,Define TypeScript interfaces for all state slices,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-5,,Description,Implement normalized state for relational data,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-6,,Description,Create Redux slices with actions and reducers,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-7,,Description,Configure API middleware for async operations,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-8,,Description,Implement reselect for efficient data access,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-9,,Description,Implement selective store subscription patterns,React Global Store Specification,Review,Active,2025-06-02,2025-06-02

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requirements Generation Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #1976d2;
+            color: white;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .connected {
+            background-color: #4caf50;
+        }
+        .disconnected {
+            background-color: #f44336;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .progress-circle {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+        .progress-circle-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .log-panel {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #212529;
+            color: #f8f9fa;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            border-radius: 5px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #343a40;
+        }
+        .log-time {
+            color: #6c757d;
+            margin-right: 10px;
+        }
+        .log-info {
+            color: #17a2b8;
+        }
+        .log-warning {
+            color: #ffc107;
+        }
+        .log-error {
+            color: #dc3545;
+        }
+        .refresh-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+        }
+        .auto-refresh-controls {
+            position: absolute;
+            top: 10px;
+            right: 120px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .auto-refresh-controls select {
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .nav-tabs .nav-link {
+            color: #495057;
+        }
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Requirements Generation Dashboard</h2>
+            <div>
+                <span class="status-indicator" id="connectionStatus"></span>
+                <span id="connectionText">Checking connection...</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <button id="refreshBtn" class="btn btn-sm btn-outline-primary refresh-btn">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                        <div class="auto-refresh-controls">
+                            <label for="autoRefreshSelect">Auto-refresh:</label>
+                            <select id="autoRefreshSelect" class="form-select form-select-sm">
+                                <option value="0">Off</option>
+                                <option value="5" selected>5 seconds</option>
+                                <option value="10">10 seconds</option>
+                                <option value="30">30 seconds</option>
+                                <option value="60">1 minute</option>
+                                <option value="300">5 minutes</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <div class="progress-circle">
+                                    <canvas id="progressCircle" width="120" height="120"></canvas>
+                                    <div class="progress-circle-text" id="progressText">0%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h5>Generation Progress</h5>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <span class="status-badge bg-success" id="completedCount">0 Completed</span>
+                                    <span class="status-badge bg-primary" id="inProgressCount">0 In Progress</span>
+                                    <span class="status-badge bg-danger" id="failedCount">0 Failed</span>
+                                    <span class="status-badge bg-secondary" id="notStartedCount">0 Not Started</span>
+                                </div>
+                                <p class="text-muted" id="startTime">Started at: Not started</p>
+                                <p class="text-muted" id="etaTime">ETA: Calculating...</p>
+                                <p class="text-muted" id="avgTime">Average document time: N/A</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab" aria-controls="documents" aria-selected="true">Documents</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button" role="tab" aria-controls="logs" aria-selected="false">Logs</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Document</th>
+                                        <th>Status</th>
+                                        <th>Size</th>
+                                        <th>Refinements</th>
+                                        <th>Generated At</th>
+                                        <th>Dependencies</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="documentsTable">
+                                    <tr>
+                                        <td colspan="6" class="text-center">Loading documents...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="log-panel" id="logPanel">
+                            <div class="text-center">Loading logs...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 text-center text-muted">
+            <p>FY.WB.Midway Requirements Generation System</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8000/api';
+        const REFRESH_INTERVAL = 3000; // 3 seconds
+
+        // DOM Elements
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionText = document.getElementById('connectionText');
+        const progressCircle = document.getElementById('progressCircle');
+        const progressText = document.getElementById('progressText');
+        const completedCount = document.getElementById('completedCount');
+        const inProgressCount = document.getElementById('inProgressCount');
+        const failedCount = document.getElementById('failedCount');
+        const notStartedCount = document.getElementById('notStartedCount');
+        const startTime = document.getElementById('startTime');
+        const etaTime = document.getElementById('etaTime');
+        const avgTime = document.getElementById('avgTime');
+        const documentsTable = document.getElementById('documentsTable');
+        const logPanel = document.getElementById('logPanel');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const autoRefreshSelect = document.getElementById('autoRefreshSelect');
+
+        // Status colors
+        const statusColors = {
+            'not_started': 'secondary',
+            'in_progress': 'primary',
+            'generated': 'success',
+            'refining': 'info',
+            'refined': 'success',
+            'validating': 'warning',
+            'validated': 'success',
+            'failed': 'danger'
+        };
+
+        // Status emojis
+        const statusEmojis = {
+            'not_started': '⏸️',
+            'in_progress': '🔄',
+            'generated': '✅',
+            'refining': '🔧',
+            'refined': '🔧',
+            'validating': '🔍',
+            'validated': '✨',
+            'failed': '❌'
+        };
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === undefined || bytes === null) return 'N/A';
+            if (bytes < 1024) return `${bytes} B`;
+            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+            return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+        }
+
+        // Format timestamp
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'N/A';
+            return new Date(timestamp).toLocaleTimeString();
+        }
+
+        // Format time duration
+        function formatDuration(seconds) {
+            if (!seconds) return 'N/A';
+            
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            
+            if (minutes < 1) {
+                return `${remainingSeconds}s`;
+            }
+            
+            return `${minutes}m ${remainingSeconds}s`;
+        }
+
+        // Draw progress circle
+        function drawProgressCircle(percentage) {
+            const ctx = progressCircle.getContext('2d');
+            const centerX = progressCircle.width / 2;
+            const centerY = progressCircle.height / 2;
+            const radius = 50;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, progressCircle.width, progressCircle.height);
+            
+            // Draw background circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#e9ecef';
+            ctx.lineWidth = 10;
+            ctx.stroke();
+            
+            // Draw progress arc
+            const startAngle = -0.5 * Math.PI;
+            const endAngle = startAngle + (percentage / 100) * 2 * Math.PI;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.strokeStyle = percentage === 100 ? '#4caf50' : '#1976d2';
+            ctx.lineWidth = 10;
+            ctx.stroke();
+            
+            // Update text
+            progressText.textContent = `${Math.round(percentage)}%`;
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            connectionStatus.className = 'status-indicator ' + (connected ? 'connected' : 'disconnected');
+            connectionText.textContent = connected ? 'Connected' : 'Disconnected';
+        }
+
+        // Fetch summary data
+        async function fetchSummary() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/summary`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const data = await response.json();
+                updateConnectionStatus(true);
+                updateDashboard(data);
+                return data;
+            } catch (error) {
+                console.error('Error fetching summary:', error);
+                updateConnectionStatus(false);
+                return null;
+            }
+        }
+
+        // Fetch logs
+        async function fetchLogs() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/logs`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const data = await response.json();
+                updateLogs(data.logs);
+                return data.logs;
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+                return [];
+            }
+        }
+
+        // Update dashboard with summary data
+        function updateDashboard(summary) {
+            // Update progress
+            drawProgressCircle(summary.overall_progress);
+            
+            // Update counts
+            completedCount.textContent = `${summary.completed} Completed`;
+            inProgressCount.textContent = `${summary.in_progress} In Progress`;
+            failedCount.textContent = `${summary.failed} Failed`;
+            notStartedCount.textContent = `${summary.not_started} Not Started`;
+            
+            // Update times
+            startTime.textContent = `Started at: ${summary.generation_started_at ? formatTimestamp(summary.generation_started_at) : 'Not started'}`;
+            etaTime.textContent = `ETA: ${summary.estimated_time_remaining ? formatDuration(summary.estimated_time_remaining) : 'Calculating...'}`;
+            avgTime.textContent = `Average document time: ${summary.average_document_time ? formatDuration(summary.average_document_time) : 'N/A'}`;
+            
+            // Update documents table
+            updateDocumentsTable(summary.documents);
+        }
+
+        // Update documents table
+        function updateDocumentsTable(documents) {
+            if (!documents || Object.keys(documents).length === 0) {
+                documentsTable.innerHTML = '<tr><td colspan="6" class="text-center">No documents found</td></tr>';
+                return;
+            }
+            
+            // Sort documents by ID
+            const sortedDocuments = Object.values(documents).sort((a, b) => {
+                const typeA = a.id.split('-')[0];
+                const typeB = b.id.split('-')[0];
+                if (typeA !== typeB) return typeA.localeCompare(typeB);
+                
+                const numA = parseInt(a.id.split('-')[1] || '0');
+                const numB = parseInt(b.id.split('-')[1] || '0');
+                return numA - numB;
+            });
+            
+            // Generate table rows
+            let html = '';
+            for (const doc of sortedDocuments) {
+                const statusColor = statusColors[doc.status] || 'secondary';
+                const statusEmoji = statusEmojis[doc.status] || '❓';
+                
+                html += `
+                <tr>
+                    <td>
+                        <strong>${doc.id}</strong><br>
+                        <small class="text-muted">${doc.title}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-${statusColor}">${statusEmoji} ${doc.status}</span>
+                        ${doc.error_message ? `<span class="badge bg-danger ms-1" title="${doc.error_message}">Error</span>` : ''}
+                    </td>
+                    <td>${formatFileSize(doc.file_size)}</td>
+                    <td>${doc.refined_count}</td>
+                    <td>${formatTimestamp(doc.generated_at)}</td>
+                    <td>
+                        ${doc.dependencies && doc.dependencies.length > 0 
+                            ? doc.dependencies.join(', ') 
+                            : '<small class="text-muted">None</small>'}
+                    </td>
+                </tr>
+                `;
+            }
+            
+            documentsTable.innerHTML = html;
+        }
+
+        // Update logs panel
+        function updateLogs(logs) {
+            if (!logs || logs.length === 0) {
+                logPanel.innerHTML = '<div class="text-center">No logs available</div>';
+                return;
+            }
+            
+            let html = '';
+            for (const log of logs) {
+                let logClass = 'log-info';
+                if (log.includes('[WARNING]') || log.includes('warning')) {
+                    logClass = 'log-warning';
+                } else if (log.includes('[ERROR]') || log.includes('error')) {
+                    logClass = 'log-error';
+                }
+                
+                // Extract timestamp if present
+                let timestamp = '';
+                let message = log;
+                
+                const timeMatch = log.match(/\[([\d-]+ [\d:]+)\]/);
+                if (timeMatch) {
+                    timestamp = timeMatch[1];
+                    message = log.replace(timeMatch[0], '').trim();
+                }
+                
+                html += `
+                <div class="log-entry">
+                    ${timestamp ? `<span class="log-time">[${timestamp}]</span>` : ''}
+                    <span class="${logClass}">${message}</span>
+                </div>
+                `;
+            }
+            
+            logPanel.innerHTML = html;
+            
+            // Auto-scroll to bottom
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        // Refresh data
+        async function refreshData() {
+            await fetchSummary();
+            await fetchLogs();
+        }
+
+        // Variable to store the auto-refresh interval ID
+        let autoRefreshIntervalId = null;
+
+        // Set up auto-refresh interval
+        function setupAutoRefresh(intervalSeconds) {
+            // Clear any existing interval
+            if (autoRefreshIntervalId !== null) {
+                clearInterval(autoRefreshIntervalId);
+                autoRefreshIntervalId = null;
+            }
+            
+            // If interval is greater than 0, set up a new interval
+            if (intervalSeconds > 0) {
+                autoRefreshIntervalId = setInterval(refreshData, intervalSeconds * 1000);
+                console.log(`Auto-refresh set to ${intervalSeconds} seconds`);
+            } else {
+                console.log('Auto-refresh disabled');
+            }
+        }
+
+        // Initialize
+        async function initialize() {
+            // Initial data fetch
+            await refreshData();
+            
+            // Set up initial auto-refresh based on select value
+            const initialInterval = parseInt(autoRefreshSelect.value);
+            setupAutoRefresh(initialInterval);
+            
+            // Set up refresh button
+            refreshBtn.addEventListener('click', refreshData);
+            
+            // Set up auto-refresh select change event
+            autoRefreshSelect.addEventListener('change', function() {
+                const intervalSeconds = parseInt(this.value);
+                setupAutoRefresh(intervalSeconds);
+            });
+        }
+
+        // Start the dashboard
+        initialize();
+    </script>
+</body>
+</html>

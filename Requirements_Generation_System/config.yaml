@@ -1,0 +1,410 @@
+# Requirements Generation System Configuration
+# For FY.WB.Midway Project
+
+# Project Information
+project:
+  name: "FY.WB.Midway"
+  description: "Enterprise Logistics and Payment Platform"
+  version: "1.0.0"
+  client: "FY Corporation"
+
+# Input/Output Paths
+paths:
+  # Base directory of the project
+  base_dir: "d:/Repository/@Clients/FY.WB.Midway"
+
+  # Source requirements directory
+  requirements_dir: "d:/Repository/@Clients/FY.WB.Midway/generated_documents"
+
+  # Prompt templates directory
+  prompts_dir: "d:/Repository/@Clients/FY.WB.Midway/Requirements_Generation_Prompts"
+
+  # Output directory for generated documents
+  output_dir: "d:/Repository/@Clients/FY.WB.Midway/generated_documents"
+
+  # Status tracking directory
+  status_dir: "d:/Repository/@Clients/FY.WB.Midway/generation_status"
+
+  # Source code directories for full regeneration
+  frontend_dir: "FrontEnd"
+  backend_dir: "BackEnd"
+
+# LLM Configuration
+llm:
+  # Primary provider: openai or anthropic
+  provider: "openai"
+
+  # Model selection
+  openai_model: "o3-mini"
+  anthropic_model: "claude-opus-4"
+  gemini_model: "gemini-2.5-pro-preview-06-05"
+
+  # Temperature for generation (0.0-1.0)
+  temperature: 0.7
+
+  # Maximum tokens per request
+  max_tokens: 4000
+
+  # Request timeout in seconds
+  timeout: 180
+
+  # Retry configuration
+  max_retries: 3
+  retry_delay: 5
+
+# Dual-LLM Review System Configuration
+review_system:
+  # Enable dual-LLM review system
+  enabled: true
+
+  # Primary LLM configuration (for initial document generation)
+  primary_llm:
+    provider: "openai"
+    model: "o3-mini"
+    temperature: 0.7
+    max_tokens: 4000
+
+  # Reviewer LLM configuration (for document review and improvement)
+  reviewer_llm:
+    provider: "gemini"
+    model: "gemini-2.5-pro-preview-06-05"
+    temperature: 0.5  # Lower temperature for more consistent reviews
+    max_tokens: 8192  # Higher token limit for comprehensive reviews
+
+  # Review process settings
+  review_settings:
+    # Enable review step after validation
+    auto_review: true
+
+    # Maximum number of review iterations
+    max_review_iterations: 1
+
+    # Skip review for certain document types (if needed)
+    skip_review_for: []
+
+    # Review prompt customization
+    preserve_structure: true
+    preserve_length: true
+    focus_on_accuracy: true
+    add_missing_details: true
+
+# Document Generation Settings
+generation:
+  # Number of refinement rounds (1-5)
+  refinement_rounds: 3
+  
+  # Enable parallel processing
+  parallel_processing: false
+  
+  # Maximum concurrent generations
+  max_concurrent: 2
+  
+  # Validation strictness (low, medium, high)
+  validation_level: "high"
+  
+  # Save intermediate versions
+  save_drafts: true
+  
+  # Include metadata in documents
+  include_metadata: true
+
+# Document Types Configuration
+documents:
+  # Business Requirements Document
+  BRD:
+    enabled: true
+    priority: 1
+    dependencies: []
+    
+  # Product Requirements Document  
+  PRD:
+    enabled: true
+    priority: 2
+    dependencies: ["BRD"]
+    
+  # Functional Requirements Document
+  FRD:
+    enabled: true
+    priority: 3
+    dependencies: ["PRD"]
+    
+  # Non-Functional Requirements Document
+  NFRD:
+    enabled: true
+    priority: 3
+    dependencies: ["PRD"]
+    
+  # Design Requirements Document
+  DRD:
+    enabled: true
+    priority: 4
+    dependencies: ["FRD", "NFRD"]
+    
+  # Database Schema
+  DB_SCHEMA:
+    enabled: true
+    priority: 5
+    dependencies: ["DRD"]
+    
+  # Technical Requirements Document
+  TRD:
+    enabled: true
+    priority: 5
+    dependencies: ["DRD"]
+    
+  # API Specification
+  API_SPEC:
+    enabled: true
+    priority: 6
+    dependencies: ["TRD"]
+    
+  # Test Plan
+  TEST_PLAN:
+    enabled: true
+    priority: 7
+    dependencies: ["FRD", "API_SPEC"]
+    
+  # Requirements Traceability Matrix
+  RTM:
+    enabled: true
+    priority: 8
+    dependencies: ["TEST_PLAN"]
+
+# Traceability Configuration
+traceability:
+  # ID format patterns
+  id_patterns:
+    BRD: "BRD-{:03d}"
+    PRD: "PRD-{:03d}"
+    FRD: "FRD-{:03d}.{:d}"
+    NFRD: "NFRD-{:03d}.{:d}"
+    DRD: "DRD-{:03d}.{:d}.{:d}"
+    TRD: "TRD-{:03d}.{:d}.{:d}"
+    TC: "TC-{:03d}.{:d}.{:d}.{:d}"
+    API: "API-{:03d}.{:d}"
+    DB: "DB-{:03d}.{:d}"
+    
+  # Enable bidirectional linking
+  bidirectional: true
+  
+  # Validate all references
+  validate_references: true
+
+# Monitoring Configuration
+monitoring:
+  # Enable real-time monitoring
+  enabled: true
+  
+  # Update frequency in seconds
+  refresh_rate: 2
+  
+  # Generate progress graphs
+  generate_graphs: true
+  
+  # Export metrics
+  export_metrics: true
+
+# Notification Settings
+notifications:
+  # Enable notifications
+  enabled: false
+  
+  # Notification methods
+  methods:
+    - console
+    - file
+    
+  # Events to notify
+  events:
+    - generation_started
+    - document_completed
+    - generation_failed
+    - all_completed
+
+# Advanced Settings
+advanced:
+  # Context window management
+  context_strategy: "sliding"  # full, sliding, or summary
+
+  # Chunk size for large documents
+  chunk_size: 3000
+
+  # Enable caching
+  enable_cache: true
+
+  # Cache TTL in hours
+  cache_ttl: 24
+
+  # Debug mode
+  debug: false
+
+  # Verbose logging
+  verbose: true
+
+# Full Regeneration from Code Settings
+code_regeneration:
+  # Batching configuration for processing code files
+  batching:
+    # Maximum number of files to process in a single batch
+    max_files: 12
+
+    # Maximum tokens per batch (to stay within LLM context limits)
+    max_tokens: 8000
+
+    # File extensions to include when scanning code directories
+    included_extensions:
+      - ".ts"
+      - ".tsx"
+      - ".js"
+      - ".jsx"
+      - ".cs"
+      - ".cshtml"
+      - ".sql"
+      - ".bicep"
+      - ".md"
+      - ".json"
+      - ".yaml"
+      - ".yml"
+
+    # Directories to exclude from scanning
+    excluded_directories:
+      - "node_modules"
+      - "bin"
+      - "obj"
+      - "dist"
+      - "build"
+      - ".git"
+      - ".vs"
+      - ".vscode"
+      - "temp"
+      - "logs"
+      - "coverage"
+
+    # Files to exclude from scanning (by name)
+    excluded_files:
+      - "package-lock.json"
+      - "yarn.lock"
+      - "*.min.js"
+      - "*.min.css"
+      - "*.map"
+
+  # Directories to purge during full regeneration
+  purge_directories:
+    - "generated_documents"
+    - "generation_status"
+    - "Requirements/consolidated-requirements"
+    - "Requirements/invoice-requirements"
+    - "Requirements/logistics-requirements"
+    - "Requirements_Generation_System/build_passes"
+
+# AI-Driven Application Builder Configuration
+application_builder:
+  # Enable the application builder system
+  enabled: true
+
+  # Maximum retries per pass
+  max_retries: 4
+
+  # Timeout for each pass in minutes
+  timeout_minutes: 30
+
+  # AI Pass Configuration
+  passes:
+    # Pass 1: Design Phase (OpenAI o3)
+    design:
+      model: "openai"
+      model_name: "o3-mini"
+      temperature: 0.2
+      max_tokens: 4000
+      timeout_seconds: 300
+
+    # Pass 2: Review Phase (Gemini 2.5)
+    review:
+      model: "gemini"
+      model_name: "gemini-2.5-pro-preview-06-05"
+      temperature: 0.1
+      max_tokens: 3000
+      timeout_seconds: 240
+
+    # Pass 3: Implementation Phase (Claude Sonnet 4)
+    implementation:
+      model: "anthropic"
+      model_name: "claude-3-sonnet-20240229"
+      temperature: 0.2
+      max_tokens: 4000
+      timeout_seconds: 360
+
+  # Build System Configuration
+  build_system:
+    # Frontend build configuration (Next.js)
+    frontend:
+      build_command: ["npm", "run", "build"]
+      test_command: ["npm", "test", "--", "--watchAll=false"]
+      dev_command: ["npm", "run", "dev"]
+      install_command: ["npm", "install"]
+      lint_command: ["npm", "run", "lint"]
+      working_directory: "FrontEnd"
+
+    # Backend build configuration (.NET Core)
+    backend:
+      build_command: ["dotnet", "build"]
+      test_command: ["dotnet", "test"]
+      run_command: ["dotnet", "run"]
+      restore_command: ["dotnet", "restore"]
+      clean_command: ["dotnet", "clean"]
+      working_directory: "BackEnd/FY.WB.Midway"
+
+  # Git Configuration
+  git:
+    # Automatically commit changes
+    auto_commit: true
+
+    # Branch naming prefix
+    branch_prefix: "feature/ai-generated"
+
+    # Automatically create pull requests
+    create_pr: true
+
+    # PR template file
+    pr_template: "templates/pr_template.md"
+
+    # Default base branch for PRs
+    base_branch: "master"
+
+    # Commit message template
+    commit_message_template: "feat: {feature_name} - AI-generated implementation"
+
+  # Logging Configuration
+  logging:
+    # Enable separate terminal windows for each pass
+    separate_terminals: true
+
+    # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    log_level: "INFO"
+
+    # Enable real-time monitoring
+    real_time_monitoring: true
+
+    # Log file retention in days
+    retention_days: 30
+
+  # Safety and Error Handling
+  safety:
+    # Maximum execution time for entire workflow (minutes)
+    max_workflow_time: 120
+
+    # Enable automatic rollback on failure
+    auto_rollback: true
+
+    # Require confirmation for destructive operations
+    require_confirmation: true
+
+    # Maximum file size for code generation (MB)
+    max_file_size_mb: 10
+
+# Environment Variables (override with actual values)
+environment:
+  OPENAI_API_KEY: "${OPENAI_API_KEY}"
+  ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+  GOOGLE_API_KEY: "${GOOGLE_API_KEY}"
+  GITHUB_TOKEN: "${GITHUB_TOKEN}"

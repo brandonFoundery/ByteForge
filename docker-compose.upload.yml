@@ -1,0 +1,117 @@
+# docker-compose.upload.yml - Upload Service Extension
+
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: fy-wb-midway-sqlserver
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=StrongPassword123!
+      - MSSQL_PID=Developer
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - fy-wb-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P StrongPassword123! -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: fy-wb-midway-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-development-redis-password}
+    volumes:
+      - redis_data:/data
+    networks:
+      - fy-wb-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # File Upload Service
+  upload-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.upload
+    container_name: fy-wb-midway-upload
+    ports:
+      - "5003:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=FYWBMidway;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=True;
+      - BlobStorage__ConnectionString=${BLOB_STORAGE_CONNECTION_STRING:-}
+      - BlobStorage__ContainerName=uploads
+      - Upload__MaxFileSize=104857600
+      - Upload__AllowedExtensions=pdf,doc,docx,xls,xlsx,jpg,jpeg,png,gif,txt,csv
+      - Upload__UploadPath=/app/uploads
+      - Authentication__JwtSecret=${JWT_SECRET:-development-secret-key-change-in-production}
+    volumes:
+      - upload_data:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      - sqlserver
+      - redis
+    networks:
+      - fy-wb-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # MinIO Object Storage (Alternative to Azure Blob Storage for local development)
+  minio:
+    image: minio/minio:latest
+    container_name: fy-wb-midway-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - fy-wb-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  # Upload service volumes
+  upload_data:
+    driver: local
+  minio_data:
+    driver: local
+  sqlserver_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  # Create network if it doesn't exist
+  fy-wb-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,10 @@
+{
+  "id": "FRD",
+  "title": "Functional Requirements Document",
+  "status": "in_progress",
+  "file_size": 8920,
+  "refined_count": 0,
+  "generated_at": "2025-06-10T21:00:00",
+  "elapsed_time": 90.5,
+  "dependencies": ["PRD"]
+}

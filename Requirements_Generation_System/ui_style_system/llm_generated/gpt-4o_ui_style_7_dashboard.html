@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway Dashboard</title>
+    <style>
+        /* Design Tokens */
+        :root {
+            --color-primary-500: #0b5ed7; /* token: color.primary.500 */
+            --color-secondary-300: #6c757d; /* token: color.secondary.300 */
+            --color-neutral-100: #f8f9fa; /* token: color.neutral.100 */
+            --spacing-xs: 4px; /* token: spacing.xs */
+            --spacing-sm: 8px; /* token: spacing.sm */
+            --spacing-md: 16px; /* token: spacing.md */
+            --spacing-lg: 24px; /* token: spacing.lg */
+            --font-heading: 'Arial', sans-serif; /* token: font.heading */
+            --font-body: 'Verdana', sans-serif; /* token: font.body */
+            --text-sm: 12px; /* token: text.sm */
+            --text-lg: 18px; /* token: text.lg */
+        }
+
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-neutral-100);
+            color: #333;
+        }
+
+        /* Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: var(--spacing-lg);
+            max-width: 1200px;
+            margin: auto;
+            padding: var(--spacing-lg);
+        }
+
+        header, nav, main {
+            padding: var(--spacing-md);
+            background: white;
+            border-radius: var(--spacing-xs);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--color-primary-500);
+            font-weight: bold;
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-lg);
+            background: #fff;
+            border-radius: var(--spacing-xs);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .stats-card h3 {
+            font-size: var(--text-lg);
+            font-family: var(--font-heading);
+        }
+
+        .stats-card span {
+            color: var(--color-secondary-300);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary-500); /* token: color.primary.500 */
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-md); /* token: spacing.sm, spacing.md */
+            border: none;
+            border-radius: var(--spacing-xs);
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #084298;
+        }
+
+        /* Recent Activity */
+        .activity-feed {
+            list-style: none;
+            padding: var(--spacing-md);
+            background: white;
+            border-radius: var(--spacing-xs);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .activity-feed li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            .stats-card, .quick-actions, .activity-feed {
+                padding: var(--spacing-sm);
+            }
+        }
+
+        /* Role-based Features */
+        [data-role="admin"] .admin-only {
+            display: block;
+        }
+
+        [data-role="user"] .admin-only {
+            display: none;
+        }
+    </style>
+</head>
+<body data-role="admin" data-tenant="tenant-id">
+    <header>
+        <h1>FY.WB.Midway</h1>
+        <div>
+            <span>Tenant Branding</span>
+            <span>User Profile</span>
+        </div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Loads</a></li>
+            <li><a href="#">Reports</a></li>
+        </ul>
+    </nav>
+    <main class="grid-container">
+        <section>
+            <h2>Welcome, User!</h2>
+            <div class="stats-card">
+                <h3>Total Loads: 1,247</h3>
+                <span>↑12% from last month</span>
+            </div>
+            <div class="stats-card">
+                <h3>Active Loads: 89</h3>
+                <span>↑8% from last month</span>
+            </div>
+            <div class="stats-card">
+                <h3>Monthly Revenue: $285,750</h3>
+                <span>↑15% from last month</span>
+            </div>
+            <div class="quick-actions">
+                <button class="btn-primary">+ New Load Entry</button>
+                <button class="btn-primary">📊 View Reports</button>
+                <button class="btn-primary admin-only">👥 Manage Carriers</button>
+            </div>
+        </section>
+        <aside>
+            <h2>Recent Activity</h2>
+            <ul class="activity-feed">
+                <li>Load #12847 delivered successfully (2 hours ago)</li>
+                <li>New carrier application received (4 hours ago)</li>
+                <li>Invoice #INV-2024-0156 pending (6 hours ago)</li>
+            </ul>
+        </aside>
+    </main>
+</body>
+</html>

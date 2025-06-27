@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FY.WB.Midway Dashboard</title>
+  <style>
+    /* CSS Design System & Reset */
+    :root {
+      /* Colors */
+      --color-primary-500: #6246EA; /* token: color.primary.500 */
+      --color-secondary-300: #7B2CBF; /* token: color.secondary.300 */
+      --color-neutral-100: #F5F5F5; /* token: color.neutral.100 */
+      --color-neutral-200: #E5E5E5; /* token: color.neutral.200 */
+      --color-neutral-700: #444444; /* token: color.neutral.700 */
+      --color-success-500: #28a745; /* token: color.success.500 */
+      --color-warning-500: #ffc107; /* token: color.warning.500 */
+      --color-error-500: #dc3545; /* token: color.error.500 */
+      --color-background: #1E1E2D; /* token: color.background */
+      --color-surface: #282A37; /* token: color.surface */
+      --color-text-primary: #FFFFFF; /* token: color.text.primary */
+      --color-text-secondary: #BDBDBD; /* token: color.text.secondary */
+
+      /* Spacing */
+      --spacing-xs: 4px; /* token: spacing.xs */
+      --spacing-sm: 8px; /* token: spacing.sm */
+      --spacing-md: 16px; /* token: spacing.md */
+      --spacing-lg: 24px; /* token: spacing.lg */
+      --spacing-xl: 32px; /* token: spacing.xl */
+
+      /* Typography */
+      --font-heading: 'Arial, sans-serif'; /* token: font.heading */
+      --font-body: 'Arial, sans-serif'; /* token: font.body */
+      --text-sm: 14px; /* token: text.sm */
+      --text-md: 16px; /* token: text.md */
+      --text-lg: 18px; /* token: text.lg */
+      --text-xl: 20px; /* token: text.xl */
+
+      /* Border Radius */
+      --border-radius-sm: 4px; /* token: border.radius.sm */
+      --border-radius-md: 8px; /* token: border.radius.md */
+      --border-radius-lg: 12px; /* token: border.radius.lg */
+    }
+
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body); /* token: font.body */
+      background-color: var(--color-background); /* token: color.background */
+      color: var(--color-text-primary); /* token: color.text.primary */
+      line-height: 1.6;
+    }
+
+    /* Layout */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr; /* Default: single column */
+      gap: var(--spacing-md); /* token: spacing.md */
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    /* Header */
+    header {
+      background-color: var(--color-surface); /* token: color.surface */
+      padding: var(--spacing-md); /* token: spacing.md */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: var(--text-xl); /* token: text.xl */
+      font-family: var(--font-heading); /* token: font.heading */
+      color: var(--color-text-primary); /* token: color.text.primary */
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    /* Navigation */
+    nav {
+      background-color: var(--color-surface); /* token: color.surface */
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column; /* Stack items vertically */
+    }
+
+    nav li {
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    nav a {
+      color: var(--color-text-secondary); /* token: color.text.secondary */
+      text-decoration: none;
+      display: block;
+      padding: var(--spacing-sm); /* token: spacing.sm */
+      border-radius: var(--border-radius-sm); /* token: border.radius.sm */
+    }
+
+    nav a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Main Content */
+    main {
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      background-color: var(--color-surface); /* token: color.surface */
+      padding: var(--spacing-lg); /* token: spacing.lg */
+      border-radius: var(--border-radius-md); /* token: border.radius.md */
+    }
+
+    .welcome-section h2 {
+      font-size: var(--text-lg); /* token: text.lg */
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    /* Stats Cards */
+    .stats-cards {
+      display: grid;
+      grid-template-columns: 1fr; /* Default: single column */
+      gap: var(--spacing-md); /* token: spacing.md */
+      margin-top: var(--spacing-lg); /* token: spacing.lg */
+    }
+
+    .card {
+      background-color: var(--color-surface); /* token: color.surface */
+      padding: var(--spacing-lg); /* token: spacing.lg */
+      border-radius: var(--border-radius-md); /* token: border.radius.md */
+    }
+
+    .card h3 {
+      font-size: var(--text-md); /* token: text.md */
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    .card .metric {
+      font-size: var(--text-xl); /* token: text.xl */
+      font-weight: bold;
+    }
+
+    .card .trend {
+      font-size: var(--text-sm); /* token: text.sm */
+      color: var(--color-success-500); /* token: color.success.500 */
+      margin-top: var(--spacing-xs); /* token: spacing.xs */
+    }
+    .trend.down {
+        color: var(--color-error-500); /*token: color.error.500 */
+    }
+
+    /* Quick Actions Panel */
+    .quick-actions {
+      margin-top: var(--spacing-lg); /* token: spacing.lg */
+    }
+
+    .quick-actions button {
+      padding: var(--spacing-md); /* token: spacing.md */
+      border: none;
+      border-radius: var(--border-radius-sm); /* token: border.radius.sm */
+      cursor: pointer;
+      color: var(--color-text-primary); /* token: color.text.primary */
+      font-size: var(--text-md); /* token: text.md */
+      margin-right: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary-500); /* token: color.primary.500 */
+    }
+
+    .btn-secondary {
+      background-color: var(--color-secondary-300); /* token: color.secondary.300 */
+    }
+
+    /* Recent Activity Feed */
+    .recent-activity {
+      margin-top: var(--spacing-lg); /* token: spacing.lg */
+    }
+
+    .recent-activity h2 {
+      font-size: var(--text-lg); /* token: text.lg */
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    .activity-item {
+      background-color: var(--color-surface); /* token: color.surface */
+      padding: var(--spacing-md); /* token: spacing.md */
+      border-radius: var(--border-radius-md); /* token: border.radius.md */
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    .activity-item p {
+      font-size: var(--text-sm); /* token: text.sm */
+    }
+
+    /* Role-Based Styling */
+    .admin-only {
+      display: none; /* Hidden by default */
+    }
+
+    .role-admin .admin-only {
+      display: block; /* Visible for admins */
+    }
+
+    /* Responsive Design */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      /* Tablet Styles */
+      .grid-container {
+        grid-template-columns: 1fr 1fr; /* Two columns on tablet */
+      }
+
+      .stats-cards {
+        grid-template-columns: 1fr 1fr; /* Two columns for stats on tablet */
+      }
+
+      nav ul {
+        flex-direction: row; /* Horizontal navigation on tablet */
+        justify-content: space-around;
+      }
+
+      nav li {
+        margin-bottom: 0; /* Reset margin for horizontal nav */
+      }
+    }
+
+    @media (min-width: 1025px) {
+      /* Desktop Styles */
+      .grid-container {
+        grid-template-columns: 250px 1fr; /* Sidebar + main content */
+      }
+
+      .stats-cards {
+        grid-template-columns: repeat(4, 1fr); /* Four columns for stats on desktop */
+      }
+
+      nav ul {
+        flex-direction: column; /* Vertical navigation on desktop */
+      }
+
+      nav li {
+        margin-bottom: var(--spacing-sm); /* Restore margin for vertical nav */
+      }
+    }
+
+    @media (max-width: 768px) {
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quick-actions button {
+            margin-bottom: var(--spacing-sm);
+            margin-right: 0;
+        }
+    }
+  </style>
+</head>
+<body data-tenant="acme-logistics" data-role="user">
+
+  <header>
+    <h1>FY.WB.Midway</h1>
+    <div class="user-profile">
+      <img src="https://via.placeholder.com/40" alt="User Avatar">
+      <span>John Doe</span>
+    </div>
+  </header>
+
+  <div class="grid-container">
+    <nav>
+      <ul>
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Loads</a></li>
+        <li><a href="#">Carriers</a></li>
+        <li class="admin-only"><a href="#">Users</a></li>
+        <li class="admin-only"><a href="#">Settings</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section class="welcome-section">
+        <h2>Welcome, John!</h2>
+        <p>Your tenant: Acme Logistics</p>
+      </section>
+
+      <section class="stats-cards">
+        <div class="card">
+          <h3>Total Loads</h3>
+          <div class="metric">1,247</div>
+          <div class="trend">↑12% from last month</div>
+        </div>
+        <div class="card">
+          <h3>Active Loads</h3>
+          <div class="metric">89</div>
+          <div class="trend">↑8% from last month</div>
+        </div>
+        <div class="card">
+          <h3>Monthly Revenue</h3>
+          <div class="metric">$285,750</div>
+          <div class="trend">↑15% from last month</div>
+        </div>
+        <div class="card">
+          <h3>On-Time Delivery Rate</h3>
+          <div class="metric">98%</div>
+          <div class="trend up">↑2% from last month</div>
+        </div>
+      </section>
+
+      <section class="quick-actions">
+        <button class="btn-primary">+ New Load Entry</button>
+        <button class="btn-secondary">📊 View Reports</button>
+        <button class="btn-secondary admin-only">👥 Manage Carriers</button>
+      </section>
+
+      <section class="recent-activity">
+        <h2>Recent Activity</h2>
+        <div class="activity-item">
+          <p>Load #12847 delivered successfully (2 hours ago)</p>
+        </div>
+        <div class="activity-item">
+          <p>New carrier application received (4 hours ago)</p>
+        </div>
+        <div class="activity-item">
+          <p>Invoice #INV-2024-0156 pending (6 hours ago)</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 FY.WB.Midway</p>
+  </footer>
+
+</body>
+</html>

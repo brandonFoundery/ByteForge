@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway Dashboard</title>
+    <style>
+        :root {
+            /* Color Tokens */
+            --color-primary-500: #0066ff;
+            --color-primary-600: #0052cc;
+            --color-success-500: #00b488;
+            --color-danger-500: #ff4444;
+            --color-neutral-100: #f8f9fa;
+            --color-neutral-200: #e9ecef;
+            --color-neutral-700: #495057;
+            --color-neutral-900: #212529;
+
+            /* Spacing Tokens */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+
+            /* Typography */
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.25rem;
+            --text-xl: 1.5rem;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background: var(--color-neutral-100);
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--color-neutral-900);
+            color: white;
+            padding: var(--spacing-md);
+        }
+
+        .main-content {
+            padding: var(--spacing-lg);
+        }
+
+        .welcome-section {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            color: var(--color-neutral-700);
+            font-size: var(--text-sm);
+        }
+
+        .stat-value {
+            font-size: var(--text-xl);
+            font-weight: 600;
+            margin: var(--spacing-xs) 0;
+        }
+
+        .trend-indicator {
+            font-size: var(--text-sm);
+            color: var(--color-success-500);
+        }
+
+        .activity-feed {
+            background: white;
+            border-radius: 8px;
+            padding: var(--spacing-md);
+        }
+
+        .activity-item {
+            padding: var(--spacing-sm) 0;
+            border-bottom: 1px solid var(--color-neutral-200);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--color-primary-500);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-600);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="logo">FY.WB.Midway</div>
+            <!-- Navigation items would go here -->
+        </nav>
+
+        <main class="main-content">
+            <section class="welcome-section">
+                <h1>Welcome to your Dashboard</h1>
+                <p>Here's your freight operations overview</p>
+            </section>
+
+            <div class="quick-actions">
+                <button class="btn btn-primary">+ New Load Entry</button>
+                <button class="btn btn-primary">📊 View Reports</button>
+                <button class="btn btn-primary" data-role="admin">👥 Manage Carriers</button>
+            </div>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Loads</h3>
+                    <div class="stat-value">1,247</div>
+                    <div class="trend-indicator">↑12% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Loads</h3>
+                    <div class="stat-value">89</div>
+                    <div class="trend-indicator">↑8% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Monthly Revenue</h3>
+                    <div class="stat-value">$285,750</div>
+                    <div class="trend-indicator">↑15% from last month</div>
+                </div>
+            </section>
+
+            <section class="activity-feed">
+                <h2>Recent Activity</h2>
+                <div class="activity-item">
+                    <p>Load #12847 delivered successfully</p>
+                    <small>2 hours ago</small>
+                </div>
+                <div class="activity-item">
+                    <p>New carrier application received</p>
+                    <small>4 hours ago</small>
+                </div>
+                <div class="activity-item">
+                    <p>Invoice #INV-2024-0156 pending</p>
+                    <small>6 hours ago</small>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

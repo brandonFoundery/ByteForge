@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway - UI Style Comparison Review</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the review interface */
+        .screenshot-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .screenshot-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+        }
+        .category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .category-professional { background-color: #dbeafe; color: #1e40af; }
+        .category-creative { background-color: #fce7f3; color: #be185d; }
+        .category-organic { background-color: #dcfce7; color: #166534; }
+        .category-corporate { background-color: #e0f2fe; color: #0369a1; }
+        .category-minimal { background-color: #f3f4f6; color: #374151; }
+        .category-tech { background-color: #0a0a0a; color: #00ff88; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover { color: #bbb; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">UI Style Comparison Review</h1>
+                    <p class="mt-1 text-sm text-gray-600">FY.WB.Midway Dashboard - 9 Professional Themes</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">Generated: June 18, 2025 at 12:36 PM</p>
+                    <div class="mt-1 flex space-x-4 text-xs text-gray-400">
+                        
+        <span>Total Themes: 9</span>
+        <span>•</span>
+        <span class="text-green-600">Captured: 9</span>
+        <span>•</span>
+        <span class="text-yellow-600">Examples: 0</span>
+        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Instructions -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">How to Review</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Click on any screenshot to view it in full size</li>
+                            <li>Compare the visual styles, colors, and overall feel</li>
+                            <li>Consider which style best fits your brand and user experience goals</li>
+                            <li>Note the category tags to understand the design approach</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screenshot Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="screenshot-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <div class="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <img 
+                        src="D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_1_screenshot.png" 
+                        alt="Modern Minimal Theme Screenshot" 
+                        class="screenshot-img w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        data-caption="Theme 1: Modern Minimal - Clean, professional design with subtle shadows"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Theme 1</h3>
+                        <span class="category-badge category-professional">Professional</span>
+                    </div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Modern Minimal</h4>
+                    <p class="text-sm text-gray-600 mb-4">Clean, professional design with subtle shadows</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Screenshot captured</span>
+                        <button 
+                            onclick="openModal('D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_1_screenshot.png', 'Theme 1: Modern Minimal - Clean, professional design with subtle shadows')"
+                            class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                            View Full Size
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screenshot-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <div class="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <img 
+                        src="D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_2_screenshot.png" 
+                        alt="Vibrant Gradient Theme Screenshot" 
+                        class="screenshot-img w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        data-caption="Theme 2: Vibrant Gradient - Colorful gradients with purple accents"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Theme 2</h3>
+                        <span class="category-badge category-creative">Creative</span>
+                    </div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Vibrant Gradient</h4>
+                    <p class="text-sm text-gray-600 mb-4">Colorful gradients with purple accents</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Screenshot captured</span>
+                        <button 
+                            onclick="openModal('D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_2_screenshot.png', 'Theme 2: Vibrant Gradient - Colorful gradients with purple accents')"
+                            class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                            View Full Size
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screenshot-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <div class="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <img 
+                        src="D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_3_screenshot.png" 
+                        alt="Dark Professional Theme Screenshot" 
+                        class="screenshot-img w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        data-caption="Theme 3: Dark Professional - Dark theme with cyan highlights"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Theme 3</h3>
+                        <span class="category-badge category-professional">Professional</span>
+                    </div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Dark Professional</h4>
+                    <p class="text-sm text-gray-600 mb-4">Dark theme with cyan highlights</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Screenshot captured</span>
+                        <button 
+                            onclick="openModal('D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_3_screenshot.png', 'Theme 3: Dark Professional - Dark theme with cyan highlights')"
+                            class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                            View Full Size
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screenshot-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <div class="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <img 
+                        src="D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_4_screenshot.png" 
+                        alt="Warm Earth Tones Theme Screenshot" 
+                        class="screenshot-img w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        data-caption="Theme 4: Warm Earth Tones - Warm yellows and browns, organic feel"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Theme 4</h3>
+                        <span class="category-badge category-organic">Organic</span>
+                    </div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Warm Earth Tones</h4>
+                    <p class="text-sm text-gray-600 mb-4">Warm yellows and browns, organic feel</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Screenshot captured</span>
+                        <button 
+                            onclick="openModal('D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_4_screenshot.png', 'Theme 4: Warm Earth Tones - Warm yellows and browns, organic feel')"
+                            class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                            View Full Size
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screenshot-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <div class="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <img 
+                        src="D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_5_screenshot.png" 
+                        alt="Cool Blue Corporate Theme Screenshot" 
+                        class="screenshot-img w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        data-caption="Theme 5: Cool Blue Corporate - Traditional corporate blue styling"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Theme 5</h3>
+                        <span class="category-badge category-corporate">Corporate</span>
+                    </div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Cool Blue Corporate</h4>
+                    <p class="text-sm text-gray-600 mb-4">Traditional corporate blue styling</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Screenshot captured</span>
+                        <button 
+                            onclick="openModal('D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_5_screenshot.png', 'Theme 5: Cool Blue Corporate - Traditional corporate blue styling')"
+                            class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                            View Full Size
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screenshot-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <div class="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <img 
+                        src="D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_6_screenshot.png" 
+                        alt="Nature Green Theme Screenshot" 
+                        class="screenshot-img w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        data-caption="Theme 6: Nature Green - Fresh green theme with rounded corners"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Theme 6</h3>
+                        <span class="category-badge category-organic">Organic</span>
+                    </div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Nature Green</h4>
+                    <p class="text-sm text-gray-600 mb-4">Fresh green theme with rounded corners</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Screenshot captured</span>
+                        <button 
+                            onclick="openModal('D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_6_screenshot.png', 'Theme 6: Nature Green - Fresh green theme with rounded corners')"
+                            class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                            View Full Size
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screenshot-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <div class="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <img 
+                        src="D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_7_screenshot.png" 
+                        alt="Elegant Monochrome Theme Screenshot" 
+                        class="screenshot-img w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        data-caption="Theme 7: Elegant Monochrome - Sophisticated grayscale design"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Theme 7</h3>
+                        <span class="category-badge category-minimal">Minimal</span>
+                    </div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Elegant Monochrome</h4>
+                    <p class="text-sm text-gray-600 mb-4">Sophisticated grayscale design</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Screenshot captured</span>
+                        <button 
+                            onclick="openModal('D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_7_screenshot.png', 'Theme 7: Elegant Monochrome - Sophisticated grayscale design')"
+                            class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                            View Full Size
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screenshot-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <div class="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <img 
+                        src="D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_8_screenshot.png" 
+                        alt="Sunset Orange Theme Screenshot" 
+                        class="screenshot-img w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        data-caption="Theme 8: Sunset Orange - Warm gradient with orange sunset colors"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Theme 8</h3>
+                        <span class="category-badge category-creative">Creative</span>
+                    </div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Sunset Orange</h4>
+                    <p class="text-sm text-gray-600 mb-4">Warm gradient with orange sunset colors</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Screenshot captured</span>
+                        <button 
+                            onclick="openModal('D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_8_screenshot.png', 'Theme 8: Sunset Orange - Warm gradient with orange sunset colors')"
+                            class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                            View Full Size
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="screenshot-card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="relative">
+                    <div class="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
+                    <img 
+                        src="D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_9_screenshot.png" 
+                        alt="Tech Neon Theme Screenshot" 
+                        class="screenshot-img w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        data-caption="Theme 9: Tech Neon - Futuristic neon green on black"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4='"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Theme 9</h3>
+                        <span class="category-badge category-tech">Tech</span>
+                    </div>
+                    <h4 class="text-md font-medium text-gray-800 mb-2">Tech Neon</h4>
+                    <p class="text-sm text-gray-600 mb-4">Futuristic neon green on black</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Screenshot captured</span>
+                        <button 
+                            onclick="openModal('D:\Repository\@Clients\FY.WB.Midway\Requirements_Generation_System\ui_style_system\screenshots\ui_style_9_screenshot.png', 'Theme 9: Tech Neon - Futuristic neon green on black')"
+                            class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                            View Full Size
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-16 pt-8 border-t border-gray-200">
+            <div class="text-center text-sm text-gray-500">
+                <p>UI Style Comparison System - FY.WB.Midway Project</p>
+                <p class="mt-1">Generated using automated screenshot capture with Playwright</p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Modal for full-size image viewing -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+        <div id="modalCaption" class="text-center text-white mt-4"></div>
+    </div>
+
+    <script>
+        // Modal functionality
+        function openModal(imageSrc, caption) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const modalCaption = document.getElementById('modalCaption');
+            
+            modal.classList.add('active');
+            modalImg.src = imageSrc;
+            modalCaption.innerHTML = caption;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside the image
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Add click handlers to all screenshot images
+        document.querySelectorAll('.screenshot-img').forEach(img => {
+            img.addEventListener('click', function() {
+                const caption = this.getAttribute('data-caption');
+                openModal(this.src, caption);
+            });
+        });
+    </script>
+</body>
+</html>

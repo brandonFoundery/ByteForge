@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-role="user" data-tenant="tenant-id">
+
+<header>
+    <div class="header-container">
+        <h1 class="company-name">FY.WB.Midway</h1>
+        <div class="tenant-branding">Tenant Branding</div>
+        <div class="user-profile">User Profile</div>
+    </div>
+</header>
+
+<nav>
+    <ul class="navigation">
+        <li>Dashboard</li>
+        <li>Loads</li>
+        <li class="admin-only">Manage Carriers</li>
+    </ul>
+</nav>
+
+<main>
+    <section class="welcome-section">
+        <h2>Hello, [User]!</h2>
+        <p>Welcome to your dashboard.</p>
+    </section>
+
+    <section class="stats-cards">
+        <div class="card">
+            <h3>Total Loads: 1,247</h3>
+            <p>(↑12% from last month)</p>
+        </div>
+        <div class="card">
+            <h3>Active Loads: 89</h3>
+            <p>(↑8% from last month)</p>
+        </div>
+        <div class="card">
+            <h3>Monthly Revenue: $285,750</h3>
+            <p>(↑15% from last month)</p>
+        </div>
+    </section>
+
+    <section class="quick-actions">
+        <button class="btn-primary">+ New Load Entry</button>
+        <button class="btn-secondary">📊 View Reports</button>
+        <button class="btn-secondary admin-only">👥 Manage Carriers</button>
+    </section>
+
+    <section class="recent-activity">
+        <h4>Recent Activity</h4>
+        <ul>
+            <li>Load #12847 delivered successfully (2 hours ago)</li>
+            <li>New carrier application received (4 hours ago)</li>
+            <li>Invoice #INV-2024-0156 pending (6 hours ago)</li>
+        </ul>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2023 FY.WB.Midway</p>
+</footer>
+
+</body>
+</html>

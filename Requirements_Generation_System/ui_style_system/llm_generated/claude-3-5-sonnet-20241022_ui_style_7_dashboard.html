@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway - Freight Brokerage Dashboard</title>
+    <style>
+        /* Design Tokens */
+        :root {
+            /* Colors */
+            --color-primary-500: #4764E6;
+            --color-primary-600: #3951CC;
+            --color-secondary-300: #E9ECF6;
+            --color-neutral-100: #F8F9FC;
+            --color-neutral-200: #E1E4ED;
+            --color-neutral-700: #4A5573;
+            --color-neutral-900: #1A1F2E;
+            --color-success-500: #34D399;
+            --color-warning-500: #FBBF24;
+            
+            /* Spacing */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            
+            /* Typography */
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-md: 1rem;
+            --text-lg: 1.125rem;
+            
+            /* Layout */
+            --sidebar-width: 280px;
+            --header-height: 64px;
+            --border-radius: 8px;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+        }
+
+        /* Layout Components */
+        .app-container {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: var(--header-height) 1fr;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        .header {
+            grid-column: 2 / -1;
+            background: white;
+            padding: var(--spacing-md) var(--spacing-xl);
+            border-bottom: 1px solid var(--color-neutral-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            grid-row: 1 / -1;
+            background: white;
+            border-right: 1px solid var(--color-neutral-200);
+            padding: var(--spacing-md);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            padding: var(--spacing-xl);
+        }
+
+        /* Card Components */
+        .stats-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .header {
+                grid-column: 1 / -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" data-tenant="midway-logistics">
+        <header class="header">
+            <div class="header-brand">
+                <h1>FY.WB.Midway</h1>
+            </div>
+            <div class="header-actions">
+                <!-- Header actions here -->
+            </div>
+        </header>
+        
+        <nav class="sidebar">
+            <!-- Navigation items here -->
+        </nav>
+        
+        <main class="main-content">
+            <div class="stats-grid">
+                <!-- Stats cards here -->
+            </div>
+        </main>
+    </div>
+</body>
+</html>

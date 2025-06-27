@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="company-logo">FY.WB.Midway</div>
+            <div class="user-info" data-role="user">
+                <span class="greeting">Hello, User!</span>
+                <img src="profile.jpg" alt="User Profile" class="profile-pic">
+            </div>
+        </div>
+    </header>
+    <nav>
+        <ul class="nav-menu">
+            <li class="nav-item active"><a href="#">Dashboard</a></li>
+            <li class="nav-item"><a href="#">Loads</a></li>
+            <li class="nav-item"><a href="#">Analytics</a></li>
+            <li class="nav-item admin-only"><a href="#">Admin Panel</a></li>
+        </ul>
+    </nav>
+    <main class="grid-container">
+        <section class="welcome-section">
+            <h1>Welcome to Your Dashboard</h1>
+        </section>
+        <section class="stats-cards">
+            <div class="card">
+                <h2>Total Loads</h2>
+                <p>1,247 <span class="trend-up">↑ 12%</span></p>
+            </div>
+            <div class="card">
+                <h2>Active Loads</h2>
+                <p>89 <span class="trend-up">↑ 8%</span></p>
+            </div>
+            <div class="card">
+                <h2>Monthly Revenue</h2>
+                <p>$285,750 <span class="trend-up">↑ 15%</span></p>
+            </div>
+        </section>
+        <aside class="quick-actions">
+            <button class="btn-primary">+ New Load Entry</button>
+            <button class="btn-secondary">📊 View Reports</button>
+            <button class="btn-secondary admin-only">👥 Manage Carriers</button>
+        </aside>
+        <section class="recent-activity">
+            <h2>Recent Activity</h2>
+            <ul>
+                <li>Load #12847 delivered successfully (2 hours ago)</li>
+                <li>New carrier application received (4 hours ago)</li>
+                <li>Invoice #INV-2024-0156 pending (6 hours ago)</li>
+            </ul>
+        </section>
+    </main>
+    <footer>
+        <p>© 2023 FY.WB.Midway</p>
+    </footer>
+</body>
+</html>

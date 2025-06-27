@@ -1,0 +1,1581 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live LLM UI Generation - FY.WB.Midway (45 Designs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .design-placeholder {
+            background: linear-gradient(45deg, #f3f4f6, #e5e7eb);
+            background-size: 20px 20px;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,.2) 25%, transparent 25%), 
+                linear-gradient(-45deg, rgba(255,255,255,.2) 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, rgba(255,255,255,.2) 75%), 
+                linear-gradient(-45deg, transparent 75%, rgba(255,255,255,.2) 75%);
+            animation: pulse 2s infinite;
+        }
+        
+        .design-completed {
+            border: 2px solid #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+        
+        .design-failed {
+            border: 2px solid #ef4444;
+            background: #fee2e2;
+        }
+        
+        .iframe-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tab-button {
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .status-pending { background-color: #fbbf24; }
+        .status-generating { background-color: #3b82f6; animation: pulse 1s infinite; }
+        .status-completed { background-color: #10b981; }
+        .status-failed { background-color: #ef4444; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Live LLM UI Generation</h1>
+                    <p class="text-gray-600">FY.WB.Midway Dashboard - 45 Designs Generating</p>
+                </div>
+                <div class="text-right">
+                    <div id="overall-status" class="text-sm font-medium mb-1">
+                        <span class="status-indicator status-pending"></span>
+                        <span id="status-text">Initializing...</span>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        <span id="completed-count">0</span>/45 completed
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8 overflow-x-auto">
+
+                <button onclick="showTab('gpt-4o')" class="tab-button active border-blue-500 text-blue-600 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    OpenAI GPT-4o (<span id="count-gpt-4o">0</span>/9)
+                </button>
+
+                <button onclick="showTab('gpt-4.1-preview')" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    OpenAI GPT-4.1 (<span id="count-gpt-4.1-preview">0</span>/9)
+                </button>
+
+                <button onclick="showTab('o3-mini')" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    OpenAI o3 (<span id="count-o3-mini">0</span>/9)
+                </button>
+
+                <button onclick="showTab('gemini-2.0-flash-exp')" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    Google Gemini 2.5 (<span id="count-gemini-2.0-flash-exp">0</span>/9)
+                </button>
+
+                <button onclick="showTab('claude-3-5-sonnet-20241022')" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap">
+                    Anthropic Claude 4 (<span id="count-claude-3-5-sonnet-20241022">0</span>/9)
+                </button>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- Model Tabs Content -->
+
+    <div id="gpt-4o" class="tab-content active">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-2">OpenAI GPT-4o</h2>
+                <p class="text-gray-600">Provider: openai | Generating 9 designs</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div id="design-gpt-4o_ui_style_1" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_1.png</h3>
+                            <span id="status-gpt-4o_ui_style_1" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4o_ui_style_1">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4o_ui_style_1" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4o_ui_style_1" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4o_ui_style_1')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4o_ui_style_2" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_2.png</h3>
+                            <span id="status-gpt-4o_ui_style_2" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4o_ui_style_2">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4o_ui_style_2" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4o_ui_style_2" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4o_ui_style_2')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4o_ui_style_3" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_3.png</h3>
+                            <span id="status-gpt-4o_ui_style_3" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4o_ui_style_3">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4o_ui_style_3" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4o_ui_style_3" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4o_ui_style_3')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4o_ui_style_4" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_4.png</h3>
+                            <span id="status-gpt-4o_ui_style_4" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4o_ui_style_4">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4o_ui_style_4" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4o_ui_style_4" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4o_ui_style_4')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4o_ui_style_5" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_5.png</h3>
+                            <span id="status-gpt-4o_ui_style_5" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4o_ui_style_5">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4o_ui_style_5" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4o_ui_style_5" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4o_ui_style_5')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4o_ui_style_6" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_6.png</h3>
+                            <span id="status-gpt-4o_ui_style_6" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4o_ui_style_6">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4o_ui_style_6" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4o_ui_style_6" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4o_ui_style_6')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4o_ui_style_7" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_7.png</h3>
+                            <span id="status-gpt-4o_ui_style_7" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4o_ui_style_7">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4o_ui_style_7" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4o_ui_style_7" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4o_ui_style_7')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4o_ui_style_8" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_8.png</h3>
+                            <span id="status-gpt-4o_ui_style_8" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4o_ui_style_8">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4o_ui_style_8" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4o_ui_style_8" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4o_ui_style_8')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4o_ui_style_9" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_9.png</h3>
+                            <span id="status-gpt-4o_ui_style_9" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4o_ui_style_9">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4o_ui_style_9" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4o_ui_style_9" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4o_ui_style_9')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="gpt-4.1-preview" class="tab-content ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-2">OpenAI GPT-4.1</h2>
+                <p class="text-gray-600">Provider: openai | Generating 9 designs</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div id="design-gpt-4.1-preview_ui_style_1" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_1.png</h3>
+                            <span id="status-gpt-4.1-preview_ui_style_1" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4.1-preview_ui_style_1">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4.1-preview_ui_style_1" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4.1-preview_ui_style_1" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4.1-preview_ui_style_1')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4.1-preview_ui_style_2" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_2.png</h3>
+                            <span id="status-gpt-4.1-preview_ui_style_2" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4.1-preview_ui_style_2">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4.1-preview_ui_style_2" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4.1-preview_ui_style_2" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4.1-preview_ui_style_2')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4.1-preview_ui_style_3" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_3.png</h3>
+                            <span id="status-gpt-4.1-preview_ui_style_3" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4.1-preview_ui_style_3">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4.1-preview_ui_style_3" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4.1-preview_ui_style_3" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4.1-preview_ui_style_3')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4.1-preview_ui_style_4" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_4.png</h3>
+                            <span id="status-gpt-4.1-preview_ui_style_4" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4.1-preview_ui_style_4">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4.1-preview_ui_style_4" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4.1-preview_ui_style_4" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4.1-preview_ui_style_4')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4.1-preview_ui_style_5" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_5.png</h3>
+                            <span id="status-gpt-4.1-preview_ui_style_5" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4.1-preview_ui_style_5">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4.1-preview_ui_style_5" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4.1-preview_ui_style_5" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4.1-preview_ui_style_5')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4.1-preview_ui_style_6" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_6.png</h3>
+                            <span id="status-gpt-4.1-preview_ui_style_6" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4.1-preview_ui_style_6">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4.1-preview_ui_style_6" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4.1-preview_ui_style_6" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4.1-preview_ui_style_6')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4.1-preview_ui_style_7" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_7.png</h3>
+                            <span id="status-gpt-4.1-preview_ui_style_7" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4.1-preview_ui_style_7">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4.1-preview_ui_style_7" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4.1-preview_ui_style_7" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4.1-preview_ui_style_7')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4.1-preview_ui_style_8" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_8.png</h3>
+                            <span id="status-gpt-4.1-preview_ui_style_8" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4.1-preview_ui_style_8">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4.1-preview_ui_style_8" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4.1-preview_ui_style_8" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4.1-preview_ui_style_8')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gpt-4.1-preview_ui_style_9" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_9.png</h3>
+                            <span id="status-gpt-4.1-preview_ui_style_9" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gpt-4.1-preview_ui_style_9">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gpt-4.1-preview_ui_style_9" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gpt-4.1-preview_ui_style_9" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gpt-4.1-preview_ui_style_9')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="o3-mini" class="tab-content ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-2">OpenAI o3</h2>
+                <p class="text-gray-600">Provider: openai | Generating 9 designs</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div id="design-o3-mini_ui_style_1" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_1.png</h3>
+                            <span id="status-o3-mini_ui_style_1" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-o3-mini_ui_style_1">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-o3-mini_ui_style_1" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-o3-mini_ui_style_1" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('o3-mini_ui_style_1')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-o3-mini_ui_style_2" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_2.png</h3>
+                            <span id="status-o3-mini_ui_style_2" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-o3-mini_ui_style_2">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-o3-mini_ui_style_2" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-o3-mini_ui_style_2" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('o3-mini_ui_style_2')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-o3-mini_ui_style_3" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_3.png</h3>
+                            <span id="status-o3-mini_ui_style_3" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-o3-mini_ui_style_3">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-o3-mini_ui_style_3" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-o3-mini_ui_style_3" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('o3-mini_ui_style_3')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-o3-mini_ui_style_4" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_4.png</h3>
+                            <span id="status-o3-mini_ui_style_4" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-o3-mini_ui_style_4">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-o3-mini_ui_style_4" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-o3-mini_ui_style_4" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('o3-mini_ui_style_4')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-o3-mini_ui_style_5" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_5.png</h3>
+                            <span id="status-o3-mini_ui_style_5" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-o3-mini_ui_style_5">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-o3-mini_ui_style_5" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-o3-mini_ui_style_5" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('o3-mini_ui_style_5')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-o3-mini_ui_style_6" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_6.png</h3>
+                            <span id="status-o3-mini_ui_style_6" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-o3-mini_ui_style_6">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-o3-mini_ui_style_6" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-o3-mini_ui_style_6" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('o3-mini_ui_style_6')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-o3-mini_ui_style_7" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_7.png</h3>
+                            <span id="status-o3-mini_ui_style_7" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-o3-mini_ui_style_7">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-o3-mini_ui_style_7" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-o3-mini_ui_style_7" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('o3-mini_ui_style_7')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-o3-mini_ui_style_8" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_8.png</h3>
+                            <span id="status-o3-mini_ui_style_8" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-o3-mini_ui_style_8">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-o3-mini_ui_style_8" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-o3-mini_ui_style_8" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('o3-mini_ui_style_8')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-o3-mini_ui_style_9" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_9.png</h3>
+                            <span id="status-o3-mini_ui_style_9" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-o3-mini_ui_style_9">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-o3-mini_ui_style_9" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-o3-mini_ui_style_9" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('o3-mini_ui_style_9')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="gemini-2.0-flash-exp" class="tab-content ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-2">Google Gemini 2.5</h2>
+                <p class="text-gray-600">Provider: google | Generating 9 designs</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div id="design-gemini-2.0-flash-exp_ui_style_1" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_1.png</h3>
+                            <span id="status-gemini-2.0-flash-exp_ui_style_1" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gemini-2.0-flash-exp_ui_style_1">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gemini-2.0-flash-exp_ui_style_1" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gemini-2.0-flash-exp_ui_style_1" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gemini-2.0-flash-exp_ui_style_1')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gemini-2.0-flash-exp_ui_style_2" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_2.png</h3>
+                            <span id="status-gemini-2.0-flash-exp_ui_style_2" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gemini-2.0-flash-exp_ui_style_2">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gemini-2.0-flash-exp_ui_style_2" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gemini-2.0-flash-exp_ui_style_2" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gemini-2.0-flash-exp_ui_style_2')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gemini-2.0-flash-exp_ui_style_3" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_3.png</h3>
+                            <span id="status-gemini-2.0-flash-exp_ui_style_3" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gemini-2.0-flash-exp_ui_style_3">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gemini-2.0-flash-exp_ui_style_3" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gemini-2.0-flash-exp_ui_style_3" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gemini-2.0-flash-exp_ui_style_3')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gemini-2.0-flash-exp_ui_style_4" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_4.png</h3>
+                            <span id="status-gemini-2.0-flash-exp_ui_style_4" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gemini-2.0-flash-exp_ui_style_4">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gemini-2.0-flash-exp_ui_style_4" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gemini-2.0-flash-exp_ui_style_4" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gemini-2.0-flash-exp_ui_style_4')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gemini-2.0-flash-exp_ui_style_5" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_5.png</h3>
+                            <span id="status-gemini-2.0-flash-exp_ui_style_5" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gemini-2.0-flash-exp_ui_style_5">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gemini-2.0-flash-exp_ui_style_5" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gemini-2.0-flash-exp_ui_style_5" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gemini-2.0-flash-exp_ui_style_5')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gemini-2.0-flash-exp_ui_style_6" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_6.png</h3>
+                            <span id="status-gemini-2.0-flash-exp_ui_style_6" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gemini-2.0-flash-exp_ui_style_6">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gemini-2.0-flash-exp_ui_style_6" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gemini-2.0-flash-exp_ui_style_6" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gemini-2.0-flash-exp_ui_style_6')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gemini-2.0-flash-exp_ui_style_7" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_7.png</h3>
+                            <span id="status-gemini-2.0-flash-exp_ui_style_7" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gemini-2.0-flash-exp_ui_style_7">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gemini-2.0-flash-exp_ui_style_7" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gemini-2.0-flash-exp_ui_style_7" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gemini-2.0-flash-exp_ui_style_7')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gemini-2.0-flash-exp_ui_style_8" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_8.png</h3>
+                            <span id="status-gemini-2.0-flash-exp_ui_style_8" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gemini-2.0-flash-exp_ui_style_8">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gemini-2.0-flash-exp_ui_style_8" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gemini-2.0-flash-exp_ui_style_8" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gemini-2.0-flash-exp_ui_style_8')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-gemini-2.0-flash-exp_ui_style_9" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_9.png</h3>
+                            <span id="status-gemini-2.0-flash-exp_ui_style_9" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-gemini-2.0-flash-exp_ui_style_9">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-gemini-2.0-flash-exp_ui_style_9" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-gemini-2.0-flash-exp_ui_style_9" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('gemini-2.0-flash-exp_ui_style_9')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="claude-3-5-sonnet-20241022" class="tab-content ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-2">Anthropic Claude 4</h2>
+                <p class="text-gray-600">Provider: anthropic | Generating 9 designs</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div id="design-claude-3-5-sonnet-20241022_ui_style_1" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_1.png</h3>
+                            <span id="status-claude-3-5-sonnet-20241022_ui_style_1" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-claude-3-5-sonnet-20241022_ui_style_1">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-claude-3-5-sonnet-20241022_ui_style_1" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-claude-3-5-sonnet-20241022_ui_style_1" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('claude-3-5-sonnet-20241022_ui_style_1')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-claude-3-5-sonnet-20241022_ui_style_2" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_2.png</h3>
+                            <span id="status-claude-3-5-sonnet-20241022_ui_style_2" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-claude-3-5-sonnet-20241022_ui_style_2">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-claude-3-5-sonnet-20241022_ui_style_2" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-claude-3-5-sonnet-20241022_ui_style_2" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('claude-3-5-sonnet-20241022_ui_style_2')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-claude-3-5-sonnet-20241022_ui_style_3" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_3.png</h3>
+                            <span id="status-claude-3-5-sonnet-20241022_ui_style_3" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-claude-3-5-sonnet-20241022_ui_style_3">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-claude-3-5-sonnet-20241022_ui_style_3" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-claude-3-5-sonnet-20241022_ui_style_3" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('claude-3-5-sonnet-20241022_ui_style_3')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-claude-3-5-sonnet-20241022_ui_style_4" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_4.png</h3>
+                            <span id="status-claude-3-5-sonnet-20241022_ui_style_4" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-claude-3-5-sonnet-20241022_ui_style_4">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-claude-3-5-sonnet-20241022_ui_style_4" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-claude-3-5-sonnet-20241022_ui_style_4" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('claude-3-5-sonnet-20241022_ui_style_4')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-claude-3-5-sonnet-20241022_ui_style_5" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_5.png</h3>
+                            <span id="status-claude-3-5-sonnet-20241022_ui_style_5" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-claude-3-5-sonnet-20241022_ui_style_5">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-claude-3-5-sonnet-20241022_ui_style_5" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-claude-3-5-sonnet-20241022_ui_style_5" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('claude-3-5-sonnet-20241022_ui_style_5')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-claude-3-5-sonnet-20241022_ui_style_6" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_6.png</h3>
+                            <span id="status-claude-3-5-sonnet-20241022_ui_style_6" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-claude-3-5-sonnet-20241022_ui_style_6">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-claude-3-5-sonnet-20241022_ui_style_6" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-claude-3-5-sonnet-20241022_ui_style_6" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('claude-3-5-sonnet-20241022_ui_style_6')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-claude-3-5-sonnet-20241022_ui_style_7" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_7.png</h3>
+                            <span id="status-claude-3-5-sonnet-20241022_ui_style_7" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-claude-3-5-sonnet-20241022_ui_style_7">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-claude-3-5-sonnet-20241022_ui_style_7" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-claude-3-5-sonnet-20241022_ui_style_7" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('claude-3-5-sonnet-20241022_ui_style_7')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-claude-3-5-sonnet-20241022_ui_style_8" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_8.png</h3>
+                            <span id="status-claude-3-5-sonnet-20241022_ui_style_8" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-claude-3-5-sonnet-20241022_ui_style_8">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-claude-3-5-sonnet-20241022_ui_style_8" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-claude-3-5-sonnet-20241022_ui_style_8" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('claude-3-5-sonnet-20241022_ui_style_8')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+                <div id="design-claude-3-5-sonnet-20241022_ui_style_9" class="design-placeholder bg-white rounded-lg shadow-sm border p-4">
+                    <div class="mb-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900 text-sm">Style: ui_style_9.png</h3>
+                            <span id="status-claude-3-5-sonnet-20241022_ui_style_9" class="status-indicator status-pending"></span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span id="status-text-claude-3-5-sonnet-20241022_ui_style_9">Waiting to generate...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="iframe-container mb-3">
+                        <div id="placeholder-claude-3-5-sonnet-20241022_ui_style_9" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div class="text-sm">Generating...</div>
+                            </div>
+                        </div>
+                        <iframe id="iframe-claude-3-5-sonnet-20241022_ui_style_9" src="" style="display: none;" loading="lazy"></iframe>
+                    </div>
+                    
+                    <button onclick="openDesign('claude-3-5-sonnet-20241022_ui_style_9')" class="w-full bg-gray-100 text-gray-400 py-2 px-3 rounded text-xs font-medium cursor-not-allowed" disabled>
+                        Generating...
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let completedCount = 0;
+        const totalDesigns = 45;
+        
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active', 'text-blue-600', 'border-blue-500');
+                button.classList.add('text-gray-500', 'border-transparent');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activate selected tab button
+            event.target.classList.add('active', 'text-blue-600', 'border-blue-500');
+            event.target.classList.remove('text-gray-500', 'border-transparent');
+        }
+        
+        function openDesign(designId) {
+            const iframe = document.getElementById(`iframe-${designId}`);
+            if (iframe && iframe.src) {
+                window.open(iframe.src, '_blank');
+            }
+        }
+        
+        function updateDesignStatus(designId, status, filename = null) {
+            console.log(`updateDesignStatus called: ${designId}, ${status}, ${filename}`);
+
+            const designCard = document.getElementById(`design-${designId}`);
+            const statusIndicator = document.getElementById(`status-${designId}`);
+            const statusText = document.getElementById(`status-text-${designId}`);
+            const placeholder = document.getElementById(`placeholder-${designId}`);
+            const iframe = document.getElementById(`iframe-${designId}`);
+
+            if (!designCard) {
+                console.log(`Design card not found for ID: design-${designId}`);
+                return;
+            }
+
+            const button = designCard.querySelector('button');
+            console.log(`Found elements for ${designId}:`, {
+                designCard: !!designCard,
+                statusIndicator: !!statusIndicator,
+                statusText: !!statusText,
+                placeholder: !!placeholder,
+                iframe: !!iframe,
+                button: !!button
+            });
+            
+            // Update status indicator
+            statusIndicator.className = `status-indicator status-${status}`;
+            
+            if (status === 'generating') {
+                statusText.textContent = 'Generating design...';
+                designCard.classList.remove('design-placeholder');
+                designCard.classList.add('bg-blue-50', 'border-blue-200');
+            } else if (status === 'completed' && filename) {
+                statusText.textContent = 'Completed!';
+                designCard.classList.remove('design-placeholder', 'bg-blue-50', 'border-blue-200');
+                designCard.classList.add('design-completed');
+                
+                // Show the iframe and hide placeholder
+                placeholder.style.display = 'none';
+                iframe.src = filename;
+                iframe.style.display = 'block';
+                
+                // Enable button
+                button.textContent = 'View Full Design';
+                button.classList.remove('bg-gray-100', 'text-gray-400', 'cursor-not-allowed');
+                button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700', 'cursor-pointer');
+                button.disabled = false;
+                
+                // Update counters
+                completedCount++;
+                updateCounters();
+                
+            } else if (status === 'failed') {
+                statusText.textContent = 'Generation failed';
+                designCard.classList.remove('design-placeholder', 'bg-blue-50', 'border-blue-200');
+                designCard.classList.add('design-failed');
+                
+                placeholder.innerHTML = `
+                    <div class="text-center text-red-500">
+                        <div class="text-4xl mb-2">❌</div>
+                        <div class="text-sm">Generation Failed</div>
+                    </div>
+                `;
+                
+                button.textContent = 'Failed';
+                button.classList.remove('bg-gray-100', 'text-gray-400');
+                button.classList.add('bg-red-100', 'text-red-600', 'cursor-not-allowed');
+            }
+        }
+        
+        function updateCounters() {
+            document.getElementById('completed-count').textContent = completedCount;
+            
+            // Update model-specific counters
+            const models = ["gpt-4o", "gpt-4.1-preview", "o3-mini", "gemini-2.0-flash-exp", "claude-3-5-sonnet-20241022"];
+            models.forEach(modelId => {
+                const modelCompleted = document.querySelectorAll(`#${modelId} .design-completed`).length;
+                document.getElementById(`count-${modelId}`).textContent = modelCompleted;
+            });
+            
+            // Update overall status
+            const statusText = document.getElementById('status-text');
+            const overallStatus = document.getElementById('overall-status').querySelector('.status-indicator');
+            
+            if (completedCount === 0) {
+                statusText.textContent = 'Starting generation...';
+                overallStatus.className = 'status-indicator status-generating';
+            } else if (completedCount < totalDesigns) {
+                statusText.textContent = `Generating... (${completedCount}/${totalDesigns})`;
+                overallStatus.className = 'status-indicator status-generating';
+            } else {
+                statusText.textContent = 'All designs completed!';
+                overallStatus.className = 'status-indicator status-completed';
+            }
+        }
+        
+        // Poll for updates every 2 seconds
+        async function pollForUpdates() {
+            try {
+                console.log('Polling for updates...', new Date().toLocaleTimeString());
+                const response = await fetch('generation_status.json?t=' + Date.now());
+
+                if (response.ok) {
+                    const status = await response.json();
+                    console.log('Status update received:', status);
+
+                    // Update designs based on status
+                    if (status.results) {
+                        status.results.forEach(result => {
+                            const imageBase = result.reference_image ? result.reference_image.replace('.png', '') : 'unknown';
+                            const designId = `${result.model_id}_${imageBase}`;
+
+                            // Extract just the filename from the full path
+                            let filename = null;
+                            if (result.output_file) {
+                                // Handle both Windows and Unix paths
+                                const pathParts = result.output_file.replace(/\\/g, '/').split('/');
+                                filename = pathParts[pathParts.length - 1];
+                            }
+
+                            console.log(`Processing result for ${designId}:`, result);
+                            console.log(`Extracted filename: ${filename}`);
+
+                            // Check if element exists with exact ID
+                            let element = document.getElementById(`design-${designId}`);
+                            if (!element) {
+                                console.log(`Element not found for ID: design-${designId}`);
+                                // Try alternative ID patterns
+                                const alternativeIds = [
+                                    `design-${result.model_id.replace(/[^a-zA-Z0-9]/g, '-')}_${imageBase}`,
+                                    `design-${result.model_id}_${imageBase}`,
+                                ];
+
+                                for (const altId of alternativeIds) {
+                                    element = document.getElementById(altId);
+                                    if (element) {
+                                        console.log(`Found element with alternative ID: ${altId}`);
+                                        break;
+                                    }
+                                }
+
+                                if (!element) {
+                                    // List all available design elements for debugging
+                                    const allDesigns = document.querySelectorAll('[id^="design-"]');
+                                    console.log('Available design elements:', Array.from(allDesigns).map(el => el.id));
+                                }
+                            }
+
+                            if (result.success && filename && element) {
+                                console.log(`Marking ${designId} as completed with file ${filename}`);
+                                updateDesignStatus(designId, 'completed', `llm_generated/${filename}`);
+                            } else if (result.success === false && element) {
+                                console.log(`Marking ${designId} as failed`);
+                                updateDesignStatus(designId, 'failed');
+                            } else if (result.status === 'generating' && element) {
+                                console.log(`Marking ${designId} as generating`);
+                                updateDesignStatus(designId, 'generating');
+                            }
+                        });
+                    }
+                } else {
+                    console.log('Failed to fetch status:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.log('Polling error:', error);
+            }
+
+            // Continue polling if not all completed
+            if (completedCount < totalDesigns) {
+                setTimeout(pollForUpdates, 2000);
+            } else {
+                console.log('All designs completed, stopping polling');
+            }
+        }
+        
+        // Start polling when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCounters();
+            setTimeout(pollForUpdates, 1000);
+        });
+    </script>
+</body>
+</html>

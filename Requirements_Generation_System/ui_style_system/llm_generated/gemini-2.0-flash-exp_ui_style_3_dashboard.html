@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FY.WB.Midway Dashboard</title>
+  <style>
+    /* CSS Design System */
+    :root {
+      /* Colors */
+      --color-primary-500: #6366F1; /* token: color.primary.500 */
+      --color-primary-700: #4F46E5; /* token: color.primary.700 */
+      --color-secondary-300: #A8A29E; /* token: color.secondary.300 */
+      --color-neutral-100: #F5F5F4; /* token: color.neutral.100 */
+      --color-neutral-200: #E5E5E4;
+      --color-neutral-900: #111827; /* token: color.neutral.900 */
+      --color-success-500: #22C55E; /* token: color.success.500 */
+      --color-warning-500: #F59E0B; /* token: color.warning.500 */
+      --color-error-500: #EF4444; /* token: color.error.500 */
+      --color-white: #FFFFFF; /* token: color.white */
+
+      /* Spacing */
+      --spacing-xs: 0.25rem; /* token: spacing.xs */
+      --spacing-sm: 0.5rem; /* token: spacing.sm */
+      --spacing-md: 1rem; /* token: spacing.md */
+      --spacing-lg: 1.5rem; /* token: spacing.lg */
+      --spacing-xl: 2rem; /* token: spacing.xl */
+
+      /* Typography */
+      --font-heading: sans-serif; /* token: font.heading */
+      --font-body: sans-serif; /* token: font.body */
+      --text-xs: 0.75rem; /* token: text.xs */
+      --text-sm: 0.875rem; /* token: text.sm */
+      --text-base: 1rem; /* token: text.base */
+      --text-lg: 1.125rem; /* token: text.lg */
+      --text-xl: 1.25rem; /* token: text.xl */
+
+      /* Border Radius */
+      --border-radius-sm: 0.25rem; /* token: border-radius.sm */
+      --border-radius-md: 0.5rem; /* token: border-radius.md */
+
+    }
+
+    /* General Styles */
+    body {
+      font-family: var(--font-body); /* token: font.body */
+      color: var(--color-neutral-900); /* token: color.neutral.900 */
+      background-color: var(--color-neutral-100); /* token: color.neutral.100 */
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    /* Layout */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--spacing-md); /* token: spacing.md */
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    /* Header */
+    header {
+      background-color: var(--color-primary-500); /* token: color.primary.500 */
+      color: var(--color-white); /* token: color.white */
+      padding: var(--spacing-md); /* token: spacing.md */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: var(--text-xl); /* token: text.xl */
+      font-family: var(--font-heading); /* token: font.heading */
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    /* Navigation */
+    nav {
+      background-color: var(--color-neutral-200); /* token: color.neutral.200 */
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    nav a {
+      display: block;
+      padding: var(--spacing-sm); /* token: spacing.sm */
+      text-decoration: none;
+      color: var(--color-neutral-900); /* token: color.neutral.900 */
+      border-radius: var(--border-radius-sm); /* token: border-radius.sm */
+    }
+
+    nav a:hover {
+      background-color: var(--color-neutral-100); /* token: color.neutral.100 */
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    /* Stats Cards */
+    .stats-card {
+      background-color: var(--color-white); /* token: color.white */
+      padding: var(--spacing-md); /* token: spacing.md */
+      border-radius: var(--border-radius-md); /* token: border-radius.md */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-card h2 {
+      font-size: var(--text-lg); /* token: text.lg */
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    .stats-card .metric {
+      font-size: var(--text-xl); /* token: text.xl */
+      font-weight: bold;
+    }
+
+    .stats-card .trend {
+      font-size: var(--text-sm); /* token: text.sm */
+      color: var(--color-success-500); /* token: color.success.500 */
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background-color: var(--color-primary-500); /* token: color.primary.500 */
+      color: var(--color-white); /* token: color.white */
+      padding: var(--spacing-sm) var(--spacing-md); /* token: spacing.sm, spacing.md */
+      border: none;
+      border-radius: var(--border-radius-sm); /* token: border-radius.sm */
+      cursor: pointer;
+      font-size: var(--text-sm); /* token: text.sm */
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-primary-700); /* token: color.primary.700 */
+    }
+
+    .btn-secondary {
+      background-color: var(--color-neutral-100); /* token: color.neutral.100 */
+      color: var(--color-neutral-900); /* token: color.neutral.900 */
+      padding: var(--spacing-sm) var(--spacing-md); /* token: spacing.sm, spacing.md */
+      border: 1px solid var(--color-neutral-200); /* token: color.neutral.200 */
+      border-radius: var(--border-radius-sm); /* token: border-radius.sm */
+      cursor: pointer;
+      font-size: var(--text-sm); /* token: text.sm */
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--color-neutral-200); /* token: color.neutral.200 */
+    }
+
+    /* Quick Actions Panel */
+    .quick-actions {
+      display: flex;
+      gap: var(--spacing-sm); /* token: spacing.sm */
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    /* Recent Activity Feed */
+    .recent-activity {
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    .activity-item {
+      padding: var(--spacing-sm); /* token: spacing.sm */
+      border-bottom: 1px solid var(--color-neutral-200); /* token: color.neutral.200 */
+    }
+
+    /* Role-Based Visibility */
+    .admin-only {
+      display: none;
+    }
+
+    .role-admin .admin-only {
+      display: block;
+    }
+
+    .role-user .admin-only {
+      display: none;
+    }
+
+    /* Multi-Tenant Styling */
+    [data-tenant="tenant-a"] {
+      /* Tenant A specific styles */
+    }
+
+    [data-tenant="tenant-b"] {
+      /* Tenant B specific styles */
+    }
+
+
+    /* Responsive Design */
+    /* Mobile */
+    @media (max-width: 768px) {
+      .grid-container {
+        grid-template-columns: 1fr; /* token: layout.grid.mobile */
+      }
+
+      .quick-actions {
+        flex-direction: column; /* token: layout.quick-actions.mobile */
+      }
+
+      nav ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+    }
+
+    /* Tablet */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .grid-container {
+        grid-template-columns: repeat(2, 1fr); /* token: layout.grid.tablet */
+      }
+    }
+
+    /* Desktop */
+    @media (min-width: 1025px) {
+      .grid-container {
+        grid-template-columns: repeat(4, 1fr); /* token: layout.grid.desktop */
+      }
+    }
+  </style>
+</head>
+<body data-role="user" data-tenant="tenant-a">
+  <header>
+    <h1>FY.WB.Midway</h1>
+    <div class="user-profile">
+      <span>John Doe</span>
+      <img src="https://via.placeholder.com/40" alt="User Avatar" style="border-radius: 50%;">
+    </div>
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="#">Dashboard</a></li>
+      <li><a href="#">Loads</a></li>
+      <li><a href="#">Carriers</a></li>
+      <li><a href="#">Invoices</a></li>
+      <li class="admin-only"><a href="#">Admin Console</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section class="welcome-section">
+      <h2>Welcome, John Doe!</h2>
+      <p>You are viewing the dashboard for Tenant A.</p>
+    </section>
+
+    <div class="grid-container">
+      <section class="stats-card">
+        <h2>Total Loads</h2>
+        <div class="metric">1,247</div>
+        <div class="trend">↑12% from last month</div>
+      </section>
+
+      <section class="stats-card">
+        <h2>Active Loads</h2>
+        <div class="metric">89</div>
+        <div class="trend">↑8% from last month</div>
+      </section>
+
+      <section class="stats-card">
+        <h2>Monthly Revenue</h2>
+        <div class="metric">$285,750</div>
+        <div class="trend">↑15% from last month</div>
+      </section>
+
+      <section class="stats-card">
+        <h2>On-Time Delivery Rate</h2>
+        <div class="metric">95%</div>
+        <div class="trend">Stable</div>
+      </section>
+    </div>
+
+    <section class="quick-actions">
+      <a href="#" class="btn-primary">+ New Load Entry</a>
+      <a href="#" class="btn-secondary">📊 View Reports</a>
+      <a href="#" class="btn-secondary admin-only">👥 Manage Carriers</a>
+    </section>
+
+    <section class="recent-activity">
+      <h2>Recent Activity</h2>
+      <div class="activity-item">
+        Load #12847 delivered successfully (2 hours ago)
+      </div>
+      <div class="activity-item">
+        New carrier application received (4 hours ago)
+      </div>
+      <div class="activity-item">
+        Invoice #INV-2024-0156 pending (6 hours ago)
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 FY.WB.Midway</p>
+  </footer>
+</body>
+</html>

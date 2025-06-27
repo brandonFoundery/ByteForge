@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+"""
+Setup script for API keys and configuration
+"""
+
+import os
+import sys
+from pathlib import Path
+from rich.console import Console
+from rich.prompt import Prompt, Confirm
+from rich.panel import Panel
+
+console = Console()
+
+def main():
+    """Interactive setup for API keys"""
+    
+    console.print(Panel.fit(
+        "[bold blue]Requirements Generation System Setup[/bold blue]\n"
+        "This script will help you configure API keys for the system.",
+        title="🔧 Setup"
+    ))
+    
+    # Check if .env file exists
+    env_file = Path(__file__).parent / ".env"
+    
+    if env_file.exists():
+        console.print(f"[yellow]Found existing .env file at: {env_file}[/yellow]")
+        if not Confirm.ask("Do you want to update it?"):
+            console.print("[green]Setup cancelled. Your existing configuration is preserved.[/green]")
+            return
+    
+    # Collect API keys
+    console.print("\n[bold]API Key Configuration[/bold]")
+    console.print("You can skip any provider you don't plan to use by pressing Enter.")
+    
+    api_keys = {}
+    
+    # OpenAI
+    console.print("\n[blue]OpenAI Configuration[/blue]")
+    console.print("Get your API key from: https://platform.openai.com/api-keys")
+    openai_key = Prompt.ask("OpenAI API Key", default="", show_default=False)
+    if openai_key:
+        api_keys["OPENAI_API_KEY"] = openai_key
+    
+    # Anthropic
+    console.print("\n[blue]Anthropic (Claude) Configuration[/blue]")
+    console.print("Get your API key from: https://console.anthropic.com/")
+    anthropic_key = Prompt.ask("Anthropic API Key", default="", show_default=False)
+    if anthropic_key:
+        api_keys["ANTHROPIC_API_KEY"] = anthropic_key
+    
+    # Google
+    console.print("\n[blue]Google (Gemini) Configuration[/blue]")
+    console.print("Get your API key from: https://makersuite.google.com/app/apikey")
+    google_key = Prompt.ask("Google API Key", default="", show_default=False)
+    if google_key:
+        api_keys["GOOGLE_API_KEY"] = google_key
+    
+    # Azure OpenAI
+    if Confirm.ask("\nDo you want to configure Azure OpenAI?", default=False):
+        console.print("\n[blue]Azure OpenAI Configuration[/blue]")
+        azure_key = Prompt.ask("Azure OpenAI API Key")
+        azure_endpoint = Prompt.ask("Azure OpenAI Endpoint (e.g., https://your-resource.openai.azure.com/)")
+        azure_version = Prompt.ask("Azure OpenAI API Version", default="2024-02-15-preview")
+        
+        if azure_key and azure_endpoint:
+            api_keys["AZURE_OPENAI_API_KEY"] = azure_key
+            api_keys["AZURE_OPENAI_ENDPOINT"] = azure_endpoint
+            api_keys["AZURE_OPENAI_API_VERSION"] = azure_version
+    
+    # Default provider
+    if api_keys:
+        providers = []
+        if "OPENAI_API_KEY" in api_keys:
+            providers.append("openai")
+        if "ANTHROPIC_API_KEY" in api_keys:
+            providers.append("anthropic")
+        if "GOOGLE_API_KEY" in api_keys:
+            providers.append("google")
+        if "AZURE_OPENAI_API_KEY" in api_keys:
+            providers.append("azure")
+        
+        if len(providers) > 1:
+            default_provider = Prompt.ask(
+                "Default model provider", 
+                choices=providers, 
+                default=providers[0]
+            )
+            api_keys["DEFAULT_MODEL_PROVIDER"] = default_provider
+        elif len(providers) == 1:
+            api_keys["DEFAULT_MODEL_PROVIDER"] = providers[0]
+    
+    # Optional settings
+    if Confirm.ask("\nDo you want to configure advanced settings?", default=False):
+        timeout = Prompt.ask("API timeout (seconds)", default="60")
+        api_keys["API_TIMEOUT"] = timeout
+        
+        max_retries = Prompt.ask("Max API retries", default="3")
+        api_keys["MAX_RETRIES"] = max_retries
+    
+    # Write .env file
+    if api_keys:
+        write_env_file(env_file, api_keys)
+        console.print(f"\n[green]✓ Configuration saved to {env_file}[/green]")
+        
+        # Show summary
+        console.print("\n[bold]Configuration Summary:[/bold]")
+        for key, value in api_keys.items():
+            if "KEY" in key:
+                # Mask API keys for security
+                masked_value = value[:8] + "..." + value[-4:] if len(value) > 12 else "***"
+                console.print(f"  {key}: {masked_value}")
+            else:
+                console.print(f"  {key}: {value}")
+        
+        console.print(f"\n[green]Setup complete! You can now run the requirements generation system.[/green]")
+        console.print(f"[yellow]To run: python orchestrator.py[/yellow]")
+    else:
+        console.print("\n[yellow]No API keys configured. You can run this setup again later.[/yellow]")
+
+def write_env_file(env_file: Path, api_keys: dict):
+    """Write the .env file with the provided API keys"""
+    
+    content = [
+        "# API Keys Configuration",
+        "# Generated by setup_api_keys.py",
+        "# Edit this file to update your configuration",
+        "",
+    ]
+    
+    # Add configured keys
+    for key, value in api_keys.items():
+        content.append(f"{key}={value}")
+    
+    # Add commented examples for unconfigured providers
+    if "OPENAI_API_KEY" not in api_keys:
+        content.extend([
+            "",
+            "# OpenAI API Key (uncomment and add your key)",
+            "# OPENAI_API_KEY=your_openai_api_key_here"
+        ])
+    
+    if "ANTHROPIC_API_KEY" not in api_keys:
+        content.extend([
+            "",
+            "# Anthropic API Key (uncomment and add your key)",
+            "# ANTHROPIC_API_KEY=your_anthropic_api_key_here"
+        ])
+    
+    if "GOOGLE_API_KEY" not in api_keys:
+        content.extend([
+            "",
+            "# Google API Key (uncomment and add your key)",
+            "# GOOGLE_API_KEY=your_google_api_key_here"
+        ])
+    
+    if "AZURE_OPENAI_API_KEY" not in api_keys:
+        content.extend([
+            "",
+            "# Azure OpenAI Configuration (uncomment and configure)",
+            "# AZURE_OPENAI_API_KEY=your_azure_openai_key_here",
+            "# AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/",
+            "# AZURE_OPENAI_API_VERSION=2024-02-15-preview"
+        ])
+    
+    # Add default settings if not configured
+    if "API_TIMEOUT" not in api_keys:
+        content.extend([
+            "",
+            "# Optional: Request timeout (seconds)",
+            "API_TIMEOUT=60"
+        ])
+    
+    if "MAX_RETRIES" not in api_keys:
+        content.extend([
+            "",
+            "# Optional: Max retries for API calls",
+            "MAX_RETRIES=3"
+        ])
+    
+    env_file.write_text("\n".join(content) + "\n")
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Setup cancelled by user.[/yellow]")
+        sys.exit(1)
+    except Exception as e:
+        console.print(f"\n[red]Error during setup: {str(e)}[/red]")
+        sys.exit(1)

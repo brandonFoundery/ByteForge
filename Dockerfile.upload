@@ -1,0 +1,71 @@
+# Dockerfile.upload - File Upload Service Container
+# Multi-stage build for optimized production image
+
+# Stage 1: Build and publish
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Create upload service project structure
+COPY <<EOF ./UploadService/UploadService.csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+  </ItemGroup>
+</Project>
+EOF
+
+# Restore NuGet packages
+RUN dotnet restore ./UploadService/UploadService.csproj
+
+# Copy source code
+COPY UploadService/ ./UploadService/
+
+# Build and publish the application
+RUN dotnet publish UploadService/UploadService.csproj -c Release -o /app/publish --no-restore
+
+# Stage 2: Runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Create upload directories
+RUN mkdir -p /app/uploads /app/logs && chown -R appuser:appuser /app
+
+# Copy published application
+COPY --from=build /app/publish .
+
+# Set ownership to non-root user
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Configure environment
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Entry point
+ENTRYPOINT ["dotnet", "UploadService.dll"]

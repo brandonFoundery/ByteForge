@@ -1,0 +1,48 @@
+# Dockerfile.backend - ASP.NET Core API Container
+# Multi-stage build for optimized production image
+
+# Stage 1: Build and publish
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy solution and project files for dependency resolution
+COPY BackEnd/FY.WB.Midway/FY.WB.Midway.sln ./FY.WB.Midway/
+COPY BackEnd/FY.WB.Midway/FY.WB.Midway.csproj ./FY.WB.Midway/
+COPY BackEnd/FY.WB.Midway.Application/FY.WB.Midway.Application.csproj ./FY.WB.Midway.Application/
+COPY BackEnd/FY.WB.Midway.Domain/FY.WB.Midway.Domain.csproj ./FY.WB.Midway.Domain/
+COPY BackEnd/FY.WB.Midway.Infrastructure/FY.WB.Midway.Infrastructure.csproj ./FY.WB.Midway.Infrastructure/
+
+# Restore NuGet packages
+RUN dotnet restore ./FY.WB.Midway/FY.WB.Midway.sln
+
+# Copy all source code
+COPY BackEnd/ ./
+
+# Build and publish the application
+RUN dotnet publish FY.WB.Midway/FY.WB.Midway.csproj -c Release -o /app/publish --no-restore
+
+# Stage 2: Runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+
+# Create non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Copy published application
+COPY --from=build /app/publish .
+
+# Set ownership to non-root user
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Configure environment
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Entry point
+ENTRYPOINT ["dotnet", "FY.WB.Midway.dll"]

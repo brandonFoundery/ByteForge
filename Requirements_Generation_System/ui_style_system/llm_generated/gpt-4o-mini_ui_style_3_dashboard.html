@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway Dashboard</title>
+    <style>
+        :root {
+            /* Color Tokens */
+            --color-primary-500: #6a5acd; /* Primary color */
+            --color-secondary-300: #f0f0f0; /* Secondary color */
+            --color-neutral-100: #ffffff; /* Neutral background */
+
+            /* Spacing Tokens */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+
+            /* Typography Tokens */
+            --font-heading: 'Arial', sans-serif;
+            --font-body: 'Verdana', sans-serif;
+            --text-sm: 0.875rem;
+            --text-lg: 1.25rem;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-body);
+            background-color: var(--color-neutral-100);
+            color: #333;
+        }
+
+        header {
+            background-color: var(--color-primary-500);
+            color: var(--color-neutral-100);
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        main {
+            padding: var(--spacing-lg);
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .stats-card, .recent-activity {
+            background-color: var(--color-secondary-300);
+            border-radius: 8px;
+            padding: var(--spacing-lg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stats-card h3, .recent-activity h3 {
+            margin: 0 0 var(--spacing-sm) 0;
+            font-family: var(--font-heading);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-body);
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary-500);
+            color: var(--color-neutral-100;
+        }
+
+        .btn-secondary {
+            background-color: var(--color-secondary-300);
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .stats-card {
+                flex: 1;
+            }
+        }
+
+        /* Role-Based Visibility */
+        .role-admin .admin-only {
+            display: block;
+        }
+        .role-user .admin-only {
+            display: none;
+        }
+    </style>
+</head>
+<body class="role-user">
+
+<header>
+    <h1>FY.WB.Midway</h1>
+    <nav>
+        <a href="#">Dashboard</a>
+        <a href="#">Reports</a>
+        <a href="#">Settings</a>
+        <span>User Profile</span>
+    </nav>
+</header>
+
+<main>
+    <section class="welcome-section">
+        <h2>Welcome, [Tenant Name]!</h2>
+        <p>Your logistics management dashboard.</p>
+    </section>
+
+    <section class="stats-cards">
+        <div class="stats-card">
+            <h3>Total Loads: 1,247</h3>
+            <p>↑12% from last month</p>
+        </div>
+        <div class="stats-card">
+            <h3>Active Loads: 89</h3>
+            <p>↑8% from last month</p>
+        </div>
+        <div class="stats-card">
+            <h3>Monthly Revenue: $285,750</h3>
+            <p>↑15% from last month</p>
+        </div>
+    </section>
+
+    <div class="quick-actions">
+        <button class="btn-primary">+ New Load Entry</button>
+        <button class="btn-secondary">📊 View Reports</button>
+        <button class="btn-secondary admin-only">👥 Manage Carriers</button>
+    </div>
+
+    <section class="recent-activity">
+        <h3>Recent Activity</h3>
+        <p>Load #12847 delivered successfully (2 hours ago)</p>
+        <p>New carrier application received (4 hours ago)</p>
+        <p>Invoice #INV-2024-0156 pending (6 hours ago)</p>
+    </section>
+</main>
+
+<footer>
+    <p>© 2023 FY.WB.Midway. All Rights Reserved.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fetch</title>
+</head>
+<body>
+    <h1>Testing JSON Fetch</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testFetch() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                console.log('Attempting to fetch generation_status.json...');
+                const response = await fetch('generation_status.json?t=' + Date.now());
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Data received:', data);
+                    
+                    resultDiv.innerHTML = `
+                        <h2>✅ Success!</h2>
+                        <p><strong>Status:</strong> ${data.status}</p>
+                        <p><strong>Completed:</strong> ${data.completed}/${data.total_combinations}</p>
+                        <p><strong>Results:</strong> ${data.results ? data.results.length : 0} items</p>
+                        <pre>${JSON.stringify(data, null, 2).substring(0, 500)}...</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h2>❌ Fetch Failed</h2>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Status Text:</strong> ${response.statusText}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                resultDiv.innerHTML = `
+                    <h2>❌ Error</h2>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>This is likely a CORS issue when using file:// protocol</p>
+                    <p><strong>Solution:</strong> Use a local web server instead</p>
+                `;
+            }
+        }
+        
+        // Test immediately
+        testFetch();
+        
+        // Test every 2 seconds
+        setInterval(testFetch, 2000);
+    </script>
+</body>
+</html>

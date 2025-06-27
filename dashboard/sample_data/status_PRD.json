@@ -1,0 +1,10 @@
+{
+  "id": "PRD",
+  "title": "Product Requirements Document",
+  "status": "refined",
+  "file_size": 18750,
+  "refined_count": 2,
+  "generated_at": "2025-06-10T20:45:00",
+  "elapsed_time": 180.2,
+  "dependencies": ["BRD"]
+}

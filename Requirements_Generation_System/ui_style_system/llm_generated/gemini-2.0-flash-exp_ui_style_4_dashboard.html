@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FY.WB.Midway Dashboard</title>
+  <style>
+    /* Design Tokens */
+    :root {
+      --color-primary-500: #64748b;
+      --color-secondary-300: #475569;
+      --color-neutral-100: #f1f5f9;
+      --color-neutral-800: #1e293b;
+      --color-neutral-900: #0f172a;
+      --color-success-500: #22c55e;
+      --color-warning-500: #f59e0b;
+      --color-danger-500: #ef4444;
+      --color-text-primary: #cbd5e1;
+      --color-text-secondary: #6b7280;
+
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+
+      --font-heading: 'Arial, sans-serif';
+      --font-body: 'Roboto, sans-serif';
+      --text-sm: 0.875rem;
+      --text-lg: 1.125rem;
+
+      --border-radius-sm: 0.25rem;
+      --border-radius-md: 0.5rem;
+
+      --box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      --box-shadow-md: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    }
+
+    /* Base Styles */
+    body {
+      font-family: var(--font-body);
+      margin: 0;
+      background-color: var(--color-neutral-900); /* token: color.neutral.900 */
+      color: var(--color-text-primary);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    /* Layout */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      gap: var(--spacing-md); /* token: spacing.md */
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    @media (min-width: 769px) {
+      .grid-container {
+        grid-template-columns: 250px 1fr;
+      }
+
+      nav {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+      }
+
+      header {
+        grid-column: 2;
+      }
+
+      main {
+        grid-column: 2;
+      }
+    }
+
+    /* Header */
+    header {
+      background-color: var(--color-neutral-800); /* token: color.neutral.800 */
+      padding: var(--spacing-md); /* token: spacing.md */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--box-shadow-sm); /* token: box-shadow.sm */
+      border-radius: var(--border-radius-md); /* token: border-radius.md */
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: var(--text-lg); /* token: text.lg */
+      font-family: var(--font-heading); /* token: font.heading */
+      color: var(--color-neutral-100); /* token: color.neutral.100 */
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-profile img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    .user-profile span {
+      color: var(--color-text-primary); /* token: color.text.primary */
+    }
+
+
+    /* Navigation */
+    nav {
+      background-color: var(--color-neutral-800); /* token: color.neutral.800 */
+      padding: var(--spacing-md); /* token: spacing.md */
+      border-radius: var(--border-radius-md); /* token: border-radius.md */
+      box-shadow: var(--box-shadow-sm); /* token: box-shadow.sm */
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    nav li {
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    nav a {
+      display: block;
+      padding: var(--spacing-sm); /* token: spacing.sm */
+      color: var(--color-text-primary); /* token: color.text.primary */
+      text-decoration: none;
+      border-radius: var(--border-radius-sm); /* token: border-radius.sm */
+      transition: background-color 0.2s ease;
+    }
+
+    nav a:hover {
+      background-color: var(--color-secondary-300); /* token: color.secondary.300 */
+    }
+
+    /* Main Content */
+    main {
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      margin-bottom: var(--spacing-lg); /* token: spacing.lg */
+      background-color: var(--color-neutral-800); /* token: color.neutral.800 */
+      padding: var(--spacing-md); /* token: spacing.md */
+      border-radius: var(--border-radius-md); /* token: border-radius.md */
+      box-shadow: var(--box-shadow-sm); /* token: box-shadow.sm */
+    }
+
+    .welcome-section h2 {
+      margin-top: 0;
+      color: var(--color-neutral-100); /* token: color.neutral.100 */
+    }
+
+    .welcome-section p {
+      color: var(--color-text-secondary); /* token: color.text.secondary */
+    }
+
+    /* Stats Cards */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md); /* token: spacing.md */
+      margin-bottom: var(--spacing-lg); /* token: spacing.lg */
+    }
+
+    .card {
+      background-color: var(--color-neutral-800); /* token: color.neutral.800 */
+      padding: var(--spacing-md); /* token: spacing.md */
+      border-radius: var(--border-radius-md); /* token: border-radius.md */
+      box-shadow: var(--box-shadow-sm); /* token: box-shadow.sm */
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+      color: var(--color-neutral-100); /* token: color.neutral.100 */
+    }
+
+    .card .metric {
+      font-size: var(--text-lg); /* token: text.lg */
+      font-weight: bold;
+      color: var(--color-neutral-100); /* token: color.neutral.100 */
+    }
+
+    .card .trend {
+      display: flex;
+      align-items: center;
+      color: var(--color-success-500); /* token: color.success.500 */
+      margin-top: var(--spacing-xs); /* token: spacing.xs */
+    }
+
+    .trend.down {
+      color: var(--color-danger-500); /* token: color.danger.500 */
+    }
+
+    .trend svg {
+      width: 16px;
+      height: 16px;
+      margin-right: var(--spacing-xs); /* token: spacing.xs */
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm); /* token: spacing.sm */
+      margin-bottom: var(--spacing-lg); /* token: spacing.lg */
+    }
+
+    .btn {
+      padding: var(--spacing-md); /* token: spacing.md */
+      border: none;
+      border-radius: var(--border-radius-sm); /* token: border-radius.sm */
+      color: var(--color-neutral-100); /* token: color.neutral.100 */
+      cursor: pointer;
+      font-size: var(--text-sm); /* token: text.sm */
+      transition: opacity 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      opacity: 0.8;
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary-500); /* token: color.primary.500 */
+    }
+
+    .btn-secondary {
+      background-color: var(--color-secondary-300); /* token: color.secondary.300 */
+    }
+
+
+    /* Recent Activity */
+    .recent-activity {
+      background-color: var(--color-neutral-800); /* token: color.neutral.800 */
+      padding: var(--spacing-md); /* token: spacing.md */
+      border-radius: var(--border-radius-md); /* token: border-radius.md */
+      box-shadow: var(--box-shadow-sm); /* token: box-shadow.sm */
+    }
+
+    .recent-activity h3 {
+      margin-top: 0;
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+      color: var(--color-neutral-100); /* token: color.neutral.100 */
+    }
+
+    .activity-item {
+      padding: var(--spacing-sm); /* token: spacing.sm */
+      border-bottom: 1px solid var(--color-neutral-800); /* token: color.neutral.800 */
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-item p {
+      margin: 0;
+      color: var(--color-text-secondary); /* token: color.text.secondary */
+    }
+
+    .activity-item span {
+      font-size: var(--text-sm); /* token: text.sm */
+    }
+
+    /* Role-Based Visibility */
+    .admin-only {
+      display: none;
+    }
+
+    .role-admin .admin-only {
+      display: inline-block;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: var(--spacing-md); /* token: spacing.md */
+      color: var(--color-text-secondary); /* token: color.text.secondary */
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        order: -1;
+      }
+
+      .quick-actions {
+        flex-direction: column;
+      }
+
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .grid-container {
+        grid-template-columns: 200px 1fr;
+      }
+    }
+
+    /* Utility Classes */
+    .text-center {
+      text-align: center;
+    }
+
+    .mt-sm {
+      margin-top: var(--spacing-sm);
+    }
+  </style>
+</head>
+
+<body data-tenant="midway" data-role="user">
+  <div class="grid-container">
+    <header>
+      <h1>FY.WB.Midway</h1>
+      <div class="user-profile">
+        <img src="https://via.placeholder.com/30" alt="User Avatar">
+        <span>John Doe</span>
+      </div>
+    </header>
+
+    <nav>
+      <ul>
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Loads</a></li>
+        <li><a href="#">Carriers</a></li>
+        <li><a href="#">Invoices</a></li>
+        <li class="admin-only"><a href="#">Admin Console</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section class="welcome-section">
+        <h2>Welcome, John!</h2>
+        <p>Your tenant: Midway Logistics</p>
+      </section>
+
+      <section class="stats-container">
+        <div class="card">
+          <h3>Total Loads</h3>
+          <div class="metric">1,247</div>
+          <div class="trend">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M12 3.75a.75.75 0 01.75.75v16.19l5.47-5.47a.75.75 0 011.06 1.06l-6.72 6.72a.75.75 0 01-1.06 0l-6.72-6.72a.75.75 0 011.06-1.06l5.47 5.47V4.5a.75.75 0 01.75-.75z"
+                clip-rule="evenodd" />
+            </svg>
+            <span>12% from last month</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Active Loads</h3>
+          <div class="metric">89</div>
+          <div class="trend">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M12 3.75a.75.75 0 01.75.75v16.19l5.47-5.47a.75.75 0 011.06 1.06l-6.72 6.72a.75.75 0 01-1.06 0l-6.72-6.72a.75.75 0 011.06-1.06l5.47 5.47V4.5a.75.75 0 01.75-.75z"
+                clip-rule="evenodd" />
+            </svg>
+            <span>8% from last month</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Monthly Revenue</h3>
+          <div class="metric">$285,750</div>
+          <div class="trend">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M12 3.75a.75.75 0 01.75.75v16.19l5.47-5.47a.75.75 0 011.06 1.06l-6.72 6.72a.75.75 0 01-1.06 0l-6.72-6.72a.75.75 0 011.06-1.06l5.47 5.47V4.5a.75.75 0 01.75-.75z"
+                clip-rule="evenodd" />
+            </svg>
+            <span>15% from last month</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick-actions">
+        <a href="#" class="btn btn-primary">+ New Load Entry</a>
+        <a href="#" class="btn btn-secondary">📊 View Reports</a>
+        <a href="#" class="btn btn-secondary admin-only">👥 Manage Carriers</a>
+      </section>
+
+      <section class="recent-activity">
+        <h3>Recent Activity</h3>
+        <div class="activity-item">
+          <p>Load #12847 delivered successfully</p>
+          <span>2 hours ago</span>
+        </div>
+        <div class="activity-item">
+          <p>New carrier application received</p>
+          <span>4 hours ago</span>
+        </div>
+        <div class="activity-item">
+          <p>Invoice #INV-2024-0156 pending</p>
+          <span>6 hours ago</span>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      &copy; 2024 FY.WB.Midway
+    </footer>
+  </div>
+</body>
+
+</html>

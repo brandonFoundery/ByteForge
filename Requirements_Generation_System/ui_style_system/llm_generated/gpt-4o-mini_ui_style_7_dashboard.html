@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway Dashboard</title>
+    <style>
+        :root {
+            --color-primary-500: #007bff;  /* Primary color */
+            --color-secondary-300: #28a745; /* Secondary color */
+            --color-neutral-100: #f8f9fa;   /* Neutral background */
+            --spacing-xs: 4px;               /* Extra small spacing */
+            --spacing-sm: 8px;               /* Small spacing */
+            --spacing-md: 16px;              /* Medium spacing */
+            --spacing-lg: 24px;              /* Large spacing */
+            --font-heading: 'Arial', sans-serif; /* Heading font */
+            --font-body: 'Verdana', sans-serif; /* Body font */
+            --text-sm: 12px;                 /* Small text size */
+            --text-lg: 18px;                 /* Large text size */
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-neutral-100);
+            margin: 0;
+            padding: var(--spacing-md);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            background-color: var(--color-primary-500);
+            padding: var(--spacing-sm);
+            border-radius: 5px;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-right: var(--spacing-md);
+            color: white;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+
+        .stats-card {
+            background-color: white;
+            padding: var(--spacing-md);
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .quick-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary-500);
+            color: white;
+            border: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .recent-activity {
+            background-color: white;
+            padding: var(--spacing-md);
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            main {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            main {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .role-admin .admin-only {
+            display: block;
+        }
+
+        .role-user .admin-only {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>FY.WB.Midway</h1>
+        <div>User Profile</div>
+    </header>
+    <nav>
+        <ul>
+            <li>Dashboard</li>
+            <li>Loads</li>
+            <li>Reports</li>
+            <li>Settings</li>
+        </ul>
+    </nav>
+    <main>
+        <section class="welcome-section">
+            <h2>Welcome, User!</h2>
+            <p>Your current tenant context is: Tenant ID</p>
+        </section>
+        <section class="stats">
+            <div class="stats-card">
+                <h3>Total Loads</h3>
+                <p>1,247 (↑12% from last month)</p>
+            </div>
+            <div class="stats-card">
+                <h3>Active Loads</h3>
+                <p>89 (↑8% from last month)</p>
+            </div>
+            <div class="stats-card">
+                <h3>Monthly Revenue</h3>
+                <p>$285,750 (↑15% from last month)</p>
+            </div>
+        </section>
+        <section class="quick-actions">
+            <button class="btn-primary">+ New Load Entry</button>
+            <button class="btn-primary">📊 View Reports</button>
+            <button class="btn-primary admin-only">👥 Manage Carriers</button>
+        </section>
+        <section class="recent-activity">
+            <h3>Recent Activity</h3>
+            <p>Load #12847 delivered successfully (2 hours ago)</p>
+            <p>New carrier application received (4 hours ago)</p>
+            <p>Invoice #INV-2024-0156 pending (6 hours ago)</p>
+        </section>
+    </main>
+    <footer>
+        <p>© 2023 FY.WB.Midway. All rights reserved.</p>
+    </footer>
+</body>
+</html>

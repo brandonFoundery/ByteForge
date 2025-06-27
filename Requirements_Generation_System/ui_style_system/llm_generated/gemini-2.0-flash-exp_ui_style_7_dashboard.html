@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FY.WB.Midway Dashboard</title>
+  <style>
+    /* CSS Design System */
+    :root {
+      /* Colors */
+      --color-primary-500: #007bff; /* token: color.primary.500 */
+      --color-secondary-300: #6c757d; /* token: color.secondary.300 */
+      --color-neutral-100: #f8f9fa; /* token: color.neutral.100 */
+      --color-neutral-200: #e9ecef; /* token: color.neutral.200 */
+      --color-neutral-500: #adb5bd; /* token: color.neutral.500 */
+      --color-success-500: #28a745; /* token: color.success.500 */
+      --color-warning-500: #ffc107; /* token: color.warning.500 */
+
+      /* Spacing */
+      --spacing-xs: 0.25rem; /* token: spacing.xs */
+      --spacing-sm: 0.5rem; /* token: spacing.sm */
+      --spacing-md: 1rem; /* token: spacing.md */
+      --spacing-lg: 1.5rem; /* token: spacing.lg */
+      --spacing-xl: 2rem; /* token: spacing.xl */
+
+      /* Typography */
+      --font-heading: sans-serif; /* token: font.heading */
+      --font-body: sans-serif; /* token: font.body */
+      --text-sm: 0.875rem; /* token: text.sm */
+      --text-lg: 1.125rem; /* token: text.lg */
+      --font-weight-bold: 600; /* token: font.weight.bold */
+    }
+
+    body {
+      font-family: var(--font-body); /* token: font.body */
+      margin: 0;
+      padding: 0;
+      background-color: var(--color-neutral-100); /* token: color.neutral.100 */
+    }
+
+    /* Layout */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr; /* Default to single column */
+      grid-gap: var(--spacing-md); /* token: spacing.md */
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    /* Header */
+    header {
+      background-color: white;
+      padding: var(--spacing-md); /* token: spacing.md */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: var(--text-lg); /* token: text.lg */
+      font-family: var(--font-heading); /* token: font.heading */
+      font-weight: var(--font-weight-bold); /* token: font.weight.bold */
+    }
+
+    header .user-profile {
+      display: flex;
+      align-items: center;
+    }
+
+    header .user-profile img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    /* Navigation */
+    nav {
+      background-color: white;
+      padding: var(--spacing-md); /* token: spacing.md */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column; /* Stack items vertically by default */
+    }
+
+    nav li {
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--color-secondary-300); /* token: color.secondary.300 */
+      display: block;
+      padding: var(--spacing-sm); /* token: spacing.sm */
+      border-radius: 5px;
+    }
+
+    nav a:hover {
+      background-color: var(--color-neutral-200); /* token: color.neutral.200 */
+    }
+
+    /* Main Content */
+    main {
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      background-color: white;
+      padding: var(--spacing-lg); /* token: spacing.lg */
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: var(--spacing-md); /* token: spacing.md */
+    }
+
+    .welcome-section h2 {
+      margin-top: 0;
+      font-size: var(--text-lg); /* token: text.lg */
+      font-family: var(--font-heading); /* token: font.heading */
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive columns */
+        grid-gap: var(--spacing-md); /* token: spacing.md */
+        margin-bottom: var(--spacing-md); /* token: spacing.md */
+    }
+
+
+    .card {
+      background-color: white;
+      padding: var(--spacing-md); /* token: spacing.md */
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      font-size: var(--text-sm); /* token: text.sm */
+      font-family: var(--font-heading); /* token: font.heading */
+    }
+
+    .card .value {
+      font-size: var(--text-lg); /* token: text.lg */
+      font-weight: var(--font-weight-bold); /* token: font.weight.bold */
+    }
+
+    .card .trend {
+      font-size: var(--text-sm); /* token: text.sm */
+      color: var(--color-success-500); /* token: color.success.500 */
+    }
+
+    /* Quick Actions Panel */
+    .quick-actions {
+      background-color: white;
+      padding: var(--spacing-md); /* token: spacing.md */
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: var(--spacing-md); /* token: spacing.md */
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .btn {
+      padding: var(--spacing-md); /* token: spacing.md */
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: var(--text-sm);
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary-500); /* token: color.primary.500 */
+    }
+
+    .btn-secondary {
+      background-color: var(--color-secondary-300); /* token: color.secondary.300 */
+    }
+
+     .btn:hover {
+        opacity: 0.8;
+     }
+
+    /* Recent Activity Feed */
+    .recent-activity {
+      background-color: white;
+      padding: var(--spacing-md); /* token: spacing.md */
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .recent-activity h2 {
+      font-size: var(--text-lg); /* token: text.lg */
+      font-family: var(--font-heading); /* token: font.heading */
+    }
+
+    .activity-item {
+      padding: var(--spacing-sm); /* token: spacing.sm */
+      border-bottom: 1px solid var(--color-neutral-200); /* token: color.neutral.200 */
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-item p {
+      margin: 0;
+    }
+
+    .activity-item .time {
+      color: var(--color-neutral-500); /* token: color.neutral.500 */
+      font-size: var(--text-sm); /* token: text.sm */
+    }
+
+    /* Role-Based Styling */
+    .admin-only {
+      display: none;
+    }
+
+    .role-admin .admin-only {
+      display: block;
+    }
+
+    /* Multi-Tenant Styling (Example) */
+    [data-tenant="tenant-id"] header {
+      border-bottom: 2px solid var(--color-primary-500); /* token: color.primary.500 */
+    }
+
+    /* Responsive Design */
+    @media (min-width: 769px) {
+      .grid-container {
+        grid-template-columns: 250px 1fr; /* Navigation and Content */
+      }
+
+      nav ul {
+        flex-direction: column; /* Stack items vertically on larger screens */
+      }
+
+      .quick-actions {
+        flex-direction: row;
+        justify-content: space-around;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      /* Desktop Styles */
+      .grid-container {
+        grid-template-columns: 250px 1fr; /* Navigation and Content */
+      }
+    }
+
+      /* Interaction */
+      .activity-item:hover {
+          background-color: var(--color-neutral-200); /* token: color.neutral.200 */
+      }
+
+  </style>
+</head>
+<body data-role="user" data-tenant="acme-logistics">
+
+  <header>
+    <h1>FY.WB.Midway</h1>
+    <div class="user-profile">
+      <img src="https://via.placeholder.com/30" alt="User Avatar">
+      <span>Robert Robertson <span class="admin-only">(Admin)</span></span>
+    </div>
+  </header>
+
+  <div class="grid-container">
+    <nav>
+      <ul>
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Loads</a></li>
+        <li><a href="#">Carriers</a></li>
+        <li><a href="#">Reports</a></li>
+        <li class="admin-only"><a href="#">Admin Console</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section class="welcome-section">
+        <h2>Welcome, Robert Robertson!</h2>
+        <p>Your tenant: ACME Logistics</p>
+      </section>
+
+      <section class="stats-grid">
+        <div class="card">
+          <h3>Total Loads</h3>
+          <div class="value">1,247</div>
+          <div class="trend">↑12% from last month</div>
+        </div>
+
+        <div class="card">
+          <h3>Active Loads</h3>
+          <div class="value">89</div>
+          <div class="trend">↑8% from last month</div>
+        </div>
+
+        <div class="card">
+          <h3>Monthly Revenue</h3>
+          <div class="value">$285,750</div>
+          <div class="trend">↑15% from last month</div>
+        </div>
+      </section>
+
+      <section class="quick-actions">
+        <a href="#" class="btn btn-primary">+ New Load Entry</a>
+        <a href="#" class="btn btn-secondary">📊 View Reports</a>
+        <a href="#" class="btn btn-secondary admin-only">👥 Manage Carriers</a>
+      </section>
+
+      <section class="recent-activity">
+        <h2>Recent Activity</h2>
+        <div class="activity-item">
+          <p>Load #12847 delivered successfully</p>
+          <p class="time">2 hours ago</p>
+        </div>
+        <div class="activity-item">
+          <p>New carrier application received</p>
+          <p class="time">4 hours ago</p>
+        </div>
+        <div class="activity-item">
+          <p>Invoice #INV-2024-0156 pending</p>
+          <p class="time">6 hours ago</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,114 @@
+ID,Parent_ID,Title,Description,Source_Doc,Verification_Method,Status,Created_Date,Modified_Date
+API-OPEN-1,,7. Security definitions,"Would you like me to add more endpoints (e.g., workflows, department members) or expand any particul...",OpenAPI Specification,Review,Active,2025-05-26,2025-05-26
+API-OPEN-2,,9. Examples for all schemas,"Would you like me to add more endpoints for roles and permissions management, or would you like to s...",OpenAPI Specification,Review,Active,2025-06-02,2025-06-02
+BRD-1,,2.2 Service Responsibilities,"| Service | Primary Responsibilities |
+|---------|------------------------|
+| API Gateway | Request ...",Backend Requirements Document,Review,Active,2025-06-02,2025-06-02
+BRD-2,,Business Application Platform,"Version 1.0 | June 2, 2025",Backend Requirements Document,Review,Active,2025-06-02,2025-06-02
+DB-SCHEMA-1,,UUID Extension,for generating unique IDs,Database Schema,Review,Active,2025-05-26,2025-05-26
+DB-SCHEMA-2,,Custom ENUM types,for status and role fields,Database Schema,Review,Active,2025-05-26,2025-05-26
+DB-SCHEMA-3,,Constraints,- Primary and foreign keys,Database Schema,Review,Active,2025-05-26,2025-05-26
+DB-SCHEMA-4,,4. Constraints,- Primary and foreign keys,Database Schema,Review,Active,2025-05-26,2025-05-26
+DB-SCHEMA-5,,12. Enum types for status and actions,The schema is optimized for:,Database Schema,Review,Active,2025-06-02,2025-06-02
+DRD-1,,2.1 Core Entities,"DRD-2.1: User
+sql
+User {
+    id: UUID (PK)
+    username: VARCHAR(50)
+    email: VARCHAR(100)
+    pas...",Data Requirements Document,Review,Active,2025-06-02,2025-06-02
+DRD-2,,2.2 Relationship Entities,"DRD-2.4: UserRole
+sql
+UserRole {
+    userid: UUID (FK)
+    roleid: UUID (FK)
+    assignedat: TIMESTA...",Data Requirements Document,Review,Active,2025-06-02,2025-06-02
+DRD-3,,Business Application Platform,"Version 1.0 | June 2, 2025",Data Requirements Document,Review,Active,2025-06-02,2025-06-02
+DRD-4,,"3.
+
+ 1.2 Scope",- User management and authentication data,Data Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-1,,2.1 Business Administrator Stories,"Epic: System Administration (FRD-2.1)
+
+As a Business Administrator
+I want to manage user access and ...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-10,,6.2 Calculation Rules,"FRD-6.2: Performance Metrics
+- Team efficiency = Tasks Completed / Time Spent
+- Response Time = Aver...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-11,,7.1 External APIs,"FRD-7.1: REST API Specifications
+typescript
+interface ApiEndpoint {
+  path: string;
+  method: 'GET' ...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-12,,8.1 User Management,"FRD-8.1: User Creation
+- [ ] Admin can create new user accounts
+- [ ] Required fields validated
+- [ ...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-13,,8.2 Workflow Management,"FRD-8.2: Workflow Execution
+- [ ] Workflow steps execute in defined order
+- [ ] Notifications sent t...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-14,,Business Application Platform,"Version 1.0 | June 2, 2025",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-15,,FRD-3.1: User Authentication,- Description: System must authenticate users using email/password,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-16,,FRD-3.2: Role-Based Access Control,- Description: Manage user permissions through role assignments,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-17,,FRD-3.3: Workflow Engine,- Description: Process automation system for business workflows,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-18,,FRD-4.2: Input Validation,- Required field indicators,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-19,,FRD-5.2: Validation Rules,- Email format validation,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-2,,2.2 Department Manager Stories,"Epic: Team Management (FRD-2.2)
+
+As a Department Manager
+I want to monitor team performance metrics
+...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-20,,FRD-6.1: Approval Process,1. Initiator submits request,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-21,,FRD-6.2: Performance Metrics,- Team efficiency = Tasks Completed / Time Spent,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-22,,FRD-8.1: User Creation,- [ ] Admin can create new user accounts,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-23,,FRD-8.2: Workflow Execution,- [ ] Workflow steps execute in defined order,Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-3,,3.1 User Management,"FRD-3.1: User Authentication
+- Description: System must authenticate users using email/password
+- In...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-4,,3.2 Workflow Automation,"FRD-3.3: Workflow Engine
+- Description: Process automation system for business workflows
+- Features:...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-5,,4.1 Navigation Structure,"FRD-4.1: Main Navigation
+typescript
+interface NavigationItem {
+  label: string;
+  path: string;
+  ic...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-6,,4.2 Form Requirements,"FRD-4.2: Input Validation
+- Required field indicators
+- Real-time validation
+- Error message display...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-7,,5.1 Data Model,"FRD-5.1: Core Entities
+sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY,
+  email VARCHAR(255) UNIQUE,
+...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-8,,5.2 Data Validation,"FRD-5.2: Validation Rules
+- Email format validation
+- Required field checks
+- Data type validation
+-...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+FRD-9,,6.1 Workflow Rules,"FRD-6.1: Approval Process
+1. Initiator submits request
+2. Manager review required for amounts > $100...",Functional Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-1,,Business Application Platform, Executive Summary (PRD-1),Product Requirements Document,Review,Active,2025-05-26,2025-05-26
+PRD-2,,Pain Points:,- Time spent on repetitive tasks,Product Requirements Document,Review,Active,2025-05-26,2025-05-26
+PRD-3,,Pain Points:,- Lack of real-time insights,Product Requirements Document,Review,Active,2025-05-26,2025-05-26
+PRD-4,,4. Generate positive ROI within 12 months, Implementation Timeline,Product Requirements Document,Review,Active,2025-05-26,2025-05-26
+PRD-5,,Business Application Platform, Executive Summary (PRD-1),Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-6,,Pain Points,"Complex setup, permission management",Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-7,,Key Requirements,- PRD-3.1: Simplified user management,Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-8,,Pain Points,"Limited visibility, manual reporting",Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+PRD-9,,Key Requirements,- PRD-3.4: Team performance dashboard,Product Requirements Document,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-1,,Performance Guidelines,"1. Use memoized selectors for derived data
+2. Implement shallow equality checks
+3. Split state by do...",React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-10,,5. Use RTK Query for API caching,This specification provides a foundation for implementing robust state management in our React appli...,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-2,,Description,Implement Redux Toolkit as the primary state management solution,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-3,,Description,Organize store modules by feature domains,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-4,,Description,Define core state structure with TypeScript interfaces,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-5,,Description,Implement normalized state structure for relational data,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-6,,Description,Create feature slices using Redux Toolkit's createSlice,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-7,,Description,Configure API middleware for HTTP requests,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-8,,Description,Implement reselect patterns for efficient data access,React Global Store Specification,Review,Active,2025-06-02,2025-06-02
+REACT-STORE-9,,Description,Implement performance patterns for minimizing re-renders,React Global Store Specification,Review,Active,2025-06-02,2025-06-02

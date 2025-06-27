@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FY.WB.Midway Dashboard</title>
+  <style>
+
+    /* CSS Variables */
+    :root {
+      --color-primary-500: #FF5733;
+      --color-secondary-300: #33FFBD;
+      --color-neutral-100: #F5F5F5;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --font-heading: 'Arial', sans-serif;
+      --font-body: 'Verdana', sans-serif;
+      --text-sm: 14px;
+      --text-lg: 18px;
+    }
+
+    /* General Styles */
+    body {
+      font-family: var(--font-body);
+      background-color: var(--color-neutral-100);
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-gap: var(--spacing-md);
+      padding: var(--spacing-md);
+    }
+
+    /* Responsive Breakpoints */
+    @media (min-width: 769px) {
+      .container {
+        grid-template-columns: 1fr 3fr;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .container {
+        grid-template-columns: 1fr 4fr;
+      }
+    }
+
+    /* Header */
+    header {
+      background-color: var(--color-primary-500);
+      padding: var(--spacing-md);
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Navigation */
+    nav {
+      background-color: var(--color-secondary-300);
+      padding: var(--spacing-md);
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    nav li {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    /* Main Content */
+    main {
+      padding: var(--spacing-md);
+    }
+
+    .stats-card {
+      background-color: #fff;
+      padding: var(--spacing-md);
+      border-radius: var(--spacing-xs);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+      margin-bottom: var(--spacing-md);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background-color: var(--color-primary-500);
+      color: #fff;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: none;
+      border-radius: var(--spacing-xs);
+      cursor: pointer;
+    }
+
+    /* Role-based styling */
+    .admin-only {
+      display: none;
+    }
+
+    .role-admin .admin-only {
+      display: block;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>FY.WB.Midway</div>
+    <div>User Profile</div>
+  </header>
+
+  <nav>
+    <ul>
+      <li>Dashboard</li>
+      <li>Loads</li>
+      <li>Reports</li>
+      <li class="admin-only">Admin</li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <main>
+      <section class="welcome-section">
+        <h1>Welcome Back!</h1>
+      </section>
+
+      <section class="stats">
+        <div class="stats-card card">
+          <h2>Total Loads</h2>
+          <p>1,247 (↑12%)</p>
+        </div>
+        <div class="stats-card card">
+          <h2>Active Loads</h2>
+          <p>89 (↑8%)</p>
+        </div>
+        <div class="stats-card card">
+          <h2>Monthly Revenue</h2>
+          <p>$285,750 (↑15%)</p>
+        </div>
+      </section>
+
+      <section class="quick-actions">
+        <button class="btn-primary">+ New Load Entry</button>
+        <button class="btn-primary">📊 View Reports</button>
+        <button class="btn-primary admin-only">👥 Manage Carriers</button>
+      </section>
+
+      <section class="recent-activity">
+        <h2>Recent Activity</h2>
+        <p>Load #12847 delivered successfully (2 hours ago)</p>
+        <p>New carrier application received (4 hours ago)</p>
+        <p>Invoice #INV-2024-0156 pending (6 hours ago)</p>
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>

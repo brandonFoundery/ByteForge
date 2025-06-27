@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FY.WB.Midway Dashboard</title>
+  <style>
+    /* CSS Design System */
+
+    :root {
+      /* Colors */
+      --color-primary-500: #007bff;
+      --color-primary-300: #66a3ff;
+      --color-secondary-300: #6c757d;
+      --color-neutral-100: #f8f9fa;
+      --color-neutral-200: #e9ecef;
+      --color-neutral-700: #495057;
+      --color-success-500: #28a745;
+      --color-warning-500: #ffc107;
+      --color-danger-500: #dc3545;
+      --color-white: #fff;
+      --color-black: #000;
+
+
+      /* Spacing */
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+
+      /* Typography */
+      --font-heading: sans-serif;
+      --font-body: sans-serif;
+      --text-sm: 0.875rem;
+      --text-lg: 1.125rem;
+
+      /* Border Radius */
+      --border-radius-sm: 0.2rem;
+      --border-radius-md: 0.375rem;
+      --border-radius-lg: 0.5rem;
+
+      /* Box Shadow */
+      --box-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --box-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --box-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: var(--font-body);
+      margin: 0;
+      background-color: var(--color-neutral-100); /* token: color.neutral.100 */
+      color: var(--color-neutral-700);
+    }
+
+    /* Layout */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 200px 1fr; /* Left sidebar, main content */
+      grid-template-rows: auto 1fr; /* Header, main content */
+      height: 100vh;
+    }
+
+    header {
+      grid-column: 1 / 3;
+      background-color: var(--color-white); /* token: color.white */
+      padding: var(--spacing-md); /* token: spacing.md */
+      box-shadow: var(--box-shadow-sm); /* token: box-shadow.sm */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav {
+      grid-column: 1 / 2;
+      background-color: var(--color-white); /* token: color.white */
+      padding: var(--spacing-md); /* token: spacing.md */
+      box-shadow: var(--box-shadow-sm); /* token: box-shadow.sm */
+    }
+
+    main {
+      grid-column: 2 / 3;
+      padding: var(--spacing-md); /* token: spacing.md */
+    }
+
+    .dashboard-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--spacing-md); /* token: spacing.md */
+    }
+
+    .card {
+      background-color: var(--color-white); /* token: color.white */
+      border-radius: var(--border-radius-md); /* token: border-radius.md */
+      padding: var(--spacing-md); /* token: spacing.md */
+      box-shadow: var(--box-shadow-sm); /* token: box-shadow.sm */
+    }
+
+    /* Typography */
+    h1 {
+      font-family: var(--font-heading); /* token: font.heading */
+      font-size: var(--text-lg); /* token: text.lg */
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    h2 {
+      font-family: var(--font-heading); /* token: font.heading */
+      font-size: var(--text-md);
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    p {
+      font-size: var(--text-sm); /* token: text.sm */
+      line-height: 1.4;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: var(--spacing-sm) var(--spacing-md); /* token: spacing.sm, spacing.md */
+      border: none;
+      border-radius: var(--border-radius-sm); /* token: border-radius.sm */
+      cursor: pointer;
+      font-size: var(--text-sm); /* token: text.sm */
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary-500); /* token: color.primary.500 */
+      color: var(--color-white); /* token: color.white */
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-primary-300); /* token: color.primary.300 */
+    }
+
+    .btn-secondary {
+      background-color: var(--color-secondary-300); /* token: color.secondary.300 */
+      color: var(--color-white); /* token: color.white */
+    }
+
+    /* Stats Cards */
+    .stats-card {
+      text-align: center;
+    }
+
+    .stats-value {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: var(--spacing-xs); /* token: spacing.xs */
+    }
+
+    .stats-label {
+      font-size: var(--text-sm); /* token: text.sm */
+      color: var(--color-secondary-300); /* token: color.secondary.300 */
+    }
+
+    .stats-trend {
+      font-size: var(--text-sm); /* token: text.sm */
+      margin-top: var(--spacing-xs); /* token: spacing.xs */
+      display: inline-block;
+    }
+
+    .trend-up {
+      color: var(--color-success-500); /* token: color.success.500 */
+    }
+
+    .trend-down {
+      color: var(--color-danger-500); /* token: color.danger.500 */
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: flex;
+      gap: var(--spacing-sm); /* token: spacing.sm */
+      margin-bottom: var(--spacing-lg); /* token: spacing.lg */
+    }
+
+    /* Recent Activity */
+    .activity-item {
+      padding: var(--spacing-sm); /* token: spacing.sm */
+      border-bottom: 1px solid var(--color-neutral-200); /* token: color.neutral.200 */
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Role-Based Visibility */
+    .admin-only {
+      display: none;
+    }
+
+    .role-admin .admin-only {
+      display: inline-block;
+    }
+
+    /* Tenant Branding */
+    [data-tenant="acme-corp"] {
+      /* Example tenant-specific styling */
+    }
+
+
+    /* Responsive Design */
+    /* Mobile */
+    @media (max-width: 768px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+      }
+
+      nav {
+        grid-column: 1 / 1;
+      }
+
+      main {
+        grid-column: 1 / 1;
+      }
+
+      .quick-actions {
+        flex-direction: column;
+      }
+    }
+
+    /* Tablet */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .dashboard-content {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      }
+    }
+
+    /* Desktop */
+    @media (min-width: 1025px) {
+      .dashboard-content {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+    }
+
+    /* Utility classes */
+    .text-right {
+      text-align: right;
+    }
+
+    .mt-sm {
+      margin-top: var(--spacing-sm);
+    }
+  </style>
+</head>
+
+<body data-role="admin" data-tenant="acme-corp">
+  <div class="grid-container">
+    <header>
+      <h1>FY.WB.Midway</h1>
+      <div class="user-profile text-right">
+        <p>Welcome, John Doe</p>
+        <small>Tenant: Acme Corp</small>
+      </div>
+    </header>
+
+    <nav>
+      <h2>Navigation</h2>
+      <ul>
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Loads</a></li>
+        <li><a href="#">Carriers</a></li>
+        <li><a href="#">Invoices</a></li>
+        <li class="admin-only"><a href="#">Admin Console</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section class="welcome-section">
+        <h1>Welcome to FY.WB.Midway!</h1>
+        <p>Here's a quick overview of your freight brokerage activity.</p>
+      </section>
+
+      <section class="quick-actions">
+        <button class="btn btn-primary">+ New Load Entry</button>
+        <button class="btn btn-secondary">📊 View Reports</button>
+        <button class="btn btn-secondary admin-only">👥 Manage Carriers</button>
+      </section>
+
+      <section class="dashboard-content">
+        <div class="card stats-card">
+          <div class="stats-value">1,247</div>
+          <div class="stats-label">Total Loads</div>
+          <div class="stats-trend trend-up">↑12% from last month</div>
+        </div>
+
+        <div class="card stats-card">
+          <div class="stats-value">89</div>
+          <div class="stats-label">Active Loads</div>
+          <div class="stats-trend trend-up">↑8% from last month</div>
+        </div>
+
+        <div class="card stats-card">
+          <div class="stats-value">$285,750</div>
+          <div class="stats-label">Monthly Revenue</div>
+          <div class="stats-trend trend-up">↑15% from last month</div>
+        </div>
+
+        <div class="card">
+          <h2>Recent Activity</h2>
+          <div class="activity-item">
+            Load #12847 delivered successfully (2 hours ago)
+          </div>
+          <div class="activity-item">
+            New carrier application received (4 hours ago)
+          </div>
+          <div class="activity-item">
+            Invoice #INV-2024-0156 pending (6 hours ago)
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+
+</html>

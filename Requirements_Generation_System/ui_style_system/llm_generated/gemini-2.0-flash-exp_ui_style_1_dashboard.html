@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FY.WB.Midway Dashboard</title>
+  <style>
+    /* CSS Design System */
+    :root {
+      /* Colors */
+      --color-primary-500: #6366f1;
+      /* token: color.primary.500 */
+      --color-secondary-300: #a8b2ff;
+      /* token: color.secondary.300 */
+      --color-neutral-100: #f3f4f6;
+      /* token: color.neutral.100 */
+      --color-neutral-200: #e5e7eb;
+      /* token: color.neutral.200 */
+      --color-neutral-700: #4b5563;
+      /* token: color.neutral.700 */
+      --color-neutral-900: #111827;
+      /* token: color.neutral.900 */
+      --color-success-500: #22c55e;
+      /* token: color.success.500 */
+      --color-warning-500: #f59e0b;
+      /* token: color.warning.500 */
+      --color-danger-500: #ef4444;
+      /* token: color.danger.500 */
+
+      /* Spacing */
+      --spacing-xs: 0.25rem;
+      /* token: spacing.xs */
+      --spacing-sm: 0.5rem;
+      /* token: spacing.sm */
+      --spacing-md: 1rem;
+      /* token: spacing.md */
+      --spacing-lg: 1.5rem;
+      /* token: spacing.lg */
+      --spacing-xl: 2rem;
+      /* token: spacing.xl */
+
+      /* Typography */
+      --font-heading: sans-serif;
+      /* token: font.heading */
+      --font-body: sans-serif;
+      /* token: font.body */
+      --text-sm: 0.875rem;
+      /* token: text.sm */
+      --text-lg: 1.125rem;
+      /* token: text.lg */
+
+      /* Border Radius */
+      --border-radius-sm: 0.25rem;
+      /* token: border-radius.sm */
+      --border-radius-md: 0.5rem;
+      /* token: border-radius.md */
+      --border-radius-lg: 0.75rem;
+      /* token: border-radius.lg */
+    }
+
+    body {
+      font-family: var(--font-body);
+      /* token: font.body */
+      margin: 0;
+      background-color: #0f172a;
+      color: var(--color-neutral-100);
+    }
+
+    /* Layout */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      /* token: layout.grid-container */
+      gap: var(--spacing-md);
+      /* token: spacing.md */
+      padding: var(--spacing-md);
+      /* token: spacing.md */
+    }
+
+    /* Header */
+    header {
+      background-color: #1e293b;
+      padding: var(--spacing-md);
+      /* token: spacing.md */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: var(--text-lg);
+      /* token: text.lg */
+      color: var(--color-neutral-100);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-profile img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: var(--spacing-sm);
+      /* token: spacing.sm */
+    }
+
+    /* Navigation */
+    nav {
+      background-color: #1e293b;
+      padding: var(--spacing-md);
+      /* token: spacing.md */
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    nav li {
+      margin-bottom: var(--spacing-sm);
+      /* token: spacing.sm */
+    }
+
+    nav a {
+      color: var(--color-neutral-100);
+      text-decoration: none;
+      display: block;
+      padding: var(--spacing-sm);
+      /* token: spacing.sm */
+      border-radius: var(--border-radius-sm);
+      /* token: border-radius.sm */
+    }
+
+    nav a:hover {
+      background-color: #334155;
+    }
+
+    /* Main Content */
+    main {
+      padding: var(--spacing-md);
+      /* token: spacing.md */
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      margin-bottom: var(--spacing-lg);
+      /* token: spacing.lg */
+    }
+
+    /* Stats Cards */
+    .stats-card {
+      background-color: #1e293b;
+      padding: var(--spacing-md);
+      /* token: spacing.md */
+      border-radius: var(--border-radius-md);
+      /* token: border-radius.md */
+    }
+
+    .stats-card h2 {
+      font-size: var(--text-lg);
+      /* token: text.lg */
+      margin-top: 0;
+      margin-bottom: var(--spacing-sm);
+      /* token: spacing.sm */
+    }
+
+    .stats-card .trend {
+      font-size: var(--text-sm);
+      /* token: text.sm */
+      color: var(--color-success-500);
+      /* token: color.success.500 */
+    }
+
+    .stats-card.negative-trend .trend {
+      color: var(--color-danger-500);
+      /* token: color.danger.500 */
+    }
+
+    /* Quick Actions Panel */
+    .quick-actions {
+      margin-bottom: var(--spacing-lg);
+      /* token: spacing.lg */
+    }
+
+    /* Buttons */
+    .btn {
+      padding: var(--spacing-md);
+      /* token: spacing.md */
+      border: none;
+      border-radius: var(--border-radius-md);
+      /* token: border-radius.md */
+      color: var(--color-neutral-100);
+      font-size: var(--text-sm);
+      /* token: text.sm */
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary-500);
+      /* token: color.primary.500 */
+    }
+
+    .btn-primary:hover {
+      background-color: #4f46e5;
+    }
+
+    .btn-secondary {
+      background-color: var(--color-secondary-300);
+      /* token: color.secondary.300 */
+    }
+
+    .btn-secondary:hover {
+      background-color: #93a5ff;
+    }
+
+    /* Recent Activity Feed */
+    .recent-activity {
+      background-color: #1e293b;
+      padding: var(--spacing-md);
+      /* token: spacing.md */
+      border-radius: var(--border-radius-md);
+      /* token: border-radius.md */
+    }
+
+    .recent-activity h2 {
+      margin-top: 0;
+      margin-bottom: var(--spacing-sm);
+      /* token: spacing.sm */
+      font-size: var(--text-lg);
+      /* token: text.lg */
+    }
+
+    .activity-item {
+      padding: var(--spacing-sm);
+      /* token: spacing.sm */
+      border-bottom: 1px solid #334155;
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-item p {
+      margin: 0;
+    }
+
+    .activity-item .time {
+      font-size: var(--text-sm);
+      /* token: text.sm */
+      color: var(--color-neutral-700);
+      /* token: color.neutral.700 */
+    }
+
+    /* Footer */
+    footer {
+      background-color: #1e293b;
+      padding: var(--spacing-md);
+      /* token: spacing.md */
+      text-align: center;
+      font-size: var(--text-sm);
+      /* token: text.sm */
+      color: var(--color-neutral-700);
+      /* token: color.neutral.700 */
+    }
+
+    /* Role-based visibility */
+    .admin-only {
+      display: none;
+    }
+
+    .role-admin .admin-only {
+      display: block;
+    }
+
+    /* Multi-tenant styling */
+    [data-tenant="tenant-123"] .stats-card {
+      border: 2px solid var(--color-primary-500);
+      /* token: color.primary.500 */
+    }
+
+    /* Responsive Design */
+    /* Mobile */
+    @media (max-width: 768px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+
+      nav ul {
+        flex-direction: column;
+      }
+    }
+
+    /* Tablet */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      nav ul {
+        flex-direction: row;
+      }
+
+      nav li {
+        margin-right: var(--spacing-md);
+        /* token: spacing.md */
+      }
+    }
+
+    /* Desktop */
+    @media (min-width: 1025px) {
+      .grid-container {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      nav ul {
+        flex-direction: row;
+      }
+
+      nav li {
+        margin-right: var(--spacing-md);
+        /* token: spacing.md */
+      }
+
+      main {
+        padding: var(--spacing-xl);
+        /* token: spacing.xl */
+      }
+    }
+
+    /* Utility Classes */
+    .mt-md {
+      margin-top: var(--spacing-md);
+      /* token: spacing.md */
+    }
+
+    .mb-md {
+      margin-bottom: var(--spacing-md);
+      /* token: spacing.md */
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body data-role="user" data-tenant="tenant-123">
+  <header>
+    <h1>FY.WB.Midway</h1>
+    <div class="user-profile">
+      <img src="https://via.placeholder.com/30" alt="User Avatar">
+      <span>John Doe</span>
+    </div>
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="#">Dashboard</a></li>
+      <li><a href="#">Loads</a></li>
+      <li><a href="#">Carriers</a></li>
+      <li><a href="#">Invoices</a></li>
+      <li class="admin-only"><a href="#">Admin Console</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section class="welcome-section">
+      <h2>Welcome, John!</h2>
+      <p>You are viewing the dashboard for Tenant 123.</p>
+    </section>
+
+    <section class="grid-container">
+      <div class="stats-card">
+        <h2>Total Loads</h2>
+        <p class="bold">1,247</p>
+        <p class="trend">↑12% from last month</p>
+      </div>
+
+      <div class="stats-card">
+        <h2>Active Loads</h2>
+        <p class="bold">89</p>
+        <p class="trend">↑8% from last month</p>
+      </div>
+
+      <div class="stats-card">
+        <h2>Monthly Revenue</h2>
+        <p class="bold">$285,750</p>
+        <p class="trend">↑15% from last month</p>
+      </div>
+
+      <div class="stats-card negative-trend">
+        <h2>Canceled Loads</h2>
+        <p class="bold">15</p>
+        <p class="trend">↓5% from last month</p>
+      </div>
+    </section>
+
+    <section class="quick-actions">
+      <button class="btn btn-primary">+ New Load Entry</button>
+      <button class="btn btn-secondary">📊 View Reports</button>
+      <button class="btn btn-secondary admin-only">👥 Manage Carriers</button>
+    </section>
+
+    <section class="recent-activity">
+      <h2>Recent Activity</h2>
+      <div class="activity-item">
+        <p>Load #12847 delivered successfully</p>
+        <p class="time">2 hours ago</p>
+      </div>
+      <div class="activity-item">
+        <p>New carrier application received</p>
+        <p class="time">4 hours ago</p>
+      </div>
+      <div class="activity-item">
+        <p>Invoice #INV-2024-0156 pending</p>
+        <p class="time">6 hours ago</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 FY.WB.Midway</p>
+  </footer>
+</body>
+
+</html>

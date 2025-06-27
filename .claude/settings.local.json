@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(dotnet build:*)",
+      "Bash(ls:*)",
+      "Bash(wget:*)",
+      "Bash(chmod:*)",
+      "Bash(./dotnet-install.sh:*)",
+      "Bash(export PATH=\"$HOME/.dotnet:$PATH\")",
+      "Bash(dotnet --version)",
+      "Bash(find:*)"
+    ],
+    "deny": []
+  }
+}

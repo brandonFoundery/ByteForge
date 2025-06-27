@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway - Freight Brokerage Dashboard</title>
+    <style>
+        /* Design Tokens */
+        :root {
+            /* Colors */
+            --color-primary-500: #0066cc;
+            --color-primary-600: #0052a3;
+            --color-neutral-50: #f8f9fa;
+            --color-neutral-100: #f1f3f5;
+            --color-neutral-700: #495057;
+            --color-success-500: #37b24d;
+            --color-warning-500: #f59f00;
+
+            /* Typography */
+            --font-family: system-ui, -apple-system, sans-serif;
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+
+            /* Spacing */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+
+            /* Layout */
+            --border-radius: 4px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Base Styles */
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background: var(--color-neutral-50);
+            color: var(--color-neutral-700);
+        }
+
+        .dashboard-header {
+            background: #002651;
+            color: white;
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: var(--text-xl);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-md);
+            padding: var(--spacing-lg);
+        }
+
+        .metric-card {
+            background: white;
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .metric-title {
+            font-size: var(--text-sm);
+            color: var(--color-neutral-700);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .metric-value {
+            font-size: var(--text-xl);
+            color: var(--color-primary-500);
+            font-weight: bold;
+        }
+
+        .metric-target {
+            font-size: var(--text-xs);
+            color: var(--color-neutral-700);
+            margin-top: var(--spacing-xs);
+        }
+
+        .action-bar {
+            padding: var(--spacing-md);
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            font-size: var(--text-sm);
+        }
+
+        .btn-primary {
+            background: var(--color-primary-500);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--color-neutral-100);
+            color: var(--color-neutral-700);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        Corporate Suite
+    </header>
+
+    <main>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">KPI 1</div>
+                <div class="metric-value">89</div>
+                <div class="metric-target">Target: 100</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">KPI 2</div>
+                <div class="metric-value">89</div>
+                <div class="metric-target">Target: 100</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">KPI 3</div>
+                <div class="metric-value">89</div>
+                <div class="metric-target">Target: 100</div>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn-primary">Generate Report</button>
+            <button class="btn btn-secondary">Export Data</button>
+        </div>
+    </main>
+</body>
+</html>

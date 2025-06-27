@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">FY.WB.Midway</div>
+        <div class="tenant-info">
+            <span class="tenant-name">Tenant: XYZ Logistics</span>
+        </div>
+        <div class="user-profile">
+            <span class="user-name">John Doe</span>
+        </div>
+    </header>
+    
+    <nav class="sidebar">
+        <ul>
+            <li><a href="#">Overview</a></li>
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Reports</a></li>
+            <li class="admin-only"><a href="#">Manage Carriers</a></li>
+        </ul>
+    </nav>
+    
+    <main class="main-content">
+        <section class="welcome-section">
+            <h1>Welcome, John!</h1>
+            <p>Your logistics hub is here!</p>
+        </section>
+        
+        <section class="stats-cards">
+            <div class="card">
+                <h2>Total Loads</h2>
+                <p>1,247 <span class="trend">↑12%</span></p>
+            </div>
+            <div class="card">
+                <h2>Active Loads</h2>
+                <p>89 <span class="trend">↑8%</span></p>
+            </div>
+            <div class="card">
+                <h2>Monthly Revenue</h2>
+                <p>$285,750 <span class="trend">↑15%</span></p>
+            </div>
+        </section>
+        
+        <aside class="quick-actions">
+            <button class="btn-primary">+ New Load Entry</button>
+            <button class="btn-secondary">📊 View Reports</button>
+            <button class="btn-secondary admin-only">👥 Manage Carriers</button>
+        </aside>
+        
+        <section class="recent-activity">
+            <h2>Recent Activity</h2>
+            <ul>
+                <li>Load #12847 delivered successfully (2 hours ago)</li>
+                <li>New carrier application received (4 hours ago)</li>
+                <li>Invoice #INV-2024-0156 pending (6 hours ago)</li>
+            </ul>
+        </section>
+    </main>
+    
+    <footer class="footer">
+        <p>&copy; 2023 FY.WB.Midway</p>
+    </footer>
+</body>
+</html>

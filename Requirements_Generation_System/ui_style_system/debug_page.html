@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Live Comparison</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-8">
+    <h1 class="text-2xl font-bold mb-4">Debug Live Comparison Page</h1>
+    
+    <div class="mb-4">
+        <button onclick="debugElements()" class="bg-blue-500 text-white px-4 py-2 rounded">
+            Debug Elements
+        </button>
+        <button onclick="debugStatus()" class="bg-green-500 text-white px-4 py-2 rounded ml-2">
+            Debug Status Data
+        </button>
+        <button onclick="testUpdate()" class="bg-purple-500 text-white px-4 py-2 rounded ml-2">
+            Test Update
+        </button>
+    </div>
+    
+    <div id="debug-output" class="bg-gray-100 p-4 rounded text-sm font-mono whitespace-pre-wrap"></div>
+    
+    <!-- Test element -->
+    <div id="design-gpt-4o_ui_style_1" class="mt-4 p-4 border rounded">
+        <h3>Test Design Element</h3>
+        <span id="status-gpt-4o_ui_style_1" class="inline-block w-3 h-3 bg-yellow-400 rounded-full"></span>
+        <span id="status-text-gpt-4o_ui_style_1">Waiting...</span>
+        <div id="placeholder-gpt-4o_ui_style_1" class="mt-2 p-4 bg-gray-200">Placeholder</div>
+        <iframe id="iframe-gpt-4o_ui_style_1" style="display: none;" class="w-full h-32 mt-2"></iframe>
+        <button class="mt-2 px-3 py-1 bg-gray-300 text-gray-600 rounded text-sm">Test Button</button>
+    </div>
+
+    <script>
+        // Sample embedded status data
+        const embeddedStatus = {
+            "results": [
+                {
+                    "model_id": "gpt-4o",
+                    "reference_image": "ui_style_1.png",
+                    "output_file": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\llm_generated\\gpt-4o_ui_style_1_dashboard.html",
+                    "success": true
+                }
+            ]
+        };
+        
+        function debugElements() {
+            const output = document.getElementById('debug-output');
+            let debug = "=== ELEMENT DEBUG ===\n\n";
+            
+            // Check for design elements
+            const allDesigns = document.querySelectorAll('[id^="design-"]');
+            debug += `Found ${allDesigns.length} design elements:\n`;
+            allDesigns.forEach(el => {
+                debug += `  - ${el.id}\n`;
+            });
+            
+            // Test specific element
+            const testId = "design-gpt-4o_ui_style_1";
+            const element = document.getElementById(testId);
+            debug += `\nTest element '${testId}': ${element ? 'FOUND' : 'NOT FOUND'}\n`;
+            
+            if (element) {
+                debug += `  - statusIndicator: ${document.getElementById('status-gpt-4o_ui_style_1') ? 'FOUND' : 'NOT FOUND'}\n`;
+                debug += `  - statusText: ${document.getElementById('status-text-gpt-4o_ui_style_1') ? 'FOUND' : 'NOT FOUND'}\n`;
+                debug += `  - placeholder: ${document.getElementById('placeholder-gpt-4o_ui_style_1') ? 'FOUND' : 'NOT FOUND'}\n`;
+                debug += `  - iframe: ${document.getElementById('iframe-gpt-4o_ui_style_1') ? 'FOUND' : 'NOT FOUND'}\n`;
+            }
+            
+            output.textContent = debug;
+        }
+        
+        function debugStatus() {
+            const output = document.getElementById('debug-output');
+            let debug = "=== STATUS DATA DEBUG ===\n\n";
+            
+            debug += `embeddedStatus exists: ${embeddedStatus ? 'YES' : 'NO'}\n`;
+            debug += `Results count: ${embeddedStatus?.results?.length || 0}\n\n`;
+            
+            if (embeddedStatus?.results) {
+                embeddedStatus.results.forEach((result, i) => {
+                    const imageBase = result.reference_image ? result.reference_image.replace('.png', '') : 'unknown';
+                    const designId = `${result.model_id}_${imageBase}`;
+                    
+                    debug += `Result ${i + 1}:\n`;
+                    debug += `  - model_id: ${result.model_id}\n`;
+                    debug += `  - reference_image: ${result.reference_image}\n`;
+                    debug += `  - imageBase: ${imageBase}\n`;
+                    debug += `  - designId: ${designId}\n`;
+                    debug += `  - success: ${result.success}\n`;
+                    debug += `  - element exists: ${document.getElementById(`design-${designId}`) ? 'YES' : 'NO'}\n\n`;
+                });
+            }
+            
+            output.textContent = debug;
+        }
+        
+        function testUpdate() {
+            const output = document.getElementById('debug-output');
+            let debug = "=== TEST UPDATE ===\n\n";
+            
+            const designId = "gpt-4o_ui_style_1";
+            const filename = "gpt-4o_ui_style_1_dashboard.html";
+            
+            debug += `Testing update for: ${designId}\n`;
+            debug += `Filename: ${filename}\n\n`;
+            
+            try {
+                updateDesignStatus(designId, 'completed', `llm_generated/${filename}`);
+                debug += "Update function called successfully!\n";
+            } catch (error) {
+                debug += `Error calling update function: ${error}\n`;
+            }
+            
+            output.textContent = debug;
+        }
+        
+        function updateDesignStatus(designId, status, filename = null) {
+            console.log(`updateDesignStatus called: ${designId}, ${status}, ${filename}`);
+
+            const designCard = document.getElementById(`design-${designId}`);
+            const statusIndicator = document.getElementById(`status-${designId}`);
+            const statusText = document.getElementById(`status-text-${designId}`);
+            const placeholder = document.getElementById(`placeholder-${designId}`);
+            const iframe = document.getElementById(`iframe-${designId}`);
+
+            if (!designCard) {
+                console.log(`Design card not found for ID: design-${designId}`);
+                return;
+            }
+
+            const button = designCard.querySelector('button');
+            
+            // Update status indicator
+            statusIndicator.className = `inline-block w-3 h-3 rounded-full ${status === 'completed' ? 'bg-green-400' : 'bg-blue-400'}`;
+            
+            if (status === 'completed' && filename) {
+                statusText.textContent = 'Completed!';
+                designCard.classList.add('border-green-500');
+                
+                // Show the iframe and hide placeholder
+                placeholder.style.display = 'none';
+                iframe.src = filename;
+                iframe.style.display = 'block';
+                
+                // Enable button
+                button.textContent = 'View Full Design';
+                button.className = 'mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm';
+            }
+        }
+        
+        // Auto-run debug on load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(debugElements, 100);
+        });
+    </script>
+</body>
+</html>

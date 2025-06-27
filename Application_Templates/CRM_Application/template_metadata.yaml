@@ -1,0 +1,77 @@
+name: "CRM_Application"
+description: "Complete CRM application template based on Pipedrive analysis with pipeline management, deal tracking, and activity scheduling"
+complexity: "Medium"
+version: "1.0.0"
+
+features:
+  - "Pipeline Board"
+  - "Deal Card Management"
+  - "Lead Inbox"
+  - "Activity Scheduler"
+  - "Basic Automation"
+  - "AI Deal Score"
+  - "Email Integration"
+  - "SMS Integration"
+  - "Insights Dashboard"
+  - "Role-Based Access"
+
+industry_variations:
+  - "Real Estate CRM"
+  - "Insurance CRM"
+  - "B2B SaaS CRM"
+  - "Financial Services CRM"
+  - "Healthcare CRM"
+
+technology_stack:
+  frontend:
+    - "React + TypeScript"
+    - "Tailwind CSS"
+    - "Next.js"
+  backend:
+    - "ASP.NET Core"
+    - "Entity Framework"
+    - "Azure SQL"
+  architecture:
+    - "CQRS Pattern"
+    - "Multi-tenant SaaS"
+    - "RESTful APIs"
+
+estimated_development_time: "6-8 weeks"
+team_size: "3-4 developers"
+
+prerequisites:
+  - "Basic understanding of CRM concepts"
+  - "Familiarity with sales processes"
+  - "Knowledge of pipeline management"
+
+success_metrics:
+  - "User adoption rate > 80%"
+  - "Data quality > 90%"
+  - "Process efficiency improvement > 50%"
+  - "Sales conversion rate improvement"
+
+customization_points:
+  - "Pipeline stages and workflow"
+  - "Deal card fields and layout"
+  - "Role permissions and access levels"
+  - "Integration endpoints"
+  - "Automation rules and triggers"
+  - "Reporting metrics and dashboards"
+
+included_artifacts:
+  detailed_specs:
+    - "CRM_Functional_Requirements.md"
+  json_blueprints:
+    - "Pipeline_Board_UI_Spec.json"
+    - "Deal_Card_Component_Spec.json"
+    - "Activity_Feed_Spec.json"
+  user_stories:
+    - "Sales_Rep_User_Stories.md"
+    - "Manager_User_Stories.md"
+  acceptance_criteria:
+    - "CRM_Acceptance_Criteria.md"
+
+related_templates:
+  - "SaaS_Platform"
+  - "Customer_Portal"
+  - "Analytics_Dashboard"

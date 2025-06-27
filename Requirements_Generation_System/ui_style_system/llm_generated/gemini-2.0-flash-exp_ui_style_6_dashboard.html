@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FY.WB.Midway Dashboard</title>
+  <style>
+    /* CSS Design System */
+    :root {
+      /* Colors */
+      --color-primary-500: #6246ea; /* token: color.primary.500 */
+      --color-secondary-300: #8ac4ff; /* token: color.secondary.300 */
+      --color-neutral-100: #f2f2f2; /* token: color.neutral.100 */
+      --color-neutral-200: #e5e5e5; /* token: color.neutral.200 */
+      --color-neutral-700: #444444; /* token: color.neutral.700 */
+      --color-neutral-900: #1a1a1a; /* token: color.neutral.900 */
+      --color-success-500: #28a745;
+      --color-warning-500: #ffc107;
+      --color-error-500: #dc3545;
+
+      /* Spacing */
+      --spacing-xs: 0.25rem; /* token: spacing.xs */
+      --spacing-sm: 0.5rem; /* token: spacing.sm */
+      --spacing-md: 1rem; /* token: spacing.md */
+      --spacing-lg: 1.5rem; /* token: spacing.lg */
+      --spacing-xl: 2rem; /* token: spacing.xl */
+
+      /* Typography */
+      --font-heading: 'Arial, sans-serif'; /* token: font.heading */
+      --font-body: 'Helvetica, sans-serif'; /* token: font.body */
+      --text-sm: 0.875rem; /* token: text.sm */
+      --text-lg: 1.125rem; /* token: text.lg */
+    }
+
+    body {
+      font-family: var(--font-body); /* token: font.body */
+      color: var(--color-neutral-700); /* token: color.neutral.700 */
+      background-color: var(--color-neutral-100); /* token: color.neutral.100 */
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Layout */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr; /* Mobile first */
+      gap: var(--spacing-lg); /* token: spacing.lg */
+      padding: var(--spacing-lg); /* token: spacing.lg */
+    }
+
+    /* Cards */
+    .card {
+      background-color: #fff;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+      padding: var(--spacing-md); /* token: spacing.md */
+      margin-bottom: var(--spacing-md);
+    }
+
+    .card-header {
+      font-size: var(--text-lg); /* token: text.lg */
+      font-weight: bold;
+      margin-bottom: var(--spacing-sm); /* token: spacing.sm */
+    }
+
+    /* Buttons */
+    .btn {
+      border: none;
+      padding: var(--spacing-sm) var(--spacing-md); /* token: spacing.sm, spacing.md */
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: var(--text-sm); /* token: text.sm */
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary-500); /* token: color.primary.500 */
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #4d36b8;
+    }
+
+    .btn-secondary {
+      background-color: var(--color-neutral-200); /* token: color.neutral.200 */
+      color: var(--color-neutral-700); /* token: color.neutral.700 */
+    }
+
+    .btn-secondary:hover {
+      background-color: #d4d4d4;
+    }
+
+    /* Header */
+    header {
+      background-color: #fff;
+      padding: var(--spacing-md); /* token: spacing.md */
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    header .user-profile {
+      display: flex;
+      align-items: center;
+    }
+
+    header .user-profile img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: var(--spacing-sm);
+    }
+
+    /* Navigation */
+    nav {
+      background-color: #fff;
+      padding: var(--spacing-md);
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+    }
+
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column; /* Stack on mobile */
+    }
+
+    nav li {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--color-neutral-700);
+      display: block;
+      padding: var(--spacing-sm);
+      border-radius: 0.25rem;
+    }
+
+    nav a:hover {
+      background-color: var(--color-neutral-200);
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      background-color: #fff;
+      padding: var(--spacing-lg);
+      border-radius: 0.5rem;
+      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+    }
+
+    /* Stats Cards */
+    .stats-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--spacing-md);
+    }
+
+    .stats-card h2 {
+      font-size: 2rem;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .stats-card p {
+      font-size: var(--text-sm);
+      color: var(--color-neutral-700);
+    }
+
+    .stats-card .trend-up {
+      color: var(--color-success-500);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .quick-actions .btn {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    /* Recent Activity Feed */
+    .activity-item {
+      padding: var(--spacing-sm);
+      border-bottom: 1px solid var(--color-neutral-200);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Admin Only */
+    .admin-only {
+      display: none; /* Hidden by default */
+    }
+
+    /* Role-based Visibility */
+    .role-admin .admin-only {
+      display: block;
+    }
+
+    .role-user .admin-only {
+      display: none;
+    }
+
+    /* SaaS Partitioning */
+    [data-tenant="tenant-id"] {
+      /* Tenant-specific styles here */
+    }
+
+    /* Responsive Design */
+    /* Tablet */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .grid-container {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      nav ul {
+        flex-direction: row; /* Horizontal on tablet */
+        justify-content: space-around;
+      }
+
+      nav li {
+        margin-bottom: 0;
+      }
+    }
+
+    /* Desktop */
+    @media (min-width: 1025px) {
+      .grid-container {
+        grid-template-columns: auto 1fr auto; /* Navigation, Content, Aside */
+        grid-template-rows: auto 1fr auto; /* Header, Main, Footer */
+        grid-template-areas:
+          "header header header"
+          "nav main aside"
+          "footer footer footer";
+        height: 100vh; /* Cover the whole screen */
+      }
+
+      header {
+        grid-area: header;
+      }
+
+      nav {
+        grid-area: nav;
+        height: calc(100vh - 8rem);
+        overflow-y: auto;
+      }
+
+      main {
+        grid-area: main;
+      }
+
+      aside {
+        grid-area: aside;
+      }
+
+      footer {
+        grid-area: footer;
+      }
+
+      nav ul {
+        flex-direction: column; /* Vertical on desktop */
+      }
+
+      .quick-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body data-role="admin"> <!-- Example: Set role to "admin" -->
+  <div class="grid-container">
+
+    <header>
+      <h1>FY.WB.Midway</h1>
+      <div class="user-profile">
+        <img src="https://via.placeholder.com/30" alt="User Avatar">
+        <span>John Doe</span>
+      </div>
+    </header>
+
+    <nav>
+      <ul>
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Loads</a></li>
+        <li><a href="#">Carriers</a></li>
+        <li><a href="#">Invoices</a></li>
+        <li class="admin-only"><a href="#">Admin Console</a></li> <!-- Admin Only -->
+      </ul>
+    </nav>
+
+    <main data-tenant="acme-logistics">
+      <section class="welcome-section">
+        <h2>Welcome, John!</h2>
+        <p>You are viewing the Acme Logistics workspace.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-header">Key Metrics</div>
+        <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+          <div class="stats-card">
+            <h2>1,247</h2>
+            <p>Total Loads <span class="trend-up">(↑12%)</span></p>
+          </div>
+          <div class="stats-card">
+            <h2>89</h2>
+            <p>Active Loads <span class="trend-up">(↑8%)</span></p>
+          </div>
+          <div class="stats-card">
+            <h2>$285,750</h2>
+            <p>Monthly Revenue <span class="trend-up">(↑15%)</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">Quick Actions</div>
+        <div class="quick-actions">
+          <button class="btn btn-primary">+ New Load Entry</button>
+          <button class="btn btn-secondary">📊 View Reports</button>
+          <button class="btn btn-secondary admin-only">👥 Manage Carriers</button> <!-- Admin Only -->
+        </div>
+      </section>
+    </main>
+
+    <aside>
+      <section class="card">
+        <div class="card-header">Recent Activity</div>
+        <div class="recent-activity">
+          <div class="activity-item">Load #12847 delivered successfully (2 hours ago)</div>
+          <div class="activity-item">New carrier application received (4 hours ago)</div>
+          <div class="activity-item">Invoice #INV-2024-0156 pending (6 hours ago)</div>
+        </div>
+      </section>
+    </aside>
+
+    <footer>
+      <p>&copy; 2024 FY.WB.Midway</p>
+    </footer>
+
+  </div>
+</body>
+</html>

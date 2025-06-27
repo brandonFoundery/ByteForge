@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FY.WB.Midway - Freight Brokerage Dashboard</title>
+    <style>
+        /* Design Tokens */
+        :root {
+            /* Colors */
+            --color-bg-primary: #13141b;
+            --color-bg-secondary: #1c1d25;
+            --color-accent: #6e5dd0;
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #8a8b91;
+            --color-success: #25b87a;
+            --color-warning: #f7931a;
+            --color-danger: #ff4976;
+
+            /* Typography */
+            --font-family: 'Inter', system-ui, sans-serif;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.25rem;
+            --font-size-xl: 1.5rem;
+
+            /* Spacing */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            background-color: var(--color-bg-secondary);
+            padding: var(--spacing-md);
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            padding: var(--spacing-lg);
+        }
+
+        /* Stats Cards Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .stat-card {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+        }
+
+        .stat-card__title {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-card__value {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-card__trend {
+            color: var(--color-success);
+            font-size: var(--font-size-sm);
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            background-color: var(--color-bg-secondary);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+        }
+
+        .activity-item {
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .btn {
+            background-color: var(--color-accent);
+            color: var(--color-text-primary);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <!-- Navigation items here -->
+        </nav>
+        
+        <main class="main-content">
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card__title">Total Loads</div>
+                    <div class="stat-card__value">1,247</div>
+                    <div class="stat-card__trend">↑12% from last month</div>
+                </div>
+                <!-- Additional stat cards -->
+            </section>
+
+            <section class="quick-actions">
+                <button class="btn">+ New Load Entry</button>
+                <button class="btn">📊 View Reports</button>
+                <button class="btn admin-only">👥 Manage Carriers</button>
+            </section>
+
+            <section class="activity-feed">
+                <!-- Activity items here -->
+            </section>
+        </main>
+    </div>
+</body>
+</html>

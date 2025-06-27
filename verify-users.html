@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .user-test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .pending { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Login Verification</h1>
+        <p>This page tests if the user login fixes have been applied successfully.</p>
+        
+        <div class="user-test" id="admin-test">
+            <h3>Admin User Test</h3>
+            <p><strong>Email:</strong> admin@example.com</p>
+            <p><strong>Password:</strong> AdminPass123!</p>
+            <button onclick="testLogin('admin@example.com', 'AdminPass123!', 'admin-result')">Test Login</button>
+            <div id="admin-result" class="result"></div>
+        </div>
+        
+        <div class="user-test" id="user-test">
+            <h3>Test User</h3>
+            <p><strong>Email:</strong> user@example.com</p>
+            <p><strong>Password:</strong> Test123!</p>
+            <button onclick="testLogin('user@example.com', 'Test123!', 'user-result')">Test Login</button>
+            <div id="user-result" class="result"></div>
+        </div>
+        
+        <div class="user-test" id="client-test">
+            <h3>Client User</h3>
+            <p><strong>Email:</strong> client1@example.com</p>
+            <p><strong>Password:</strong> Test123!</p>
+            <button onclick="testLogin('client1@example.com', 'Test123!', 'client-result')">Test Login</button>
+            <div id="client-result" class="result"></div>
+        </div>
+        
+        <div class="user-test">
+            <h3>Test All Users</h3>
+            <button onclick="testAllUsers()">Test All Users</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5002';
+        
+        async function testLogin(email, password, resultElementId) {
+            const resultElement = document.getElementById(resultElementId);
+            resultElement.innerHTML = 'Testing login...';
+            resultElement.className = 'result pending';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/Auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.innerHTML = `
+                        <strong>✅ Login Successful!</strong><br>
+                        User ID: ${data.userId}<br>
+                        Email: ${data.email}<br>
+                        Tenant ID: ${data.tenantId || 'N/A'}<br>
+                        Is Admin: ${data.isAdmin}<br>
+                        Token: ${data.token.substring(0, 50)}...
+                    `;
+                    resultElement.className = 'result success';
+                } else {
+                    const errorData = await response.json();
+                    resultElement.innerHTML = `
+                        <strong>❌ Login Failed</strong><br>
+                        Status: ${response.status}<br>
+                        Error: ${errorData.message || 'Unknown error'}
+                    `;
+                    resultElement.className = 'result error';
+                }
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <strong>❌ Network Error</strong><br>
+                    Error: ${error.message}<br>
+                    Make sure the backend is running on ${API_BASE}
+                `;
+                resultElement.className = 'result error';
+            }
+        }
+        
+        async function testAllUsers() {
+            await testLogin('admin@example.com', 'AdminPass123!', 'admin-result');
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+            await testLogin('user@example.com', 'Test123!', 'user-result');
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+            await testLogin('client1@example.com', 'Test123!', 'client-result');
+        }
+    </script>
+</body>
+</html>

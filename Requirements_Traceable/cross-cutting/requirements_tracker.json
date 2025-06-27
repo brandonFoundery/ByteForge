@@ -1,0 +1,1324 @@
+{
+  "project": {
+    "name": "FY.WB.Midway - Requirements Traceability System",
+    "description": "Comprehensive traceability system for the Enterprise Logistics and Payment Platform",
+    "version": "1.0.0",
+    "created_date": "2024-01-15",
+    "last_updated": "2024-01-15",
+    "status": "In Development",
+    "owner": "Product Manager",
+    "platform_scope": [
+      "Customer Payment Processing System",
+      "Load Booking Management System",
+      "Invoice Processing System",
+      "Notchify Carrier Payment System"
+    ]
+  },
+  "metadata": {
+    "total_requirements": 42,
+    "traceability_requirements": 8,
+    "platform_requirements": 34,
+    "requirements_by_system": {
+      "Cross-System": 16,
+      "Payment System": 6,
+      "Load Booking System": 6,
+      "Invoice System": 5,
+      "Carrier Payment System": 5,
+      "Platform Infrastructure": 4
+    },
+    "requirements_by_status": {
+      "Draft": 8,
+      "Active": 34,
+      "Review": 0,
+      "Approved": 0,
+      "Implemented": 0,
+      "Verified": 0,
+      "Rejected": 0
+    },
+    "requirements_by_business_value": {
+      "High": 28,
+      "Medium": 12,
+      "Low": 2
+    },
+    "requirements_by_risk": {
+      "High": 8,
+      "Medium": 22,
+      "Low": 12
+    }
+  },
+  "traceability_requirements": [
+    {
+      "id": "TRC-PRD-1",
+      "title": "Requirements Traceability System for FY.WB.Midway Logistics Platform",
+      "status": "Draft",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Product Manager",
+      "dependencies": [],
+      "children": [
+        "TRC-PRD-1.1",
+        "TRC-PRD-1.2",
+        "TRC-PRD-1.3"
+      ],
+      "verification_method": "Business Review",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15",
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "TRC-PRD-1.1",
+      "title": "Cross-System Requirements Visibility",
+      "status": "Draft",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Product Manager",
+      "dependencies": [
+        "TRC-PRD-1"
+      ],
+      "children": [],
+      "verification_method": "Metrics Analysis",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15",
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "TRC-PRD-1.2",
+      "title": "Multi-System Impact Analysis",
+      "status": "Draft",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Product Manager",
+      "dependencies": [
+        "TRC-PRD-1"
+      ],
+      "children": [],
+      "verification_method": "Performance Testing",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15",
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "TRC-PRD-1.3",
+      "title": "Regulatory Compliance Support",
+      "status": "Draft",
+      "business_value": "High",
+      "risk_level": "Low",
+      "owner": "Compliance Officer",
+      "dependencies": [
+        "TRC-PRD-1"
+      ],
+      "children": [],
+      "verification_method": "Compliance Review",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15",
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "TRC-PRD-2",
+      "title": "Multi-System Requirements Traceability Matrix",
+      "status": "Draft",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Product Manager",
+      "dependencies": [
+        "TRC-PRD-1"
+      ],
+      "children": [],
+      "verification_method": "User Acceptance Testing",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15",
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "TRC-PRD-3",
+      "title": "Cross-System Change Management",
+      "status": "Draft",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Product Manager",
+      "dependencies": [
+        "TRC-PRD-1",
+        "TRC-PRD-2"
+      ],
+      "children": [],
+      "verification_method": "Integration Testing",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15",
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "TRC-PRD-4",
+      "title": "Regulatory Compliance Reporting",
+      "status": "Draft",
+      "business_value": "High",
+      "risk_level": "Low",
+      "owner": "Compliance Officer",
+      "dependencies": [
+        "TRC-PRD-1",
+        "TRC-PRD-2"
+      ],
+      "children": [],
+      "verification_method": "Compliance Review",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15",
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "TRC-PRD-5",
+      "title": "Platform Integration Automation",
+      "status": "Draft",
+      "business_value": "Medium",
+      "risk_level": "Medium",
+      "owner": "DevOps Team",
+      "dependencies": [
+        "TRC-PRD-1",
+        "TRC-PRD-2",
+        "TRC-PRD-3"
+      ],
+      "children": [],
+      "verification_method": "Integration Testing",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15",
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-DATA-001",
+      "description": "The system must categorize leads/customers into five specific statuses: 'Leads', 'Leads that need a call back', 'Potential clients', 'Customers in 30 days', and 'customers outside of 30 days'.",
+      "type": "Data",
+      "status": "New",
+      "created_date": "2025-06-11T12:04:39.338396",
+      "updated_date": "2025-06-11T12:04:39.338396",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-001",
+      "description": "The system shall provide a 'Request New Customer' button for any entity in the 'Leads', 'Leads that need a call back', or 'Potential clients' categories.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:05:38.599478",
+      "updated_date": "2025-06-11T12:05:38.599478",
+      "dependencies": [
+        "The system must categorize leads/customers into five specific statuses: 'Leads', 'Leads that need a call back', 'Potential clients', 'Customers in 30 days', and 'customers outside of 30 days'."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-002",
+      "description": "Upon a 'Request New Customer' action, the system must trigger a back-office workflow to perform a credit check on the potential customer.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:06:42.238878",
+      "updated_date": "2025-06-11T12:06:42.238878",
+      "dependencies": [
+        "The system shall provide a 'Request New Customer' button for any entity in the 'Leads', 'Leads that need a call back', or 'Potential clients' categories."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-003",
+      "description": "The back-office workflow must automatically send a new customer packet email to the email address associated with the potential customer's profile.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:07:39.829979",
+      "updated_date": "2025-06-11T12:07:39.829979",
+      "dependencies": [
+        "Upon a 'Request New Customer' action, the system must trigger a back-office workflow to perform a credit check on the potential customer."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-004",
+      "description": "The system must send a notification to the originating broker when the new customer setup process is complete.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:08:43.973300",
+      "updated_date": "2025-06-11T12:08:43.973300",
+      "dependencies": [
+        "The back-office workflow must automatically send a new customer packet email to the email address associated with the potential customer's profile."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-005",
+      "description": "Upon successful completion of the new customer setup process, the system must automatically update the entity's status to 'customers within 30 days'.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:09:55.819481",
+      "updated_date": "2025-06-11T12:09:55.819481",
+      "dependencies": [
+        "The system must send a notification to the originating broker when the new customer setup process is complete."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-DATA-002",
+      "description": "The system must store a credit limit for entities with the status 'customers within 30 days'.",
+      "type": "Data",
+      "status": "New",
+      "created_date": "2025-06-11T12:10:47.650546",
+      "updated_date": "2025-06-11T12:10:47.650546",
+      "dependencies": [
+        "Upon successful completion of the new customer setup process, the system must automatically update the entity's status to 'customers within 30 days'."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-006",
+      "description": "The system shall only allow brokers to book loads for customers who have an established credit limit.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:11:52.537397",
+      "updated_date": "2025-06-11T12:11:52.537397",
+      "dependencies": [
+        "The system must store a credit limit for entities with the status 'customers within 30 days'."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-007",
+      "description": "The system shall display charts showing the total number of loads booked by a broker.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:13:02.019998",
+      "updated_date": "2025-06-11T12:13:02.019998",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-008",
+      "description": "The load count chart must be filterable by the time periods: 'day', 'week', and 'year'.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:14:15.324487",
+      "updated_date": "2025-06-11T12:14:15.324487",
+      "dependencies": [
+        "The system shall display charts showing the total number of loads booked by a broker."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-009",
+      "description": "The system shall display a pie chart showing the sales percentage contribution of each of a broker's customers.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:15:27.625899",
+      "updated_date": "2025-06-11T12:15:27.625899",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-010",
+      "description": "Brokers must be able to view their own individual sales numbers in the charts.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:16:40.252954",
+      "updated_date": "2025-06-11T12:16:40.252954",
+      "dependencies": [
+        "The system shall display charts showing the total number of loads booked by a broker.",
+        "The system shall display a pie chart showing the sales percentage contribution of each of a broker's customers."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-011",
+      "description": "The system shall display company-wide aggregate sales numbers for comparison.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:17:52.857283",
+      "updated_date": "2025-06-11T12:17:52.857283",
+      "dependencies": [
+        "The system shall display charts showing the total number of loads booked by a broker."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-NFR-001",
+      "description": "The system must prevent brokers from viewing the specific client details or client-specific sales data of other brokers.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:18:43.121094",
+      "updated_date": "2025-06-11T12:18:43.121094",
+      "dependencies": [
+        "The system shall display a pie chart showing the sales percentage contribution of each of a broker's customers."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-012",
+      "description": "The system must integrate with the specified third-party carrier vetting service.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:19:57.111627",
+      "updated_date": "2025-06-11T12:19:57.111627",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-013",
+      "description": "The integration must allow the system to retrieve carrier insurance status and legitimacy data from the third-party service.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:21:11.637664",
+      "updated_date": "2025-06-11T12:21:11.637664",
+      "dependencies": [
+        "The system must integrate with the specified third-party carrier vetting service."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-014",
+      "description": "The system shall provide a search bar for brokers to look up clients and leads.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:22:23.672638",
+      "updated_date": "2025-06-11T12:22:23.672638",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-015",
+      "description": "The search functionality must support searching by company name.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:23:37.422520",
+      "updated_date": "2025-06-11T12:23:37.422520",
+      "dependencies": [
+        "The system shall provide a search bar for brokers to look up clients and leads."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-016",
+      "description": "The search functionality must support searching by phone number.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:24:48.271314",
+      "updated_date": "2025-06-11T12:24:48.271314",
+      "dependencies": [
+        "The system shall provide a search bar for brokers to look up clients and leads."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-DATA-003",
+      "description": "The system must track the date of the last activity for each client and lead.",
+      "type": "Data",
+      "status": "New",
+      "created_date": "2025-06-11T12:25:37.041423",
+      "updated_date": "2025-06-11T12:25:37.041423",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-017",
+      "description": "If a search for a client/lead yields no results, the system must display the message: 'This number has not been found in the system. (Happy hunting.)'.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:26:48.177347",
+      "updated_date": "2025-06-11T12:26:48.177347",
+      "dependencies": [
+        "The system shall provide a search bar for brokers to look up clients and leads."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-018",
+      "description": "If a searched client/lead exists but has had no activity in the last 30 days, the system must display the message: 'client or lead has no activity in 30 days. Please request from admin.'.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:28:03.246597",
+      "updated_date": "2025-06-11T12:28:03.246597",
+      "dependencies": [
+        "The system shall provide a search bar for brokers to look up clients and leads.",
+        "The system must track the date of the last activity for each client and lead."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-019",
+      "description": "If a searched client/lead exists and has had activity within the last 30 days, the system must display the message: 'Client and/or lead has activity in the last 30 days currently is unavailable'.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-11T12:29:15.166180",
+      "updated_date": "2025-06-11T12:29:15.166180",
+      "dependencies": [
+        "The system shall provide a search bar for brokers to look up clients and leads.",
+        "The system must track the date of the last activity for each client and lead."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-NFR-002",
+      "description": "The system shall ensure an API performance with a 95th percentile latency of less than 200 milliseconds under 100 concurrent users.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T06:49:01.125386",
+      "updated_date": "2025-06-23T06:49:01.125386",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-NFR-003",
+      "description": "The system shall be hosted on a cloud-native platform, either on Azure or AWS.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T06:49:28.370763",
+      "updated_date": "2025-06-23T06:49:28.370763",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-NFR-004",
+      "description": "The system shall be extensible by providing REST and Webhook APIs, and maintain a React component library for front-end development.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T06:49:54.236880",
+      "updated_date": "2025-06-23T06:49:54.236880",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-NFR-005",
+      "description": "The system shall implement robust security measures, including Role-Based Access Control (RBAC), OAuth2 for authentication, and adherence to a SOC-2 compliance baseline.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T06:50:19.305642",
+      "updated_date": "2025-06-23T06:50:19.305642",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-NFR-006",
+      "description": "The system's user interface shall be mobile-responsive and support native push notifications using a Progressive Web App (PWA) framework.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T06:50:47.353855",
+      "updated_date": "2025-06-23T06:50:47.353855",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-01T00:00:00",
+      "plan_version": "v1.0"
+    },
+    {
+      "id": "REQ-FUNC-020",
+      "description": "The system shall support a new user role 'Broker' that is distinct from the Admin and Accountant roles.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:26:56.439020",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-021",
+      "description": "Upon login, users with the Broker role shall be redirected to a dedicated dashboard section comprised of a separate grouping of pages.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:27:02.098797",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [
+        "The system shall support a new user role 'Broker' that is distinct from the Admin and Accountant roles."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-NFR-007",
+      "description": "The system shall render all new pages using the Medtronic style to ensure UI consistency with the rest of the application.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:27:11.062280",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-022",
+      "description": "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date. In the Broker view, users can view and edit only their own deals, while in the Manager view, users can view all deals with stage filters.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:27:21.340137",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [
+        "Upon login, users with the Broker role shall be redirected to a dedicated dashboard section comprised of a separate grouping of pages."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-023",
+      "description": "The system shall provide a Deal Card that displays the deal title, organization/contact, deal value, aging badge, and next activity. Clicking a deal card shall open a side panel with full deal details.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:27:29.530651",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [
+        "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-024",
+      "description": "The system shall provide a separate Lead Inbox view for unqualified leads that supports bulk actions such as 'Convert to Deal'. In the Broker view, the inbox is primary, and in the Manager view, bulk operations are optional.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:27:39.253206",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [
+        "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-025",
+      "description": "The system shall include an Activity Scheduler that allows users to log calls, emails, and tasks, and synchronize with a calendar (e.g., Google Calendar). Overdue activities shall display a badge on deal cards. In the Broker view, the scheduler manages own activities, while in the Manager view, it displays a team-wide calendar.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:27:46.351527",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [
+        "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-026",
+      "description": "The system shall include a Basic Automation feature with a rule builder. When a deal enters a designated stage this rule builder shall trigger one or more actions (a) assign a task, (b) send a templated email, or (c) fire a webhook. For the Broker view, automation is limited to own deals, while in the Manager view users can create and edit all rules.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:27:54.719782",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [
+        "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-027",
+      "description": "The system shall implement an AI Deal Score capability that uses a lightweight machine learning model (or a rules-based starter) to assign a probability score (0-100) to each deal. The score shall be visible on the deal card, with filtering available in the Broker view and a pipeline health chart available in the Manager view.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:28:02.289138",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [
+        "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-028",
+      "description": "The system shall provide an AI Email Helper feature powered by GPT to deliver functionalities such as 'Draft Reply' and 'Thread Summary' within the email panel (available in the Broker view).",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:28:12.133611",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-029",
+      "description": "The system shall integrate with Gmail via OAuth to enable email send/receive, open and link tracking, and support for templating with merge tags. In the Broker view, users have personal templates, while in the Manager view there is a team template library.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:28:28.683184",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-030",
+      "description": "The system shall integrate with Twilio to support one-to-one SMS functionality from a deal/contact and to enable stage-based SMS workflows. In the Broker view, this integration provides standard one-to-one SMS capability, while in the Manager view it allows configuration of sender IDs.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:28:41.670759",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-FUNC-031",
+      "description": "The system shall provide an Insights Dashboard that displays real-time charts for funnel conversion, time-in-stage, and forecast (calculated as the sum of deal value multiplied by the probability). It shall allow CSV and JSON export. This feature is available in the Manager view.",
+      "type": "Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:28:49.942235",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-NFR-008",
+      "description": "The system shall adhere to a performance requirement with API latency under 200 milliseconds at the 95th percentile for up to 100 concurrent users.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:28:58.297958",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-NFR-009",
+      "description": "The system shall be hosted in the cloud using a cloud-native solution such as Azure or AWS.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:29:07.908575",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-NFR-010",
+      "description": "The system shall be designed for extensibility by providing a REST and webhook API, as well as a React component library for future integrations.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:29:18.261828",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-NFR-011",
+      "description": "The system shall enforce security measures including Role-Based Access Control (RBAC), OAuth2 authentication, and adhere to a SOC-2 compliance baseline.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:29:27.010568",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-NFR-012",
+      "description": "The system shall provide a responsive web experience for mobile devices and support native push notifications via a Progressive Web App (PWA) implementation.",
+      "type": "Non-Functional",
+      "status": "New",
+      "created_date": "2025-06-23T09:29:37.935180",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    },
+    {
+      "id": "REQ-DATA-004",
+      "description": "The system shall implement the pipeline board layout and functionalities in strict adherence to the provided JSON blueprint, ensuring a pixel-perfect match for design and front-end development.",
+      "type": "Data",
+      "status": "New",
+      "created_date": "2025-06-23T09:29:45.321294",
+      "updated_date": "2025-06-23T10:47:50.029529",
+      "dependencies": [
+        "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+      ],
+      "development_status": "planned",
+      "last_planned": "2025-06-23T10:47:50.029529",
+      "plan_version": "incremental-20250623-104750"
+    }
+  ],
+  "platform_requirements": [
+    {
+      "id": "REQ-PAY-001",
+      "title": "Customer Registration and Onboarding",
+      "status": "Active",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Payment Team",
+      "dependencies": [],
+      "verification_method": "Integration Testing",
+      "system_scope": "Payment System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15"
+    },
+    {
+      "id": "REQ-PAY-002",
+      "title": "Customer Profile Management",
+      "status": "Active",
+      "business_value": "High",
+      "risk_level": "Low",
+      "owner": "Payment Team",
+      "dependencies": [
+        "REQ-PAY-001"
+      ],
+      "verification_method": "User Acceptance Testing",
+      "system_scope": "Payment System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15"
+    },
+    {
+      "id": "REQ-PAY-003",
+      "title": "Multi-Method Payment Processing",
+      "status": "Active",
+      "business_value": "High",
+      "risk_level": "High",
+      "owner": "Payment Team",
+      "dependencies": [
+        "REQ-PAY-002"
+      ],
+      "verification_method": "Security Testing",
+      "system_scope": "Payment System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15"
+    },
+    {
+      "id": "REQ-LOAD-001",
+      "title": "Load Creation and Booking",
+      "status": "Active",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Load Booking Team",
+      "dependencies": [],
+      "verification_method": "Integration Testing",
+      "system_scope": "Load Booking System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15"
+    },
+    {
+      "id": "REQ-INV-001",
+      "title": "Automated Invoice Creation",
+      "status": "Active",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Invoice Team",
+      "dependencies": [
+        "REQ-LOAD-001",
+        "REQ-PAY-001"
+      ],
+      "verification_method": "Integration Testing",
+      "system_scope": "Invoice System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15"
+    },
+    {
+      "id": "REQ-CARR-001",
+      "title": "Automated Payment Calculation",
+      "status": "Active",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Carrier Payment Team",
+      "dependencies": [
+        "REQ-LOAD-002"
+      ],
+      "verification_method": "Integration Testing",
+      "system_scope": "Carrier Payment System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15"
+    },
+    {
+      "id": "REQ-INT-001",
+      "title": "Real-time Data Synchronization",
+      "status": "Active",
+      "business_value": "High",
+      "risk_level": "High",
+      "owner": "Integration Team",
+      "dependencies": [
+        "REQ-PAY-001",
+        "REQ-LOAD-001",
+        "REQ-INV-001",
+        "REQ-CARR-001"
+      ],
+      "verification_method": "Integration Testing",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15"
+    },
+    {
+      "id": "REQ-INT-002",
+      "title": "Event-Driven Architecture",
+      "status": "Active",
+      "business_value": "High",
+      "risk_level": "High",
+      "owner": "Integration Team",
+      "dependencies": [
+        "REQ-INT-001"
+      ],
+      "verification_method": "Architecture Review",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15"
+    },
+    {
+      "id": "REQ-INT-003",
+      "title": "End-to-End Workflow Automation",
+      "status": "Active",
+      "business_value": "High",
+      "risk_level": "Medium",
+      "owner": "Integration Team",
+      "dependencies": [
+        "REQ-INT-001",
+        "REQ-INT-002"
+      ],
+      "verification_method": "Integration Testing",
+      "system_scope": "Cross-System",
+      "created_date": "2024-01-15",
+      "updated_date": "2024-01-15"
+    }
+  ],
+  "dependencies": {
+    "TRC-PRD-1": [],
+    "TRC-PRD-1.1": [
+      "TRC-PRD-1"
+    ],
+    "TRC-PRD-1.2": [
+      "TRC-PRD-1"
+    ],
+    "TRC-PRD-1.3": [
+      "TRC-PRD-1"
+    ],
+    "TRC-PRD-2": [
+      "TRC-PRD-1"
+    ],
+    "TRC-PRD-3": [
+      "TRC-PRD-1",
+      "TRC-PRD-2"
+    ],
+    "TRC-PRD-4": [
+      "TRC-PRD-1",
+      "TRC-PRD-2"
+    ],
+    "TRC-PRD-5": [
+      "TRC-PRD-1",
+      "TRC-PRD-2",
+      "TRC-PRD-3"
+    ],
+    "REQ-PAY-001": [],
+    "REQ-PAY-002": [
+      "REQ-PAY-001"
+    ],
+    "REQ-PAY-003": [
+      "REQ-PAY-002"
+    ],
+    "REQ-LOAD-001": [],
+    "REQ-INV-001": [
+      "REQ-LOAD-001",
+      "REQ-PAY-001"
+    ],
+    "REQ-CARR-001": [
+      "REQ-LOAD-002"
+    ],
+    "REQ-INT-001": [
+      "REQ-PAY-001",
+      "REQ-LOAD-001",
+      "REQ-INV-001",
+      "REQ-CARR-001"
+    ],
+    "REQ-INT-002": [
+      "REQ-INT-001"
+    ],
+    "REQ-INT-003": [
+      "REQ-INT-001",
+      "REQ-INT-002"
+    ],
+    "REQ-DATA-001": [],
+    "REQ-FUNC-001": [
+      "The system must categorize leads/customers into five specific statuses: 'Leads', 'Leads that need a call back', 'Potential clients', 'Customers in 30 days', and 'customers outside of 30 days'."
+    ],
+    "REQ-FUNC-002": [
+      "The system shall provide a 'Request New Customer' button for any entity in the 'Leads', 'Leads that need a call back', or 'Potential clients' categories."
+    ],
+    "REQ-FUNC-003": [
+      "Upon a 'Request New Customer' action, the system must trigger a back-office workflow to perform a credit check on the potential customer."
+    ],
+    "REQ-FUNC-004": [
+      "The back-office workflow must automatically send a new customer packet email to the email address associated with the potential customer's profile."
+    ],
+    "REQ-FUNC-005": [
+      "The system must send a notification to the originating broker when the new customer setup process is complete."
+    ],
+    "REQ-DATA-002": [
+      "Upon successful completion of the new customer setup process, the system must automatically update the entity's status to 'customers within 30 days'."
+    ],
+    "REQ-FUNC-006": [
+      "The system must store a credit limit for entities with the status 'customers within 30 days'."
+    ],
+    "REQ-FUNC-007": [],
+    "REQ-FUNC-008": [
+      "The system shall display charts showing the total number of loads booked by a broker."
+    ],
+    "REQ-FUNC-009": [],
+    "REQ-FUNC-010": [
+      "The system shall display charts showing the total number of loads booked by a broker.",
+      "The system shall display a pie chart showing the sales percentage contribution of each of a broker's customers."
+    ],
+    "REQ-FUNC-011": [
+      "The system shall display charts showing the total number of loads booked by a broker."
+    ],
+    "REQ-NFR-001": [
+      "The system shall display a pie chart showing the sales percentage contribution of each of a broker's customers."
+    ],
+    "REQ-FUNC-012": [],
+    "REQ-FUNC-013": [
+      "The system must integrate with the specified third-party carrier vetting service."
+    ],
+    "REQ-FUNC-014": [],
+    "REQ-FUNC-015": [
+      "The system shall provide a search bar for brokers to look up clients and leads."
+    ],
+    "REQ-FUNC-016": [
+      "The system shall provide a search bar for brokers to look up clients and leads."
+    ],
+    "REQ-DATA-003": [],
+    "REQ-FUNC-017": [
+      "The system shall provide a search bar for brokers to look up clients and leads."
+    ],
+    "REQ-FUNC-018": [
+      "The system shall provide a search bar for brokers to look up clients and leads.",
+      "The system must track the date of the last activity for each client and lead."
+    ],
+    "REQ-FUNC-019": [
+      "The system shall provide a search bar for brokers to look up clients and leads.",
+      "The system must track the date of the last activity for each client and lead."
+    ],
+    "REQ-NFR-002": [],
+    "REQ-NFR-003": [],
+    "REQ-NFR-004": [],
+    "REQ-NFR-005": [],
+    "REQ-NFR-006": [],
+    "REQ-FUNC-020": [],
+    "REQ-FUNC-021": [
+      "The system shall support a new user role 'Broker' that is distinct from the Admin and Accountant roles."
+    ],
+    "REQ-NFR-007": [],
+    "REQ-FUNC-022": [
+      "Upon login, users with the Broker role shall be redirected to a dedicated dashboard section comprised of a separate grouping of pages."
+    ],
+    "REQ-FUNC-023": [
+      "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+    ],
+    "REQ-FUNC-024": [
+      "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+    ],
+    "REQ-FUNC-025": [
+      "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+    ],
+    "REQ-FUNC-026": [
+      "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+    ],
+    "REQ-FUNC-027": [
+      "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+    ],
+    "REQ-FUNC-028": [],
+    "REQ-FUNC-029": [],
+    "REQ-FUNC-030": [],
+    "REQ-FUNC-031": [],
+    "REQ-NFR-008": [],
+    "REQ-NFR-009": [],
+    "REQ-NFR-010": [],
+    "REQ-NFR-011": [],
+    "REQ-NFR-012": [],
+    "REQ-DATA-004": [
+      "The system shall provide a Pipeline Board with a Kanban view featuring at least 5 configurable stages, drag-and-drop functionality, and inline editing of deal value and expected close date."
+    ]
+  },
+  "system_integration_map": {
+    "Payment_to_Invoice": {
+      "requirements": [
+        "REQ-PAY-001",
+        "REQ-PAY-003",
+        "REQ-INV-001",
+        "REQ-INV-004"
+      ],
+      "integration_type": "Real-time",
+      "data_flow": "Customer data, Payment status",
+      "critical_path": true
+    },
+    "LoadBooking_to_Invoice": {
+      "requirements": [
+        "REQ-LOAD-001",
+        "REQ-LOAD-002",
+        "REQ-INV-001"
+      ],
+      "integration_type": "Event-driven",
+      "data_flow": "Load completion data, Billing information",
+      "critical_path": true
+    },
+    "LoadBooking_to_CarrierPayment": {
+      "requirements": [
+        "REQ-LOAD-002",
+        "REQ-CARR-001",
+        "REQ-CARR-003"
+      ],
+      "integration_type": "Event-driven",
+      "data_flow": "Load completion, Carrier performance data",
+      "critical_path": true
+    },
+    "Invoice_to_Payment": {
+      "requirements": [
+        "REQ-INV-004",
+        "REQ-PAY-003",
+        "REQ-PAY-005"
+      ],
+      "integration_type": "Real-time",
+      "data_flow": "Payment confirmations, Invoice status updates",
+      "critical_path": true
+    }
+  },
+  "compliance_mapping": {
+    "PCI_DSS": {
+      "requirements": [
+        "REQ-PAY-003",
+        "REQ-SEC-001",
+        "REQ-COMP-001"
+      ],
+      "system_scope": [
+        "Payment System"
+      ],
+      "audit_frequency": "Annual",
+      "risk_level": "High"
+    },
+    "SOX": {
+      "requirements": [
+        "REQ-INV-002",
+        "REQ-SEC-001",
+        "REQ-COMP-001"
+      ],
+      "system_scope": [
+        "Invoice System",
+        "Payment System"
+      ],
+      "audit_frequency": "Annual",
+      "risk_level": "High"
+    },
+    "DOT_FMCSA": {
+      "requirements": [
+        "REQ-LOAD-003",
+        "REQ-COMP-002"
+      ],
+      "system_scope": [
+        "Load Booking System"
+      ],
+      "audit_frequency": "Quarterly",
+      "risk_level": "High"
+    }
+  },
+  "validation": {
+    "last_validated": "2024-01-15",
+    "validation_status": "Passed",
+    "issues": [],
+    "warnings": [
+      "All traceability requirements are in Draft status - review and approval needed",
+      "Cross-system integration requirements have high risk levels - mitigation planning required",
+      "Compliance requirements need detailed implementation planning"
+    ]
+  },
+  "metrics": {
+    "traceability_coverage": "100%",
+    "requirements_with_dependencies": 28,
+    "requirements_without_dependencies": 14,
+    "cross_system_requirements": 16,
+    "high_risk_requirements": 8,
+    "critical_path_requirements": 12,
+    "compliance_requirements": 6,
+    "average_dependencies_per_requirement": 1.8,
+    "most_connected_requirement": "REQ-INT-001",
+    "system_integration_points": 4
+  },
+  "team_assignments": {
+    "Product Manager": {
+      "requirements": [
+        "TRC-PRD-1",
+        "TRC-PRD-1.1",
+        "TRC-PRD-1.2",
+        "TRC-PRD-2",
+        "TRC-PRD-3"
+      ],
+      "count": 5,
+      "focus_area": "Traceability Strategy"
+    },
+    "Payment Team": {
+      "requirements": [
+        "REQ-PAY-001",
+        "REQ-PAY-002",
+        "REQ-PAY-003",
+        "REQ-PAY-004",
+        "REQ-PAY-005"
+      ],
+      "count": 5,
+      "focus_area": "Payment Processing"
+    },
+    "Load Booking Team": {
+      "requirements": [
+        "REQ-LOAD-001",
+        "REQ-LOAD-002",
+        "REQ-LOAD-003",
+        "REQ-LOAD-004",
+        "REQ-LOAD-005"
+      ],
+      "count": 5,
+      "focus_area": "Load Management"
+    },
+    "Invoice Team": {
+      "requirements": [
+        "REQ-INV-001",
+        "REQ-INV-002",
+        "REQ-INV-003",
+        "REQ-INV-004",
+        "REQ-INV-005"
+      ],
+      "count": 5,
+      "focus_area": "Invoice Processing"
+    },
+    "Carrier Payment Team": {
+      "requirements": [
+        "REQ-CARR-001",
+        "REQ-CARR-002",
+        "REQ-CARR-003",
+        "REQ-CARR-004",
+        "REQ-CARR-005"
+      ],
+      "count": 5,
+      "focus_area": "Carrier Payments"
+    },
+    "Integration Team": {
+      "requirements": [
+        "REQ-INT-001",
+        "REQ-INT-002",
+        "REQ-INT-003"
+      ],
+      "count": 3,
+      "focus_area": "Cross-System Integration"
+    },
+    "Compliance Officer": {
+      "requirements": [
+        "TRC-PRD-1.3",
+        "TRC-PRD-4"
+      ],
+      "count": 2,
+      "focus_area": "Regulatory Compliance"
+    },
+    "DevOps Team": {
+      "requirements": [
+        "TRC-PRD-5"
+      ],
+      "count": 1,
+      "focus_area": "Platform Automation"
+    }
+  },
+  "next_steps": {
+    "immediate": [
+      "Complete stakeholder review of traceability requirements",
+      "Approve traceability PRD and move requirements to Active status",
+      "Begin functional requirements document for traceability system",
+      "Establish cross-team coordination for traceability implementation"
+    ],
+    "short_term": [
+      "Develop detailed technical architecture for traceability system",
+      "Create data requirements and database schema",
+      "Implement basic RTM functionality",
+      "Integrate with existing development workflows"
+    ],
+    "long_term": [
+      "Deploy production traceability system",
+      "Train all teams on traceability processes",
+      "Establish ongoing compliance monitoring",
+      "Optimize cross-system integration tracking"
+    ]
+  }
+}

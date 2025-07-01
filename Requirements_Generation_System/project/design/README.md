@@ -1,6 +1,6 @@
 # AI Agent Design Documents
 
-This directory contains detailed design documents for each AI agent that will implement features according to the ByteForge development plan.
+This directory contains detailed design documents for each AI agent that will implement features according to the LSOMigrator development plan.
 
 ## Agent Overview
 
@@ -49,7 +49,7 @@ The design documents provide comprehensive context including:
 - Test plans and validation criteria
 
 ## Generated At
-2025-06-27 17:38:24
+2025-06-30 21:22:46
 
 ## Model Provider
 OPENAI

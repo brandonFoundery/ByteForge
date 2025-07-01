@@ -319,16 +319,19 @@ class RequirementsOrchestrator:
             self.output_path = byteforge_root / config['paths'].get('output_dir', "project/requirements")
             self.prompts_path = byteforge_root / config['paths'].get('prompts_dir', "Requirements_Generation_Prompts")
             self.requirements_path = byteforge_root / config['paths'].get('requirements_dir', "project/requirements")
+            self.status_path = byteforge_root / config['paths'].get('status_dir', "project/generation_status")
         else:
             # Fallback to default paths relative to ByteForge root
             self.output_path = byteforge_root / "project" / "requirements"
             self.prompts_path = byteforge_root / "Requirements_Generation_Prompts"
             self.requirements_path = byteforge_root / "project" / "requirements"
+            self.status_path = byteforge_root / "project" / "generation_status"
 
         # Resolve all paths to absolute paths
         self.output_path = self.output_path.resolve()
         self.prompts_path = self.prompts_path.resolve()
         self.requirements_path = self.requirements_path.resolve()
+        self.status_path = self.status_path.resolve()
 
 
 
@@ -808,11 +811,10 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
             dep_doc = self.documents[dep_type]
             logger.info(f"Processing dependency {dep_type.value} (status: {dep_doc.status.value})")
 
-            # For requirements documents, try to load from the current docs location first
+            # For requirements documents, try to load from the requirements directory first
             if dep_type in [DocumentType.FRD, DocumentType.NFRD, DocumentType.DRD]:
-                current_docs_path = self.base_path / "Requirements_Generation_System" / "fy-wb-midway-docs" / "docs" / "requirements"
                 doc_filename = f"{dep_type.name.lower()}.md"
-                current_doc_file = current_docs_path / doc_filename
+                current_doc_file = self.requirements_path / doc_filename
                 logger.info(f"Checking for existing {dep_type.value} at: {current_doc_file}")
 
                 if current_doc_file.exists():
@@ -831,8 +833,8 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
                             if metadata_end > 0:
                                 current_content = current_content[metadata_end + 3:].strip()
                         context[dep_type.name.lower()] = current_content
-                        logger.info(f"Loaded {dep_type.value} from docs folder (content length: {len(current_content)} chars)")
-                        console.print(f"[dim]Loaded current {dep_type.name} from docs folder[/dim]")
+                        logger.info(f"Loaded {dep_type.value} from requirements directory (content length: {len(current_content)} chars)")
+                        console.print(f"[dim]Loaded current {dep_type.name} from requirements directory[/dim]")
                         continue
                     except Exception as e:
                         logger.warning(f"Could not load current {dep_type.name}: {e}")
@@ -921,8 +923,25 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
             else:
                 logger.info("No video annotations found")
 
+            # Check for client requirements document first
+            client_requirements_path = self.requirements_path / "Requirements_Doc_From_Client.md"
+            logger.info(f"Checking for client requirements at: {client_requirements_path}")
+            if client_requirements_path.exists():
+                try:
+                    # Try UTF-8 first, then fall back to other encodings
+                    try:
+                        context["client_requirements"] = client_requirements_path.read_text(encoding='utf-8')
+                    except UnicodeDecodeError:
+                        context["client_requirements"] = client_requirements_path.read_text(encoding='latin-1')
+                        logger.warning(f"Used latin-1 encoding for {client_requirements_path} due to encoding issues")
+                    logger.info(f"Loaded client requirements (content length: {len(context['client_requirements'])} chars)")
+                except Exception as e:
+                    logger.error(f"Failed to read client requirements: {e}")
+            else:
+                logger.info("No client requirements document found")
+
             # Provide default business context if no existing requirements found
-            if not context.get("master_prd") and not context.get("video_annotations"):
+            if not context.get("master_prd") and not context.get("video_annotations") and not context.get("client_requirements"):
                 logger.info("No existing business context found, providing default context")
                 context["business_context"] = f"""
 **Company Background**: {self.project_name} is a software development project requiring comprehensive requirements documentation.
@@ -946,7 +965,7 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
 """
                 logger.info(f"Added default business context (content length: {len(context['business_context'])} chars)")
             else:
-                logger.info("Using existing business context from master PRD or video annotations")
+                logger.info("Using existing business context from master PRD, video annotations, or client requirements")
 
         # Log final context summary
         logger.info(f"Context gathering complete for {doc_type.value}:")
@@ -1976,7 +1995,12 @@ This log tracks the batch processing of code files for requirements generation.
         # Parse existing YAML
         yaml_content = '\n'.join(lines[yaml_start + 1:yaml_end])
         try:
-            metadata = yaml.safe_load(yaml_content) or {}
+            parsed_yaml = yaml.safe_load(yaml_content)
+            # Ensure we have a dictionary, not a list or other type
+            if isinstance(parsed_yaml, dict):
+                metadata = parsed_yaml
+            else:
+                metadata = {}
         except:
             metadata = {}
 
@@ -2036,9 +2060,19 @@ This log tracks the batch processing of code files for requirements generation.
         # Try to parse and fix the YAML
         yaml_content = '\n'.join(cleaned_yaml_lines)
         try:
-            metadata = yaml.safe_load(yaml_content) or {}
+            parsed_yaml = yaml.safe_load(yaml_content)
+            # Ensure we have a dictionary, not a list or other type
+            if isinstance(parsed_yaml, dict):
+                metadata = parsed_yaml
+            else:
+                # If YAML parsed but isn't a dict, create new metadata
+                metadata = {}
         except:
             # If YAML is completely broken, create new metadata
+            metadata = {}
+
+        # Ensure metadata is a dictionary before accessing it
+        if not isinstance(metadata, dict):
             metadata = {}
 
         # Ensure required fields
@@ -2169,7 +2203,12 @@ This log tracks the batch processing of code files for requirements generation.
 
         # Parse the YAML and create proper metadata
         try:
-            yaml_data = yaml.safe_load(yaml_content) or {}
+            parsed_yaml = yaml.safe_load(yaml_content)
+            # Ensure we have a dictionary, not a list or other type
+            if isinstance(parsed_yaml, dict):
+                yaml_data = parsed_yaml
+            else:
+                yaml_data = {}
         except:
             yaml_data = {}
 
@@ -3690,10 +3729,9 @@ This document defines the carrier management view specifications following the U
         doc = self.documents[doc_type]
 
         # Create status directory
-        status_dir = self.base_path / "generation_status"
-        status_dir.mkdir(parents=True, exist_ok=True)
+        self.status_path.mkdir(parents=True, exist_ok=True)
 
-        status_file = status_dir / f"status_{doc_type.name.lower()}.json"
+        status_file = self.status_path / f"status_{doc_type.name.lower()}.json"
 
         # Calculate file size
         file_size = 0
@@ -3728,12 +3766,10 @@ This document defines the carrier management view specifications following the U
             "total_progress": 0
         }
 
-        status_dir = self.base_path / "generation_status"
-
         for doc_type in DocumentType:
             doc_status = DocumentStatus.NOT_STARTED
 
-            status_file = status_dir / f"status_{doc_type.name.lower()}.json"
+            status_file = self.status_path / f"status_{doc_type.name.lower()}.json"
             if status_file.exists():
                 try:
                     with open(status_file, 'r', encoding='utf-8') as f:
@@ -3770,7 +3806,7 @@ This document defines the carrier management view specifications following the U
 
         for doc_type in DocumentType:
             doc_file = self.output_path / f"{doc_type.name.lower()}.md"
-            status_file = self.base_path / "generation_status" / f"status_{doc_type.name.lower()}.json"
+            status_file = self.status_path / f"status_{doc_type.name.lower()}.json"
 
             if doc_type not in self.documents:
                 self.documents[doc_type] = Document(doc_type)
@@ -4232,7 +4268,7 @@ async def main():
     args = parser.parse_args()
     
     # Configuration - Use project folder instead of hardcoded client path
-    project_name = "FY.WB.Midway"
+    project_name = "LSOMigrator"
     # Get the current script directory and navigate to project folder
     script_dir = Path(__file__).parent
     project_root = script_dir.parent / "project"

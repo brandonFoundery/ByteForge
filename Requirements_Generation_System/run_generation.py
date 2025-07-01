@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Run the Requirements Generation System for FY.WB.Midway
+Run the Requirements Generation System for LSOMigrator
 This script orchestrates the entire document generation process.
 
 Supports multiple LLM providers:
@@ -1937,7 +1937,7 @@ echo "🐧 WSL Distribution: $(cat /etc/os-release | grep PRETTY_NAME)"
 echo ""
 
 echo "[TOOL] Step 2: Checking target directory..."
-TARGET_DIR="/mnt/d/Repository/@Clients/FY.WB.Midway/FrontEnd"
+TARGET_DIR="/mnt/d/Repository/ContractLogix/LSOMitigator/ByteForge/project/FrontEnd"
 if [ -d "$TARGET_DIR" ]; then
     echo "[OK] Target directory exists: $TARGET_DIR"
     cd "$TARGET_DIR"

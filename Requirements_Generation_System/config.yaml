@@ -3,10 +3,10 @@
 
 # Project Information
 project:
-  name: "ByteForge"
-  description: "AI-Powered Application Generation System"
+  name: "LSOMigrator"
+  description: "LSM to CLX Data Migration System"
   version: "1.0.0"
-  client: "ByteForge"
+  client: "ContractLogix"
 
 # Input/Output Paths (all relative to ByteForge root directory)
 paths:

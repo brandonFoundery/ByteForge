@@ -56,7 +56,16 @@ class TraceabilityAnalyzer:
             if content.startswith("---"):
                 metadata_end = content.find("---", 3)
                 if metadata_end > 0:
-                    metadata = yaml.safe_load(content[3:metadata_end])
+                    try:
+                        parsed_metadata = yaml.safe_load(content[3:metadata_end])
+                        # Ensure metadata is a dictionary
+                        if isinstance(parsed_metadata, dict):
+                            metadata = parsed_metadata
+                        else:
+                            metadata = {"id": doc_file.stem, "title": "Unknown"}
+                    except:
+                        metadata = {"id": doc_file.stem, "title": "Unknown"}
+
                     doc_id = metadata.get("id", doc_file.stem)
                     self.documents[doc_id] = {
                         "file": doc_file,
@@ -291,11 +300,16 @@ def validate_document_structure(doc_path: Path):
             issues.append("Incomplete metadata section")
         else:
             try:
-                metadata = yaml.safe_load(content[3:metadata_end])
-                required_fields = ["id", "title", "version", "generated_at", "status"]
-                for field in required_fields:
-                    if field not in metadata:
-                        issues.append(f"Missing metadata field: {field}")
+                parsed_metadata = yaml.safe_load(content[3:metadata_end])
+                # Ensure metadata is a dictionary
+                if isinstance(parsed_metadata, dict):
+                    metadata = parsed_metadata
+                    required_fields = ["id", "title", "version", "generated_at", "status"]
+                    for field in required_fields:
+                        if field not in metadata:
+                            issues.append(f"Missing metadata field: {field}")
+                else:
+                    issues.append("YAML metadata is not a valid dictionary")
             except:
                 issues.append("Invalid YAML metadata")
                 

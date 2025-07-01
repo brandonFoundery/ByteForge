@@ -191,7 +191,7 @@ def main():
     if len(sys.argv) > 1:
         output_path = Path(sys.argv[1])
     else:
-        output_path = Path("d:/Repository/@Clients/FY.WB.Midway/generated_documents")
+        output_path = Path("project/generated_documents")
     
     if not output_path.exists():
         console.print(f"[red]Output directory not found: {output_path}[/red]")

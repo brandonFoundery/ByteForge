@@ -88,8 +88,8 @@ def execute_claude_code_frontend():
     console.print(f"[green]📁 Found frontend directory: {frontend_dir.absolute()}[/green]")
     
     # Create Claude Code command
-    wsl_frontend_path = "/mnt/d/Repository/@Clients/FY.WB.Midway/FrontEnd"
-    wsl_instruction_path = "/mnt/d/Repository/@Clients/FY.WB.Midway/generated_documents/design/claude_instructions/frontend-phase1-mvp-core-features.md"
+    wsl_frontend_path = "project/FrontEnd"
+    wsl_instruction_path = "project/generated_documents/design/claude_instructions/frontend-phase1-mvp-core-features.md"
     
     console.print(f"[cyan]💻 Executing Claude Code with real-time monitoring...[/cyan]")
     console.print(f"[dim]Frontend path: {wsl_frontend_path}[/dim]")

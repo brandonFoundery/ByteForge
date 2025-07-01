@@ -589,8 +589,8 @@ Please refine the following {doc_type.value}:
 async def main():
     """Main entry point"""
     # Configuration
-    project_name = "FY.WB.Midway"
-    base_path = Path("d:/Repository/@Clients/FY.WB.Midway")
+    project_name = "LSOMigrator"
+    base_path = Path("d:/Repository/@Clients/LSOMigrator")
     
     # Create orchestrator
     orchestrator = RequirementsOrchestrator(project_name, base_path)
@@ -705,7 +705,7 @@ class GenerationMonitor:
 
 def main():
     """Run the monitor"""
-    output_path = Path("d:/Repository/@Clients/FY.WB.Midway/generated_documents")
+    output_path = Path("d:/Repository/@Clients/LSOMigrator/generated_documents")
     
     if not output_path.exists():
         console.print(f"[red]Output directory not found: {output_path}[/red]")
@@ -734,12 +734,12 @@ Create `config.yaml`:
 # Requirements Generation System Configuration
 
 project:
-  name: "FY.WB.Midway"
+  name: "LSOMigrator"
   description: "Enterprise Logistics and Payment Platform"
   version: "1.0"
 
 paths:
-  base: "d:/Repository/@Clients/FY.WB.Midway"
+  base: "d:/Repository/@Clients/LSOMigrator"
   prompts: "Requirements_Generation_Prompts"
   requirements: "Requirements"
   output: "generated_documents"

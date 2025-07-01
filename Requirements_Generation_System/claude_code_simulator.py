@@ -240,7 +240,7 @@ Key Features Implemented:
 
 async def main():
     """Test the Claude Code simulator"""
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     simulator = ClaudeCodeSimulator(base_path)
     
     console.print("[bold blue]🧪 Claude Code Implementation Simulator[/bold blue]")

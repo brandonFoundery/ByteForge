@@ -1,6 +1,6 @@
 # Information Architecture and Navigation Design
 
-This document defines the site structure, navigation patterns, and role-based access for the FY.WB.Midway platform.
+This document defines the site structure, navigation patterns, and role-based access for the LSOMigrator platform.
 
 ## Site Map Structure
 

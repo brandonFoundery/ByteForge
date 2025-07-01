@@ -28,7 +28,7 @@ async def repair_all_documents():
     
     # Initialize orchestrator
     project_name = "FY.WB.Midway"
-    base_path = Path("d:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     orchestrator = RequirementsOrchestrator(project_name, base_path, model_provider="openai")
     
     # Load existing documents

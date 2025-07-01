@@ -1,6 +1,6 @@
 # LLM UI Generation System
 
-A powerful system that leverages multiple AI models to generate **45 unique dashboard designs** for the FY.WB.Midway freight brokerage application.
+A powerful system that leverages multiple AI models to generate **45 unique dashboard designs** for the LSOMigrator freight brokerage application.
 
 ## 🎯 Overview
 

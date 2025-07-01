@@ -11,10 +11,10 @@ Here is the enhanced version of the NFRD, followed by my clarification questions
 ## Introduction
 
 ### Purpose
-The purpose of this Non-Functional Requirements Document (NFRD) is to delineate the quality attributes, performance benchmarks, and operational constraints essential for the FY.WB.Midway platform. This document is intended to ensure that the platform not only meets the functional requirements specified in the [FRD] but also aligns with the strategic business objectives from the [BRD], technical constraints, and compliance mandates outlined in the [PRD]. These requirements are critical for delivering a reliable, secure, and high-performing system.
+The purpose of this Non-Functional Requirements Document (NFRD) is to delineate the quality attributes, performance benchmarks, and operational constraints essential for the LSOMigrator platform. This document is intended to ensure that the platform not only meets the functional requirements specified in the [FRD] but also aligns with the strategic business objectives from the [BRD], technical constraints, and compliance mandates outlined in the [PRD]. These requirements are critical for delivering a reliable, secure, and high-performing system.
 
 ### Scope
-This document encompasses the non-functional attributes of the FY.WB.Midway platform, including performance, scalability, security, usability, reliability, maintainability, and compliance. It establishes a framework for designing, implementing, and validating the system's quality attributes through quantifiable and testable criteria. These requirements apply to the entire platform, including all microservices, APIs, and user-facing applications.
+This document encompasses the non-functional attributes of the LSOMigrator platform, including performance, scalability, security, usability, reliability, maintainability, and compliance. It establishes a framework for designing, implementing, and validating the system's quality attributes through quantifiable and testable criteria. These requirements apply to the entire platform, including all microservices, APIs, and user-facing applications.
 
 ### References
 - Product Requirements Document (PRD) v1.1 [PRD]
@@ -149,7 +149,7 @@ This document encompasses the non-functional attributes of the FY.WB.Midway plat
 | NFRD-6.2       | Auditability                         | NFRD-3.2, NFRD-6.1                    |
 
 ## Conclusion
-This NFRD delineates the quality and non-functional expectations for the FY.WB.Midway platform. By adhering to these requirements, the platform will not only fulfill functional needs but also deliver a high-quality, reliable, secure, and compliant solution for mid-sized enterprises in the manufacturing and retail sectors. These requirements will serve as the basis for architectural decisions, development standards, and quality assurance testing.
+This NFRD delineates the quality and non-functional expectations for the LSOMigrator platform. By adhering to these requirements, the platform will not only fulfill functional needs but also deliver a high-quality, reliable, secure, and compliant solution for mid-sized enterprises in the manufacturing and retail sectors. These requirements will serve as the basis for architectural decisions, development standards, and quality assurance testing.
 
 ***
 

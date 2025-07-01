@@ -177,7 +177,7 @@ class FileMonitor:
 def monitor_files():
     """Monitor file changes in real-time"""
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     monitor = FileMonitor(base_path)
     
     console.print("[bold blue]Starting Real-time File Monitor[/bold blue]")

@@ -16,7 +16,7 @@ def test_claude_direct():
     
     console.print("[bold blue]Testing Claude Code with Direct File Creation[/bold blue]")
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     
     # Create a very specific, simple prompt
     prompt = """Please create a simple React component file right now.

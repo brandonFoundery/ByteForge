@@ -1,11 +1,11 @@
 # Business Requirements Document (BRD)
-**Project FY.WB.Midway**  
+**Project LSOMigrator**  
 Version 1.0 | June 13, 2025
 
 ## 1. Overview (BRD-1)
 
 ### 1.1 Purpose
-This document delineates the business requirements for Project FY.WB.Midway, a strategic initiative of Midway Logistics. The project aims to enhance logistics and payment processing capabilities by leveraging advanced technology solutions. The primary objective is to address existing operational challenges, elevate customer satisfaction, and align with the strategic directives of Midway Logistics.
+This document delineates the business requirements for Project LSOMigrator, a strategic initiative of Midway Logistics. The project aims to enhance logistics and payment processing capabilities by leveraging advanced technology solutions. The primary objective is to address existing operational challenges, elevate customer satisfaction, and align with the strategic directives of Midway Logistics.
 
 ### 1.2 Scope
 This project encompasses the following components:
@@ -194,4 +194,4 @@ Midway Logistics operates within the logistics sector and currently grapples wit
 - Utilize Docker for containerization.
 - Implement robust monitoring and alerting systems to ensure system health.
 
-This BRD offers a comprehensive outline of the business requirements for Project FY.WB.Midway, aligning with Midway Logistics' strategic objectives to enhance operational efficiency, improve customer satisfaction, and support business growth. Development teams should reference this document for guidance on system enhancements and integration efforts.
+This BRD offers a comprehensive outline of the business requirements for Project LSOMigrator, aligning with Midway Logistics' strategic objectives to enhance operational efficiency, improve customer satisfaction, and support business growth. Development teams should reference this document for guidance on system enhancements and integration efforts.

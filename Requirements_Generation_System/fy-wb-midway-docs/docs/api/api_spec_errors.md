@@ -1,6 +1,6 @@
 # API Error Handling and Response Patterns
 
-This document defines standardized error handling patterns and response structures for the FY.WB.Midway Enterprise Logistics Platform API.
+This document defines standardized error handling patterns and response structures for the LSOMigrator Enterprise Logistics Platform API.
 
 ## Standard Error Schema
 

@@ -3,10 +3,10 @@
 
 # Project Information
 project:
-  name: "ByteForge"
-  description: "AI-Powered Application Generation System"
+  name: "LSOMigrator"
+  description: "LSM to CLX Data Migration System"
   version: "1.0.0"
-  client: "ByteForge"
+  client: "ContractLogix"
 
 # Input/Output Paths (all relative to ByteForge root directory)
 paths:
@@ -37,20 +37,33 @@ llm:
   # Model selection (can be overridden at runtime)
   # OpenAI options: "o3", "o3-mini", "gpt-4o", etc.
   openai_model: "o3-mini"
-  anthropic_model: "claude-opus-4"
+  anthropic_model: "claude-sonnet-4-20250514"
   gemini_model: "gemini-2.5-pro-preview-06-05"
 
-  # Temperature for generation (0.0-1.0)
-  temperature: 0.7
+  # Temperature for generation (0.0-1.0) - optimized for code generation
+  temperature: 0.2
 
-  # Maximum tokens per request
-  max_tokens: 4000
+  # Maximum tokens per request - increased for better context
+  max_tokens: 8000
 
-  # Request timeout in seconds
-  timeout: 180
+  # Request timeout in seconds - optimized for claude-sonnet-4
+  timeout: 240
 
   # Extended timeout for o3 models (seconds) - o3 models need longer due to reasoning
   o3_timeout: 300
+
+  # Claude Code specific settings
+  claude_code:
+    # Model for claude code execution
+    model: "claude-sonnet-4-20250514"
+    # Temperature for code generation (lower for consistency)
+    temperature: 0.1
+    # Timeout for claude code operations (seconds)
+    timeout: 600
+    # Maximum retries for failed executions
+    max_retries: 3
+    # Retry delay in seconds
+    retry_delay: 10
 
   # Retry configuration
   max_retries: 3
@@ -245,6 +258,120 @@ advanced:
   # Verbose logging
   verbose: true
 
+# Claude Code Execution Configuration
+claude_code_execution:
+  # WSL Configuration
+  wsl:
+    # WSL distribution name
+    distribution: "Ubuntu"
+    # Base mount path for Windows drives
+    mount_prefix: "/mnt"
+    # Default shell
+    shell: "bash"
+
+  # Execution Settings
+  execution:
+    # Default working directory (relative to project root)
+    working_directory: "."
+    # Command prefix for claude code
+    command_prefix: "claude"
+    # Default flags
+    default_flags: ["--model", "sonnet", "--dangerously-skip-permissions"]
+    # Maximum execution time per agent (minutes)
+    max_execution_time: 60
+    # Maximum prompt size (characters)
+    max_prompt_size: 50000
+
+  # Agent Configuration
+  agents:
+    backend:
+      name: "Backend Agent"
+      description: "ASP.NET Core API, data models, business logic"
+      directory: "BackEnd"
+      priority: 1
+      estimated_duration: 45
+    frontend:
+      name: "Frontend Agent"
+      description: "React/Next.js user interface components"
+      directory: "FrontEnd"
+      priority: 2
+      estimated_duration: 40
+    security:
+      name: "Security Agent"
+      description: "Authentication, authorization, audit logging"
+      directory: "BackEnd"
+      priority: 3
+      estimated_duration: 30
+    infrastructure:
+      name: "Infrastructure Agent"
+      description: "Azure resources, CI/CD, containerization"
+      directory: "Infrastructure"
+      priority: 4
+      estimated_duration: 35
+    integration:
+      name: "Integration Agent"
+      description: "API integration, data synchronization, external services"
+      directory: "BackEnd"
+      priority: 5
+      estimated_duration: 30
+
+  # Phase Configuration
+  phases:
+    phase1:
+      name: "MVP Core Features"
+      description: "Implement core functionality for minimum viable product"
+      priority: 1
+      estimated_duration: 180
+      dependencies: {}
+    phase2:
+      name: "Advanced Features"
+      description: "Add advanced functionality and business logic"
+      priority: 2
+      estimated_duration: 150
+      dependencies:
+        backend: ["backend-phase1"]
+        frontend: ["backend-phase2", "frontend-phase1"]
+        security: ["backend-phase2", "security-phase1"]
+        infrastructure: ["infrastructure-phase1"]
+        integration: ["backend-phase2", "frontend-phase2", "security-phase2"]
+    phase3:
+      name: "Production Ready"
+      description: "Production hardening, performance, monitoring"
+      priority: 3
+      estimated_duration: 120
+      dependencies:
+        backend: ["infrastructure-phase3", "backend-phase2"]
+        frontend: ["infrastructure-phase3", "frontend-phase2"]
+        security: ["infrastructure-phase3", "security-phase2"]
+        infrastructure: ["infrastructure-phase2"]
+        integration: ["backend-phase3", "frontend-phase3", "security-phase3"]
+
+  # Monitoring and Logging
+  monitoring:
+    # Enable real-time progress monitoring
+    enabled: true
+    # Log file paths
+    log_directory: "logs"
+    # Progress tracking file
+    progress_file: "progress_tracker.json"
+    # Execution plan file
+    execution_plan_file: "execution_plan.md"
+    # Update frequency (seconds)
+    update_frequency: 5
+
+  # Error Handling and Recovery
+  error_handling:
+    # Enable automatic retry on failure
+    auto_retry: true
+    # Maximum retry attempts
+    max_retries: 3
+    # Retry delay (seconds)
+    retry_delay: 30
+    # Enable rollback on critical failure
+    auto_rollback: false
+    # Save error logs
+    save_error_logs: true
+
 # Full Regeneration from Code Settings
 code_regeneration:
   # Batching configuration for processing code files
@@ -333,10 +460,10 @@ application_builder:
     # Pass 3: Implementation Phase (Claude Sonnet 4)
     implementation:
       model: "anthropic"
-      model_name: "claude-3-sonnet-20240229"
-      temperature: 0.2
-      max_tokens: 4000
-      timeout_seconds: 360
+      model_name: "claude-sonnet-4-20250514"
+      temperature: 0.1
+      max_tokens: 8000
+      timeout_seconds: 600
 
   # Build System Configuration
   build_system:
@@ -356,7 +483,7 @@ application_builder:
       run_command: ["dotnet", "run"]
       restore_command: ["dotnet", "restore"]
       clean_command: ["dotnet", "clean"]
-      working_directory: "BackEnd/FY.WB.Midway"
+      working_directory: "BackEnd"
 
   # Git Configuration
   git:

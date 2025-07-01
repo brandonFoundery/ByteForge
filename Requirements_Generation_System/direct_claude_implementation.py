@@ -67,7 +67,7 @@ Focus on creating the CRM customer management system with:
 Begin implementation immediately."""
     
     # Convert to WSL path
-    wsl_frontend_path = "/mnt/d/Repository/@Clients/FY.WB.Midway/FrontEnd"
+    wsl_frontend_path = "project/FrontEnd"
     
     console.print(f"[cyan]💻 Executing Claude Code with direct instructions...[/cyan]")
     console.print(f"[dim]Frontend path: {wsl_frontend_path}[/dim]")

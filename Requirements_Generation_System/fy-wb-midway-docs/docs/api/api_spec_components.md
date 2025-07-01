@@ -1,6 +1,6 @@
 # Component Library and Design System Integration
 
-This document defines the design system components and their integration patterns for the FY.WB.Midway platform.
+This document defines the design system components and their integration patterns for the LSOMigrator platform.
 
 ## Design System Reference
 

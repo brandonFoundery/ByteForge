@@ -1,12 +1,12 @@
-# Technical Requirements Document - FY.WB.Midway
+# Technical Requirements Document - LSOMigrator
 
 ## Overview
 
-This is the master document for the FY.WB.Midway Enterprise Logistics Platform Technical Requirements. The complete technical specification is organized into multiple linked documents for better maintainability and navigation.
+This is the master document for the LSOMigrator Enterprise Logistics Platform Technical Requirements. The complete technical specification is organized into multiple linked documents for better maintainability and navigation.
 
 ## Executive Summary
 
-The FY.WB.Midway platform is designed as a cloud-native, microservices-based enterprise logistics solution that provides secure, scalable, and high-performance operations for customer management, payment processing, load booking, and invoice generation.
+The LSOMigrator platform is designed as a cloud-native, microservices-based enterprise logistics solution that provides secure, scalable, and high-performance operations for customer management, payment processing, load booking, and invoice generation.
 
 ### Key Technical Decisions
 - **Architecture**: Microservices with API Gateway pattern

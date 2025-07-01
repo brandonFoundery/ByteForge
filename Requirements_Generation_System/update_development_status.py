@@ -12,7 +12,7 @@ def update_requirements_with_development_status():
     """Update all requirements with development_status field."""
     
     # Load the requirements tracker
-    tracker_path = Path('d:/Repository/@Clients/FY.WB.Midway/Requirements_Traceable/cross-cutting/requirements_tracker.json')
+    tracker_path = Path('project/Requirements_Traceable/cross-cutting/requirements_tracker.json')
     
     print(f"Loading requirements from: {tracker_path}")
     

@@ -53,7 +53,7 @@ Requirements:
 START IMPLEMENTING NOW. Create the actual files with working code."""
     
     # Convert to WSL path
-    wsl_frontend_path = "/mnt/d/Repository/@Clients/FY.WB.Midway/FrontEnd"
+    wsl_frontend_path = "project/FrontEnd"
     
     console.print(f"[cyan]💻 Executing Claude Code with simple CRM prompt...[/cyan]")
     console.print(f"[dim]Frontend path: {wsl_frontend_path}[/dim]")

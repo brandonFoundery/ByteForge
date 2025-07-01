@@ -710,13 +710,13 @@ You are converting the frontend test plan into executable testRigor test scripts
             wsl_instruction_file = instruction_file.replace("D:\\", "/mnt/d/").replace("\\", "/")
 
             # Create the Claude Code command with correct syntax
-            claude_command = f"cd /mnt/d/Repository/@Clients/FY.WB.Midway && claude -p '{wsl_instruction_file}'"
+            claude_command = f"cd project && claude -p '{wsl_instruction_file}'"
 
             if sys.platform == "win32":
                 # Launch WSL terminal with Claude Code
                 subprocess.Popen([
                     "wsl", "-d", "Ubuntu", "-e", "bash", "-c",
-                    f"cd /mnt/d/Repository/@Clients/FY.WB.Midway && echo 'Starting {title}...' && echo 'Working Directory: {wsl_working_dir}' && {claude_command}"
+                    f"cd project && echo 'Starting {title}...' && echo 'Working Directory: {wsl_working_dir}' && {claude_command}"
                 ], shell=False)
 
                 console.print(f"[green]✅ Claude Code terminal launched for: {title}[/green]")
@@ -736,7 +736,7 @@ You are converting the frontend test plan into executable testRigor test scripts
             console.print(f"[red]Error launching Claude Code terminal: {e}[/red]")
             console.print("[yellow]You can manually run Claude Code with these commands:[/yellow]")
             console.print(f"[dim]wsl -d Ubuntu[/dim]")
-            console.print(f"[dim]cd /mnt/d/Repository/@Clients/FY.WB.Midway[/dim]")
+            console.print(f"[dim]cd project[/dim]")
             console.print(f"[dim]claude -p '{wsl_instruction_file}'[/dim]")
 
 
@@ -747,7 +747,7 @@ async def main():
 
     # Test configuration
     project_name = "FY.WB.Midway"
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     model_provider = "anthropic"
 
     # Initialize the generator

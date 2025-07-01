@@ -26,7 +26,7 @@ def main():
         console.print("[green]✅ ApplicationBuilder imported successfully[/green]")
         
         # Set up paths
-        base_path = Path("d:/Repository/@Clients/FY.WB.Midway")
+        base_path = Path("project")
         config_path = Path(__file__).parent / "config.yaml"
         
         # Initialize the application builder

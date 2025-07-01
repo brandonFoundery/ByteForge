@@ -16,7 +16,7 @@ def create_visible_claude_terminal():
     
     console.print("[bold blue]🔍 Creating Visible Claude Code Terminal[/bold blue]")
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path.cwd().parent.parent.parent.parent  # Navigate up to get the project base path
     logs_path = base_path / "logs"
     
     # Convert paths to WSL format
@@ -153,7 +153,7 @@ def show_current_files():
     
     console.print("\n[bold]📁 Files Created So Far:[/bold]")
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path.cwd().parent.parent.parent.parent  # Navigate up to get the project base path
     components_path = base_path / "FrontEnd" / "src" / "components"
     
     if components_path.exists():
@@ -204,7 +204,7 @@ def main():
         try:
             last_count = 0
             while True:
-                components_path = Path("D:/Repository/@Clients/FY.WB.Midway/FrontEnd/src/components")
+                components_path = Path("project/FrontEnd/src/components")
                 if components_path.exists():
                     tsx_files = list(components_path.rglob("*.tsx"))
                     if len(tsx_files) != last_count:

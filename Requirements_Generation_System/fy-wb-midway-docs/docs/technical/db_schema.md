@@ -6,7 +6,7 @@ I have enhanced the schema by:
 -   **Improving Technical Precision:** I replaced generic `TIMESTAMP` types with `TIMESTAMPTZ` for proper time zone handling, refined data types, and added `NOT NULL` constraints where logically required.
 -   **Strengthening Non-Functional Requirements:** I have provided more specific strategies for indexing (including composite and GIN indexes), optimization (partitioning), security (Row-Level Security), and backups (Point-in-Time Recovery), turning general statements into actionable technical requirements.
 
-This enhanced version provides a much stronger foundation for developers, DBAs, and QA engineers, reducing ambiguity and ensuring the database is built to meet the complex needs of the FY.WB.Midway platform.
+This enhanced version provides a much stronger foundation for developers, DBAs, and QA engineers, reducing ambiguity and ensuring the database is built to meet the complex needs of the LSOMigrator platform.
 
 ***
 
@@ -17,7 +17,7 @@ This enhanced version provides a much stronger foundation for developers, DBAs, 
 ## 1. Introduction
 
 ### 1.1 Purpose
-The purpose of this document is to define the database schema for the FY.WB.Midway project. This document translates the data requirements from the Data Requirements Document (DRD) and the technical architecture outlined in the Technical Requirements Document (TRD) into an optimized database schema that supports the project's functional and non-functional requirements.
+The purpose of this document is to define the database schema for the LSOMigrator project. This document translates the data requirements from the Data Requirements Document (DRD) and the technical architecture outlined in the Technical Requirements Document (TRD) into an optimized database schema that supports the project's functional and non-functional requirements.
 
 ### 1.2 Scope
 The database schema described herein supports both transactional and analytical workloads for the platform's core domains, including user management, inventory and resource management, workflow automation, and system integration. It is designed to ensure data integrity, performance, and scalability as specified in the project requirements.
@@ -25,7 +25,7 @@ The database schema described herein supports both transactional and analytical 
 ## 2. Database Design
 
 ### 2.1 Database Technology
-Following the TRD (TRD-001), the database technology selected for the FY.WB.Midway project is PostgreSQL, chosen for its robust transaction support, advanced querying capabilities, extensibility, and suitability for handling both structured and semi-structured data through JSONB fields.
+Following the TRD (TRD-001), the database technology selected for the LSOMigrator project is PostgreSQL, chosen for its robust transaction support, advanced querying capabilities, extensibility, and suitability for handling both structured and semi-structured data through JSONB fields.
 
 ### 2.2 Logical Data Model
 
@@ -238,13 +238,13 @@ Automated daily backups are configured, with a retention period of 30 days. The 
 
 ## 6. Conclusion
 
-This Database Schema Document serves as a blueprint for implementing the database structure of the FY.WB.Midway project, ensuring alignment with the data requirements, technical architecture, and security standards. The schema is designed to support the project's scalability, performance, and compliance needs, facilitating efficient data management and utilization.
+This Database Schema Document serves as a blueprint for implementing the database structure of the LSOMigrator project, ensuring alignment with the data requirements, technical architecture, and security standards. The schema is designed to support the project's scalability, performance, and compliance needs, facilitating efficient data management and utilization.
 
 ## REVIEWER'S CLARIFICATION QUESTIONS
 
 ### REVIEW CONTEXT:
 
-**Project Name:** FY.WB.Midway
+**Project Name:** LSOMigrator
 **Generation Date:** 2025-06-13
 
 ### DRD CONTEXT:

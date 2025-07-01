@@ -21,7 +21,7 @@ async def test_complete_workflow():
         border_style="blue"
     ))
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     
     # Step 1: Verify existing design documents
     console.print("\n[bold]Step 1: Verifying Design Documents[/bold]")

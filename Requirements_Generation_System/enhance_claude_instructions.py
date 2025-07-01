@@ -130,7 +130,7 @@ You have access to the following context documents in the repository:
 ## Specific Deliverables
 
 ### 1. Core Data Models (Priority: CRITICAL)
-Create the following entity classes in `BackEnd/FY.WB.Midway.Domain/Entities/`:
+Create the following entity classes in `BackEnd.Domain/Entities/`:
 
 #### Required Entities
 - **Client.cs** - Customer/client management
@@ -148,7 +148,7 @@ Create the following entity classes in `BackEnd/FY.WB.Midway.Domain/Entities/`:
 - Follow Clean Architecture patterns
 
 ### 2. Database Context and Configuration
-Create/update the following in `BackEnd/FY.WB.Midway.Infrastructure/Persistence/`:
+Create/update the following in `BackEnd.Infrastructure/Persistence/`:
 
 #### Required Files
 - **ApplicationDbContext.cs** - Main EF Core context
@@ -164,7 +164,7 @@ Create/update the following in `BackEnd/FY.WB.Midway.Infrastructure/Persistence/
 - Include seed data for development
 
 ### 3. Repository Pattern Implementation
-Create repositories in `BackEnd/FY.WB.Midway.Infrastructure/Persistence/`:
+Create repositories in `BackEnd.Infrastructure/Persistence/`:
 
 #### Required Repositories
 - **IClientRepository.cs** and **ClientRepository.cs**
@@ -174,7 +174,7 @@ Create repositories in `BackEnd/FY.WB.Midway.Infrastructure/Persistence/`:
 - **IUserRepository.cs** and **UserRepository.cs**
 
 ### 4. CQRS Implementation
-Create commands and queries in `BackEnd/FY.WB.Midway.Application/`:
+Create commands and queries in `BackEnd.Application/`:
 
 #### Client Operations
 - **Commands/CreateClientCommand.cs**
@@ -192,7 +192,7 @@ Create commands and queries in `BackEnd/FY.WB.Midway.Application/`:
 #### Similar patterns for Invoice, Carrier, and User entities
 
 ### 5. API Controllers
-Create controllers in `BackEnd/FY.WB.Midway/Controllers/`:
+Create controllers in `BackEnd/Controllers/`:
 
 #### Required Controllers
 - **ClientsController.cs** - Client management endpoints
@@ -235,7 +235,7 @@ dotnet build
 
 ### 2. Database Setup
 ```bash
-cd BackEnd/FY.WB.Midway
+cd BackEnd
 dotnet ef migrations add InitialCreate
 dotnet ef database update
 ```
@@ -630,7 +630,7 @@ You have access to the following context documents in the repository:
 ## Specific Deliverables
 
 ### 1. Enhanced JWT Security (Priority: CRITICAL)
-Enhance the JWT service in `BackEnd/FY.WB.Midway/Services/`:
+Enhance the JWT service in `BackEnd/Services/`:
 
 #### Enhanced JwtService.cs
 - **Token Expiration Management**: Configurable access and refresh tokens
@@ -647,7 +647,7 @@ Enhance the JWT service in `BackEnd/FY.WB.Midway/Services/`:
 - Token validation middleware enhancements
 
 ### 2. Role-Based Access Control (Priority: HIGH)
-Implement RBAC system in `BackEnd/FY.WB.Midway.Domain/`:
+Implement RBAC system in `BackEnd.Domain/`:
 
 #### Required Entities
 - **Entities/Role.cs** - User roles definition
@@ -665,7 +665,7 @@ Implement RBAC system in `BackEnd/FY.WB.Midway.Domain/`:
 - Role hierarchy support
 
 ### 3. Security Middleware Enhancement (Priority: HIGH)
-Enhance security middleware in `BackEnd/FY.WB.Midway/Middleware/`:
+Enhance security middleware in `BackEnd/Middleware/`:
 
 #### Enhanced AuthenticationMiddleware.cs
 - **JWT Validation**: Comprehensive token validation
@@ -679,7 +679,7 @@ Enhance security middleware in `BackEnd/FY.WB.Midway/Middleware/`:
 - **AuditMiddleware.cs** - Request/response auditing
 
 ### 4. Comprehensive Audit Logging (Priority: HIGH)
-Implement audit system in `BackEnd/FY.WB.Midway/Services/`:
+Implement audit system in `BackEnd/Services/`:
 
 #### Enhanced AuditService.cs
 - **User Actions**: Log all user actions with context

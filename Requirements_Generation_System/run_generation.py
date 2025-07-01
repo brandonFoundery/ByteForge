@@ -18,6 +18,7 @@ import getpass
 import asyncio
 from pathlib import Path
 from datetime import datetime
+from typing import List
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -327,6 +328,61 @@ def run_orchestrator(config_path: Path, model_provider: str = "openai"):
     except Exception as e:
         console.print(f"\n[bold red]Error running orchestrator: {str(e)}[/bold red]")
 
+
+def run_orchestrator_selective(config_path: Path, model_provider: str = "openai", selected_documents: List[str] = None):
+    """Run the orchestrator with selected documents"""
+    if not selected_documents:
+        console.print("[red]No documents specified for selective generation[/red]")
+        return
+        
+    console.print(f"\n[bold cyan]Starting Selective Requirements Generation using {model_provider.upper()}[/bold cyan]")
+    console.print(f"[dim]Documents to generate: {', '.join(selected_documents)}[/dim]")
+    
+    # Get API key for the selected provider
+    key_info = get_api_key_info(model_provider)
+    api_key = get_api_key(model_provider)
+    
+    if not api_key:
+        console.print(f"[bold red]Error: No API key available for {key_info['name']}[/bold red]")
+        return
+    
+    # Get the script directory
+    script_dir = Path(__file__).parent
+    orchestrator_path = script_dir / "orchestrator.py"
+    
+    # Run orchestrator with config, model provider, and selected documents
+    documents_param = ",".join(selected_documents)
+    cmd = [sys.executable, str(orchestrator_path), "--config", str(config_path), "--model", model_provider, "--documents", documents_param]
+    
+    try:
+        # Create environment with API key
+        env = os.environ.copy()
+        if key_info and api_key:
+            env[key_info["env_var"]] = api_key
+            console.print(f"[dim]Using {key_info['name']} API key[/dim]")
+        
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            env=env
+        )
+        
+        # Stream output in real-time
+        for line in iter(process.stdout.readline, ''):
+            if line:
+                print(line.rstrip())
+        
+        process.wait()
+        
+        if process.returncode == 0:
+            console.print(f"\n[bold green]Selective generation completed successfully![/bold green]")
+        else:
+            console.print(f"\n[bold red]Selective generation failed with return code {process.returncode}[/bold red]")
+            
+    except Exception as e:
+        console.print(f"[bold red]Error running selective generation: {str(e)}[/bold red]")
 
 def run_orchestrator_resume(config_path: Path, model_provider: str = "openai"):
     """Run the orchestrator in resume mode"""
@@ -1021,15 +1077,77 @@ def main():
             run_orchestrator_resume(config_path, model_provider)
         
     elif choice == "3":
-        console.print("\n[bold]Available documents:[/bold]")
-        for doc_type in config['documents']:
-            if config['documents'][doc_type]['enabled']:
-                console.print(f"  - {doc_type}")
+        # Selective generation - generate specific documents
+        console.print("\n[bold cyan]Selective Document Generation[/bold cyan]")
+        console.print("Choose specific documents to generate:")
         
-        selected = input("\nEnter document types (comma-separated): ").strip()
-        console.print(f"[yellow]Selective generation not yet implemented[/yellow]")
-        # When implemented, it will use the selected model provider
-        # run_orchestrator(config_path, model_provider, documents=selected.split(','))
+        # Show available document types
+        console.print("\n[bold]Available document types:[/bold]")
+        document_types = [
+            ("BRD", "Business Requirements Document"),
+            ("PRD", "Product Requirements Document"), 
+            ("FRD", "Functional Requirements Document"),
+            ("NFRD", "Non-Functional Requirements Document"),
+            ("DRD", "Data Requirements Document"),
+            ("DB_SCHEMA", "Database Schema Document"),
+            ("API_SPEC", "API Specifications (OpenAPI)"),
+            ("TRD", "Technical Requirements Document"),
+            ("TEST_PLAN", "Test Plan Document"),
+            ("RTM", "Requirements Traceability Matrix"),
+            ("UIUX_SPEC", "UI/UX Specifications Document"),
+            ("DEV_PLAN", "Development Plan Document")
+        ]
+        
+        for i, (code, description) in enumerate(document_types, 1):
+            console.print(f"  {i:2d}. {code:10} - {description}")
+        
+        console.print("\nEnter document types (comma-separated, e.g., 'BRD,PRD,API_SPEC' or numbers '1,2,7'):")
+        selected_input = input("> ").strip()
+        
+        if not selected_input:
+            console.print("[yellow]No documents selected. Cancelled.[/yellow]")
+            return 0
+        
+        # Parse input - support both codes and numbers
+        selected_docs = []
+        for item in selected_input.split(','):
+            item = item.strip().upper()
+            
+            # Check if it's a number (1-based index)
+            if item.isdigit():
+                index = int(item) - 1
+                if 0 <= index < len(document_types):
+                    selected_docs.append(document_types[index][0])
+                else:
+                    console.print(f"[yellow]Warning: Invalid number '{item}'. Valid range is 1-{len(document_types)}[/yellow]")
+            else:
+                # Check if it's a valid document code
+                valid_codes = [code for code, _ in document_types]
+                if item in valid_codes:
+                    selected_docs.append(item)
+                else:
+                    console.print(f"[yellow]Warning: Invalid document type '{item}'. Valid types: {', '.join(valid_codes)}[/yellow]")
+        
+        if not selected_docs:
+            console.print("[red]No valid documents selected. Cancelled.[/red]")
+            return 0
+        
+        console.print(f"\n[green]Selected documents: {', '.join(selected_docs)}[/green]")
+        
+        confirm = Prompt.ask("Proceed with selective generation?", choices=["y", "n"], default="y")
+        if confirm.lower() != "y":
+            console.print("[yellow]Selective generation cancelled.[/yellow]")
+            return 0
+        
+        # Start monitor if enabled
+        if config['monitoring']['enabled']:
+            run_monitor(config['paths']['output_dir'])
+
+        # Launch dashboard in browser
+        launch_dashboard()
+        
+        # Run orchestrator with selected documents
+        run_orchestrator_selective(config_path, model_provider, selected_docs)
         
     elif choice == "4":
         # Run validation

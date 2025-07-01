@@ -1025,7 +1025,7 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
 
         if needs_loading:
             console.print("[dim]Loading existing documents from disk...[/dim]")
-            await self.load_existing_documents()
+            # Document loading is handled in gather_context() method when needed
 
     async def generate_document(self, doc_type: DocumentType, model_provider: str = "openai") -> str:
         """Generate a document using LLM"""
@@ -1687,7 +1687,7 @@ This log tracks the batch processing of code files for requirements generation.
                 console.print(f"  [red]- {error}[/red]")
             return False
 
-    async def validate_and_repair_document(self, doc_type: DocumentType, max_repair_attempts: int = 3) -> bool:
+    async def validate_and_repair_document(self, doc_type: DocumentType, max_repair_attempts: int = 5) -> bool:
         """Validate document and automatically repair common issues"""
         doc = self.documents[doc_type]
 
@@ -1748,7 +1748,7 @@ This log tracks the batch processing of code files for requirements generation.
         errors = []
 
         # Check 1: YAML frontmatter validation
-        yaml_errors = self._validate_yaml_frontmatter(doc.content)
+        yaml_errors = self._validate_yaml_frontmatter(doc.content, doc_type)
         errors.extend(yaml_errors)
 
         # Check 2: Content structure validation
@@ -1761,7 +1761,7 @@ This log tracks the batch processing of code files for requirements generation.
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
 
-    def _validate_yaml_frontmatter(self, content: str) -> List[str]:
+    def _validate_yaml_frontmatter(self, content: str, doc_type: DocumentType) -> List[str]:
         """Validate YAML frontmatter structure"""
         errors = []
 
@@ -1788,7 +1788,9 @@ This log tracks the batch processing of code files for requirements generation.
 
         if frontmatter_end == -1:
             errors.append("Missing YAML frontmatter end marker (---)")
-            return errors
+            # Don't return early - this will be fixed by repair logic
+            # Set a reasonable end position for validation
+            frontmatter_end = min(20, len(lines) - 1)
 
         # Extract and validate YAML
         yaml_content = '\n'.join(lines[1:frontmatter_end])
@@ -1802,8 +1804,12 @@ This log tracks the batch processing of code files for requirements generation.
                 print(f"[DEBUG] Raw YAML content:\n{yaml_content}")
                 return errors
 
-            # Check required fields
-            required_fields = ['id', 'title', 'version', 'dependencies']
+            # Check required fields (make dependencies optional for API specs)
+            if doc_type == DocumentType.API_SPEC:
+                required_fields = ['id', 'title', 'version']
+            else:
+                required_fields = ['id', 'title', 'version', 'dependencies']
+                
             for field in required_fields:
                 if field not in metadata:
                     errors.append(f"Missing required field in YAML frontmatter: {field}")
@@ -1955,12 +1961,29 @@ This log tracks the batch processing of code files for requirements generation.
         """Add missing YAML frontmatter end marker"""
         lines = content.split('\n')
         if lines[0] == '---':
-            # Find where content starts (after YAML)
+            # Look for existing end marker first
+            has_end_marker = False
             for i, line in enumerate(lines[1:], 1):
-                if line.strip() and not line.startswith(' ') and ':' not in line:
-                    # Insert end marker before content
-                    lines.insert(i, '---')
+                if line.strip() == '---':
+                    has_end_marker = True
                     break
+            
+            if not has_end_marker:
+                # Find first line that looks like markdown content (starts with #)
+                # or if no markdown headers found, insert after first 10 lines of YAML-like content
+                insert_position = None
+                for i, line in enumerate(lines[1:], 1):
+                    if line.strip().startswith('#') or line.strip().startswith('openapi:') or line.strip().startswith('```'):
+                        insert_position = i
+                        break
+                
+                # If no clear content found, insert after reasonable YAML section (max 20 lines)
+                if insert_position is None:
+                    insert_position = min(20, len(lines))
+                
+                # Insert end marker
+                lines.insert(insert_position, '---')
+        
         return '\n'.join(lines)
 
     def _repair_multiple_yaml_blocks(self, content: str) -> str:
@@ -2473,10 +2496,10 @@ This log tracks the batch processing of code files for requirements generation.
                 "## Functional Requirements",
                 "",
                 "### Core Features",
-                "- Customer management",
-                "- Payment processing",
-                "- Load booking and tracking",
-                "- Invoice generation",
+                "- Tenant management and configuration",
+                "- Data migration processing",
+                "- Migration job scheduling and tracking",
+                "- Migration report generation",
                 "",
                 "## Acceptance Criteria",
                 "",
@@ -2509,8 +2532,8 @@ This log tracks the batch processing of code files for requirements generation.
                 "",
                 "### Dashboard Views",
                 "- Main dashboard with key metrics",
-                "- Customer management interface",
-                "- Payment processing screens",
+                "- Tenant management interface",
+                "- Data migration processing screens",
                 "",
                 "### User Experience Guidelines",
                 "- Responsive design for mobile and desktop",
@@ -2527,13 +2550,13 @@ This log tracks the batch processing of code files for requirements generation.
                 "",
                 "## Endpoints",
                 "",
-                "### Customer Management",
-                "- GET /api/customers",
-                "- POST /api/customers",
+                "### Tenant Management",
+                "- GET /api/tenants",
+                "- POST /api/tenants",
                 "",
-                "### Payment Processing",
-                "- POST /api/payments",
-                "- GET /api/payments/{id}",
+                "### Migration Processing",
+                "- POST /api/migrations",
+                "- GET /api/migrations/{id}",
                 ""
             ]
         elif doc_type == DocumentType.DEV_PLAN and "development plan" in error.lower():
@@ -2546,10 +2569,10 @@ This log tracks the batch processing of code files for requirements generation.
                 "## Feature Analysis",
                 "",
                 "### Core Features",
-                "- Customer management system",
-                "- Payment processing platform",
-                "- Load booking and tracking",
-                "- Invoice generation and reporting",
+                "- Tenant management system",
+                "- Data migration processing platform",
+                "- Migration job scheduling and tracking",
+                "- Migration report generation and monitoring",
                 "",
                 "## Development Phases",
                 "",
@@ -2559,9 +2582,9 @@ This log tracks the batch processing of code files for requirements generation.
                 "- Basic API endpoints",
                 "",
                 "### Phase 2: Core Features",
-                "- Customer onboarding",
-                "- Payment processing",
-                "- Load management",
+                "- Tenant onboarding and configuration",
+                "- Data migration processing",
+                "- Migration job management",
                 "",
                 "## Feature Branch Strategy",
                 "",
@@ -2677,10 +2700,30 @@ This log tracks the batch processing of code files for requirements generation.
                 "id": "API_SPEC_COMMON",
                 "content": self._generate_common_patterns(content)
             },
-            "api_spec_endpoints.md": {
-                "title": "API Endpoints",
-                "id": "API_SPEC_ENDPOINTS",
-                "content": self._extract_endpoints_section(content)
+            "api_spec_auth.md": {
+                "title": "API Authentication & Security Endpoints",
+                "id": "API_SPEC_AUTH",
+                "content": self._extract_auth_endpoints(content)
+            },
+            "api_spec_field_mapping.md": {
+                "title": "API Field Mapping Endpoints",
+                "id": "API_SPEC_FIELD_MAPPING",
+                "content": self._extract_field_mapping_endpoints(content)
+            },
+            "api_spec_migration_jobs.md": {
+                "title": "API Migration Job Management Endpoints",
+                "id": "API_SPEC_MIGRATION_JOBS",
+                "content": self._extract_migration_jobs_endpoints(content)
+            },
+            "api_spec_process_history.md": {
+                "title": "API Process History & Status Endpoints",
+                "id": "API_SPEC_PROCESS_HISTORY",
+                "content": self._extract_process_history_endpoints(content)
+            },
+            "api_spec_system_integration.md": {
+                "title": "API System Integration Endpoints",
+                "id": "API_SPEC_SYSTEM_INTEGRATION",
+                "content": self._extract_system_integration_endpoints(content)
             }
         }
 
@@ -2750,15 +2793,19 @@ The complete API specification is organized into the following documents:
 - **[Error Handling](./api_spec_errors.md)** - Standardized error response patterns
 - **[Common Patterns](./api_spec_common.md)** - Shared parameters, headers, and response structures
 
-### API Endpoints
-- **[API Endpoints](./api_spec_endpoints.md)** - Complete API endpoint specifications
+### Migration System API Endpoints
+- **[Authentication & Security](./api_spec_auth.md)** - Authentication, authorization, and security API endpoints
+- **[Field Mapping](./api_spec_field_mapping.md)** - Field mapping configuration and validation API endpoints
+- **[Migration Jobs](./api_spec_migration_jobs.md)** - Migration job management and control API endpoints
+- **[Process History & Status](./api_spec_process_history.md)** - Process tracking, history, and status API endpoints
+- **[System Integration](./api_spec_system_integration.md)** - LSO and ContractLogix integration API endpoints
 
 ## Navigation
 
 - [← Back to Requirements](../Requirements/)
 - [Security Schemes →](./api_spec_security.md)
 - [Common Components →](./api_spec_components.md)
-- [API Endpoints →](./api_spec_endpoints.md)
+- [Authentication & Security →](./api_spec_auth.md)
 """
 
     def _extract_security_section(self, content):
@@ -3067,14 +3114,34 @@ This document contains the complete API endpoint specifications for the {self.pr
                 "content": self._extract_interactions_section(content)
             },
             "uiux_spec_dashboard.md": {
-                "title": "Dashboard and Analytics Interface Design",
+                "title": "Dashboard Views and Analytics Interface Design",
                 "id": "UIUX_SPEC_DASHBOARD",
                 "content": self._extract_dashboard_views(content)
             },
-            "uiux_spec_views.md": {
-                "title": "Application Views and Interface Designs",
-                "id": "UIUX_SPEC_VIEWS",
-                "content": self._extract_application_views(content)
+            "uiux_spec_auth_security.md": {
+                "title": "Authentication & Security Interface Design",
+                "id": "UIUX_SPEC_AUTH_SECURITY",
+                "content": self._extract_auth_security_views(content)
+            },
+            "uiux_spec_field_mapping.md": {
+                "title": "Field Mapping Interface Design",
+                "id": "UIUX_SPEC_FIELD_MAPPING",
+                "content": self._extract_field_mapping_views(content)
+            },
+            "uiux_spec_migration_jobs.md": {
+                "title": "Migration Job Management Interface Design",
+                "id": "UIUX_SPEC_MIGRATION_JOBS",
+                "content": self._extract_migration_jobs_views(content)
+            },
+            "uiux_spec_process_history.md": {
+                "title": "Process History & Status Interface Design",
+                "id": "UIUX_SPEC_PROCESS_HISTORY",
+                "content": self._extract_process_history_views(content)
+            },
+            "uiux_spec_system_integration.md": {
+                "title": "System Integration Interface Design",
+                "id": "UIUX_SPEC_SYSTEM_INTEGRATION",
+                "content": self._extract_system_integration_views(content)
             }
         }
 
@@ -3134,13 +3201,19 @@ The complete UXDMD specification is organized into the following documents:
 - **[Component Library](./uiux_spec_components.md)** - Design system integration and component specifications
 - **[Interaction Flows](./uiux_spec_interactions.md)** - User journeys, state charts, and sequence diagrams
 
-### Application Interface Specifications
+### Migration System Interface Specifications
 
-#### Dashboard and Analytics
+#### Core Application Views
 - **[Dashboard Views](./uiux_spec_dashboard.md)** - Main dashboard and analytics interface specifications
+- **[Authentication & Security](./uiux_spec_auth_security.md)** - Login, user management, and security interface specifications
 
-#### Application Views
-- **[Application Views](./uiux_spec_views.md)** - Complete application interface specifications and view definitions
+#### Migration Management Views
+- **[Field Mapping Interface](./uiux_spec_field_mapping.md)** - Field mapping configuration and validation interface specifications
+- **[Migration Job Management](./uiux_spec_migration_jobs.md)** - Migration job creation, monitoring, and control interface specifications
+- **[Process History & Status](./uiux_spec_process_history.md)** - Process tracking, history, and status monitoring interface specifications
+
+#### System Integration Views
+- **[System Integration](./uiux_spec_system_integration.md)** - LSO and ContractLogix integration interface specifications
 
 ## UXDMD Structure Overview
 
@@ -3169,11 +3242,11 @@ Each view specification follows the standardized UXDMD format:
 | Document | Requirements Covered | View-IDs | API Endpoints |
 |----------|---------------------|----------|---------------|
 | [Dashboard Views](./uiux_spec_dashboard.md) | FRD-3.1.3, PRD-3.1 | view-dashboard-* | /dashboard/*, /reports/* |
-| [Customer Management](./uiux_spec_customer_mgt.md) | FRD-3.1.1, PRD-3.2 | view-customer-* | /customers/* |
-| [Payment Processing](./uiux_spec_payment_proc.md) | FRD-3.1.2, PRD-3.3 | view-payment-* | /payments/* |
-| [Load Management](./uiux_spec_load_mgt.md) | FRD-3.2.1, FRD-3.2.2, PRD-3.4 | view-load-* | /loads/*, /loads/*/track |
-| [Invoice Processing](./uiux_spec_invoice_proc.md) | FRD-3.3.1, FRD-3.3.2, PRD-3.5 | view-invoice-* | /invoices/*, /reports/financial |
-| [Carrier Management](./uiux_spec_carrier_mgt.md) | FRD-3.4.1, FRD-3.4.2, PRD-3.6 | view-carrier-* | /carrier/* |
+| [Authentication & Security](./uiux_spec_auth_security.md) | FRD-3.1.1, PRD-3.2 | view-auth-* | /auth/*, /security/* |
+| [Field Mapping Interface](./uiux_spec_field_mapping.md) | FRD-3.1.2, PRD-3.3 | view-mapping-* | /mappings/*, /tenant/*/mappings |
+| [Migration Job Management](./uiux_spec_migration_jobs.md) | FRD-3.2.1, FRD-3.2.2, PRD-3.4 | view-migration-* | /migrations/*, /jobs/*/status |
+| [Process History & Status](./uiux_spec_process_history.md) | FRD-3.3.1, FRD-3.3.2, PRD-3.5 | view-process-* | /processes/*, /history/* |
+| [System Integration](./uiux_spec_system_integration.md) | FRD-3.4.1, FRD-3.4.2, PRD-3.6 | view-integration-* | /lso/*, /clx/* |
 
 ## Implementation Notes
 
@@ -3195,19 +3268,24 @@ This document defines the site structure, navigation patterns, and role-based ac
 ```yaml
 /
 ├── /dashboard (authenticated)
-├── /customers (role: admin, sales)
-│   ├── /customers/list
-│   ├── /customers/:id
-│   └── /customers/new
-├── /payments (role: admin, finance)
-├── /loads (role: admin, operations)
-│   ├── /loads/list
-│   ├── /loads/book
-│   └── /loads/:id/track
-├── /invoices (role: admin, finance)
-├── /carriers (role: admin, operations)
-│   ├── /carriers/register
-│   └── /carriers/portal
+├── /auth (public)
+│   ├── /auth/login
+│   ├── /auth/logout
+│   └── /auth/mfa
+├── /tenants (role: admin, operator)
+│   ├── /tenants/list
+│   ├── /tenants/:id/config
+│   └── /tenants/:id/mappings
+├── /migrations (role: admin, operator)
+│   ├── /migrations/active
+│   ├── /migrations/new
+│   └── /migrations/:id/progress
+├── /processes (role: admin, operator)
+│   ├── /processes/history
+│   └── /processes/:id/details
+├── /integrations (role: admin)
+│   ├── /integrations/lso
+│   └── /integrations/clx
 └── /reports (role: admin, finance)
 ```
 
@@ -3262,16 +3340,16 @@ This document defines the design system components and their integration pattern
 ### Form Components
 | Component | Usage | API Binding | Validation |
 |-----------|-------|-------------|------------|
-| `CustomerForm` | Customer registration | POST /customers | Zod schema validation |
-| `PaymentForm` | Payment processing | POST /payments | PCI DSS compliant |
-| `LoadBookingForm` | Load booking | POST /loads | Business rule validation |
+| `TenantConfigForm` | Tenant configuration | POST /tenants/:id/config | Zod schema validation |
+| `FieldMappingForm` | Field mapping setup | POST /tenants/:id/mappings | Mapping rule validation |
+| `MigrationJobForm` | Migration job creation | POST /migrations | Business rule validation |
 
 ### Data Display Components
 | Component | Usage | Data Source | Caching |
 |-----------|-------|-------------|---------|
-| `CustomerTable` | Customer listing | GET /customers | 60s TTL |
-| `LoadTracker` | Real-time tracking | GET /loads/:id/track | 5s polling |
-| `InvoiceList` | Invoice management | GET /invoices | 30s TTL |
+| `TenantTable` | Tenant listing | GET /tenants | 60s TTL |
+| `MigrationTracker` | Real-time progress | GET /migrations/:id/progress | 5s polling |
+| `ProcessHistoryList` | Process history | GET /processes/history | 30s TTL |
 
 ### Layout Components
 | Component | Usage | Responsive | Accessibility |
@@ -3351,7 +3429,7 @@ This document defines the interaction patterns, user flows, and state management
 
 ## Primary User Flows
 
-### Customer Onboarding Flow
+### Tenant Onboarding Flow
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -3359,18 +3437,18 @@ sequenceDiagram
     participant A as API
     participant D as Database
 
-    U->>F: Navigate to /customers/new
-    F->>F: Render CustomerForm
+    U->>F: Navigate to /tenants/new
+    F->>F: Render TenantConfigForm
     U->>F: Fill form and submit
-    F->>A: POST /customers
+    F->>A: POST /tenants
     A->>D: Validate and store
-    D->>A: Return customer ID
+    D->>A: Return tenant ID
     A->>F: 201 Created response
-    F->>F: Navigate to /customers/:id
+    F->>F: Navigate to /tenants/:id
     F->>U: Show success message
 ```
 
-### Payment Processing Flow
+### Migration Processing Flow
 ```mermaid
 stateDiagram-v2
     [*] --> FormEntry
@@ -3383,35 +3461,35 @@ stateDiagram-v2
     Failed --> FormEntry: Retry
 ```
 
-### Load Tracking Flow
+### Migration Job Tracking Flow
 ```mermaid
 journey
-    title Load Tracking User Journey
-    section Booking
-      Book Load: 5: Customer
-      Receive Confirmation: 4: Customer
+    title Migration Job Tracking User Journey
+    section Job Creation
+      Create Migration Job: 5: User
+      Receive Confirmation: 4: User
     section Tracking
-      Check Status: 3: Customer
-      View Location: 4: Customer
-      Get Updates: 5: Customer
-    section Delivery
-      Confirm Delivery: 5: Customer
-      Rate Service: 3: Customer
+      Check Status: 3: User
+      View Progress: 4: User
+      Get Updates: 5: User
+    section Completion
+      Confirm Completion: 5: User
+      Review Results: 3: User
 ```
 
 ## State Management Patterns
 
 ### Global State Structure
 ```typescript
-interface AppState {
+interface AppState {{
   auth: AuthState;
-  customers: CustomersState;
-  loads: LoadsState;
-  payments: PaymentsState;
-  invoices: InvoicesState;
-  carriers: CarriersState;
+  tenants: TenantsState;
+  migrations: MigrationsState;
+  mappings: FieldMappingsState;
+  processes: ProcessesState;
+  integrations: IntegrationsState;
   ui: UIState;
-}
+}}
 ```
 
 ### Component State Patterns
@@ -3497,7 +3575,7 @@ This document defines the dashboard and analytics view specifications following 
 |---------|--------|
 | **Purpose** | Provide real-time overview of key business metrics and KPIs |
 | **Layout** | Grid layout with metric cards, charts, and quick actions |
-| **Displayed Fields** | Total Revenue • Active Loads • Customer Count • Payment Status |
+| **Displayed Fields** | Active Migrations • Migration Progress • Tenant Count • Job Status |
 | **Primary Actions** | Refresh Data • Export Report • View Details |
 | **Secondary Actions** | Filter by date range, drill-down to specific metrics |
 | **State Behavior** | Loading skeleton cards, empty state with onboarding |
@@ -3513,7 +3591,7 @@ This document defines the dashboard and analytics view specifications following 
 
 - [← Back to Master Document](./uiux_spec.md)
 - [← Interaction Flows](./uiux_spec_interactions.md)
-- [Customer Management →](./uiux_spec_customer_mgt.md)
+- [Tenant Management →](./uiux_spec_tenant_mgt.md)
 """
 
     def _extract_application_views(self, content):
@@ -3599,6 +3677,335 @@ This document contains the complete application interface specifications for the
 - [Information Architecture →](./uiux_spec_architecture.md)
 """
 
+    def _extract_auth_security_views(self, content):
+        """Extract authentication and security view specifications"""
+        return f"""# Authentication & Security Interface Design
+
+This document contains the authentication and security interface specifications for the {self.project_name}.
+
+## Authentication Views
+
+### Login Interface
+- Username/password authentication
+- Multi-factor authentication options
+- Password recovery flows
+- Session management
+
+### User Management Interface
+- User profile management
+- Role-based access control
+- Permission management
+- Security settings
+
+## Security Features
+
+### Access Control
+- Role-based permissions
+- Feature-level security
+- Data access restrictions
+
+### Audit Trail
+- User activity logging
+- Security event monitoring
+- Compliance reporting
+
+## Navigation
+
+- [← Back to Master Document](./uiux_spec.md)
+- [Dashboard Views →](./uiux_spec_dashboard.md)
+"""
+
+    def _extract_field_mapping_views(self, content):
+        """Extract field mapping interface specifications"""
+        return f"""# Field Mapping Interface Design
+
+This document contains the field mapping interface specifications for the {self.project_name}.
+
+## Field Mapping Views
+
+### Mapping Configuration Interface
+- Source system field selection
+- Target system field mapping
+- Data transformation rules
+- Validation configuration
+
+### Mapping Validation Interface
+- Field compatibility checking
+- Data type validation
+- Business rule validation
+- Error reporting and resolution
+
+## Data Transformation
+
+### Transformation Rules
+- Field-level transformations
+- Conditional mapping logic
+- Data formatting rules
+- Custom transformation functions
+
+## Navigation
+
+- [← Back to Master Document](./uiux_spec.md)
+- [Authentication & Security →](./uiux_spec_auth_security.md)
+"""
+
+    def _extract_migration_jobs_views(self, content):
+        """Extract migration job management interface specifications"""
+        return f"""# Migration Job Management Interface Design
+
+This document contains the migration job management interface specifications for the {self.project_name}.
+
+## Migration Job Views
+
+### Job Creation Interface
+- Migration job configuration
+- Source and target selection
+- Schedule and timing options
+- Notification settings
+
+### Job Monitoring Interface
+- Real-time job status
+- Progress tracking
+- Performance metrics
+- Error monitoring and alerts
+
+### Job Control Interface
+- Start/stop/pause controls
+- Job modification options
+- Rollback capabilities
+- Recovery procedures
+
+## Navigation
+
+- [← Back to Master Document](./uiux_spec.md)
+- [Field Mapping Interface →](./uiux_spec_field_mapping.md)
+"""
+
+    def _extract_process_history_views(self, content):
+        """Extract process history and status interface specifications"""
+        return f"""# Process History & Status Interface Design
+
+This document contains the process history and status interface specifications for the {self.project_name}.
+
+## Process History Views
+
+### History Dashboard
+- Process execution timeline
+- Status tracking and monitoring
+- Performance analytics
+- Trend analysis
+
+### Detailed Process View
+- Individual process details
+- Step-by-step execution log
+- Error and warning details
+- Resource utilization metrics
+
+### Reporting Interface
+- Custom report generation
+- Export capabilities
+- Historical data analysis
+- Compliance reporting
+
+## Navigation
+
+- [← Back to Master Document](./uiux_spec.md)
+- [Migration Job Management →](./uiux_spec_migration_jobs.md)
+"""
+
+    def _extract_system_integration_views(self, content):
+        """Extract system integration interface specifications"""
+        return f"""# System Integration Interface Design
+
+This document contains the system integration interface specifications for the {self.project_name}.
+
+## System Integration Views
+
+### LSO Integration Interface
+- LSO system connection management
+- Data synchronization controls
+- Integration monitoring
+- Configuration management
+
+### ContractLogix Integration Interface
+- ContractLogix system connection
+- Data mapping and transformation
+- Integration testing tools
+- Deployment management
+
+### Integration Dashboard
+- Overall system health
+- Connection status monitoring
+- Data flow visualization
+- Performance metrics
+
+## Navigation
+
+- [← Back to Master Document](./uiux_spec.md)
+- [Process History & Status →](./uiux_spec_process_history.md)
+"""
+
+    def _extract_auth_endpoints(self, content):
+        """Extract authentication and security API endpoints"""
+        return f"""# API Authentication & Security Endpoints
+
+This document contains the authentication and security API endpoint specifications for the {self.project_name}.
+
+## Authentication Endpoints
+
+### User Authentication
+- POST /auth/login - User login
+- POST /auth/logout - User logout
+- POST /auth/refresh - Token refresh
+- POST /auth/mfa/verify - Multi-factor authentication
+
+### User Management
+- GET /users - List users
+- POST /users - Create user
+- GET /users/{{id}} - Get user details
+- PUT /users/{{id}} - Update user
+- DELETE /users/{{id}} - Delete user
+
+## Security Endpoints
+
+### Access Control
+- GET /roles - List roles
+- POST /roles - Create role
+- GET /permissions - List permissions
+- POST /users/{{id}}/roles - Assign role to user
+
+## Navigation
+
+- [← Back to Master Document](./api_spec.md)
+- [Common Components →](./api_spec_components.md)
+"""
+
+    def _extract_field_mapping_endpoints(self, content):
+        """Extract field mapping API endpoints"""
+        return f"""# API Field Mapping Endpoints
+
+This document contains the field mapping API endpoint specifications for the {self.project_name}.
+
+## Field Mapping Endpoints
+
+### Mapping Configuration
+- GET /mappings - List field mappings
+- POST /mappings - Create field mapping
+- GET /mappings/{{id}} - Get mapping details
+- PUT /mappings/{{id}} - Update mapping
+- DELETE /mappings/{{id}} - Delete mapping
+
+### Mapping Validation
+- POST /mappings/validate - Validate field mapping
+- GET /mappings/{{id}}/compatibility - Check field compatibility
+- POST /mappings/{{id}}/test - Test mapping transformation
+
+## Data Transformation
+
+### Transformation Rules
+- GET /transformations - List transformation rules
+- POST /transformations - Create transformation rule
+- GET /transformations/{{id}} - Get transformation details
+
+## Navigation
+
+- [← Back to Master Document](./api_spec.md)
+- [Authentication & Security →](./api_spec_auth.md)
+"""
+
+    def _extract_migration_jobs_endpoints(self, content):
+        """Extract migration job management API endpoints"""
+        return f"""# API Migration Job Management Endpoints
+
+This document contains the migration job management API endpoint specifications for the {self.project_name}.
+
+## Migration Job Endpoints
+
+### Job Management
+- GET /migrations - List migration jobs
+- POST /migrations - Create migration job
+- GET /migrations/{{id}} - Get job details
+- PUT /migrations/{{id}} - Update job
+- DELETE /migrations/{{id}} - Delete job
+
+### Job Control
+- POST /migrations/{{id}}/start - Start migration job
+- POST /migrations/{{id}}/stop - Stop migration job
+- POST /migrations/{{id}}/pause - Pause migration job
+- POST /migrations/{{id}}/resume - Resume migration job
+
+### Job Status
+- GET /migrations/{{id}}/status - Get job status
+- GET /migrations/{{id}}/progress - Get job progress
+- GET /migrations/{{id}}/logs - Get job logs
+
+## Navigation
+
+- [← Back to Master Document](./api_spec.md)
+- [Field Mapping →](./api_spec_field_mapping.md)
+"""
+
+    def _extract_process_history_endpoints(self, content):
+        """Extract process history and status API endpoints"""
+        return f"""# API Process History & Status Endpoints
+
+This document contains the process history and status API endpoint specifications for the {self.project_name}.
+
+## Process History Endpoints
+
+### History Management
+- GET /processes - List all processes
+- GET /processes/{{id}} - Get process details
+- GET /processes/{{id}}/history - Get process history
+- GET /processes/{{id}}/steps - Get process steps
+
+### Status Monitoring
+- GET /processes/{{id}}/status - Get current status
+- GET /processes/{{id}}/metrics - Get performance metrics
+- GET /processes/{{id}}/errors - Get error details
+
+### Reporting
+- GET /reports/processes - Generate process reports
+- POST /reports/export - Export process data
+- GET /analytics/processes - Get process analytics
+
+## Navigation
+
+- [← Back to Master Document](./api_spec.md)
+- [Migration Jobs →](./api_spec_migration_jobs.md)
+"""
+
+    def _extract_system_integration_endpoints(self, content):
+        """Extract system integration API endpoints"""
+        return f"""# API System Integration Endpoints
+
+This document contains the system integration API endpoint specifications for the {self.project_name}.
+
+## System Integration Endpoints
+
+### LSO Integration
+- GET /integrations/lso - LSO integration status
+- POST /integrations/lso/connect - Connect to LSO system
+- POST /integrations/lso/sync - Synchronize with LSO
+- GET /integrations/lso/config - Get LSO configuration
+
+### ContractLogix Integration
+- GET /integrations/clx - ContractLogix integration status
+- POST /integrations/clx/connect - Connect to ContractLogix
+- POST /integrations/clx/sync - Synchronize with ContractLogix  
+- GET /integrations/clx/config - Get ContractLogix configuration
+
+### Integration Monitoring
+- GET /integrations/health - Overall integration health
+- GET /integrations/status - All system status
+- GET /integrations/metrics - Integration performance metrics
+
+## Navigation
+
+- [← Back to Master Document](./api_spec.md)
+- [Process History & Status →](./api_spec_process_history.md)
+"""
+
     async def save_status_file(self, doc_type: DocumentType):
         """Save status file for resume functionality"""
         doc = self.documents[doc_type]
@@ -3624,6 +4031,103 @@ This document contains the complete application interface specifications for the
         except Exception as e:
             logger.error(f"Failed to save status file: {e}")
 
+    async def run(self, selected_documents: Optional[List[DocumentType]] = None):
+        """
+        Run the requirements generation process
+        
+        Args:
+            selected_documents: List of specific document types to generate. If None, generates all documents.
+        """
+        console.print(f"[bold cyan]Starting Requirements Generation for {self.project_name}[/bold cyan]")
+        
+        if selected_documents:
+            console.print(f"[dim]Generating selected documents: {', '.join([doc.value for doc in selected_documents])}[/dim]")
+            documents_to_generate = selected_documents
+        else:
+            console.print("[dim]Generating all documents[/dim]")
+            documents_to_generate = list(DocumentType)
+        
+        # Get generation order for all documents, then filter if needed
+        full_order = self.get_generation_order()
+        if selected_documents:
+            # Filter to only the selected documents but maintain dependency order
+            generation_order = [doc for doc in full_order if doc in selected_documents]
+        else:
+            generation_order = full_order
+        
+        console.print(f"[dim]Generation order: {', '.join([doc.value for doc in generation_order])}[/dim]")
+        
+        success_count = 0
+        total_count = len(generation_order)
+        
+        for i, doc_type in enumerate(generation_order, 1):
+            console.print(f"\n[bold]Step {i}/{total_count}: Generating {doc_type.value}[/bold]")
+            
+            try:
+                # Generate the document
+                await self.generate_document(doc_type, self.model_provider)
+                
+                # Validate and repair if needed
+                validation_success = await self.validate_and_repair_document(doc_type)
+                
+                if validation_success:
+                    console.print(f"[green]SUCCESS: {doc_type.value} generated and validated successfully[/green]")
+                    success_count += 1
+                else:
+                    console.print(f"[yellow]WARNING: {doc_type.value} generated but failed validation[/yellow]")
+                    # Show validation status for debugging
+                    doc = self.documents[doc_type]
+                    if hasattr(doc, 'validation_errors') and doc.validation_errors:
+                        console.print(f"[dim]Validation errors: {', '.join(doc.validation_errors[:3])}{'...' if len(doc.validation_errors) > 3 else ''}[/dim]")
+                    
+            except Exception as e:
+                console.print(f"[red]ERROR: Failed to generate {doc_type.value}: {str(e)}[/red]")
+                logger.error(f"Failed to generate {doc_type.value}: {str(e)}", exc_info=True)
+        
+        # Print final summary
+        console.print(f"\n[bold]Generation Complete[/bold]")
+        console.print(f"[green]Successfully generated: {success_count}/{total_count} documents[/green]")
+        
+        if success_count < total_count:
+            console.print(f"[yellow]Failed or incomplete: {total_count - success_count} documents[/yellow]")
+        
+        # Print status summary
+        self.print_status_summary()
+        
+        return success_count == total_count
+
+    async def resume(self):
+        """
+        Resume generation from the last checkpoint
+        """
+        console.print(f"[bold cyan]Resuming Requirements Generation for {self.project_name}[/bold cyan]")
+        
+        # Load existing documents to determine current state
+        await self._ensure_documents_loaded()
+        
+        # Find documents that need to be generated
+        full_order = self.get_generation_order()
+        pending_documents = []
+        
+        for doc_type in full_order:
+            doc = self.documents[doc_type]
+            if doc.status in [DocumentStatus.NOT_STARTED, DocumentStatus.FAILED]:
+                pending_documents.append(doc_type)
+            elif doc.status == DocumentStatus.IN_PROGRESS:
+                # Include in-progress documents for retry
+                pending_documents.append(doc_type)
+                console.print(f"[yellow]Found in-progress document: {doc_type.value}[/yellow]")
+        
+        if not pending_documents:
+            console.print("[green]All documents are already completed![/green]")
+            self.print_status_summary()
+            return True
+        
+        console.print(f"[dim]Resuming with {len(pending_documents)} remaining documents: {', '.join([doc.value for doc in pending_documents])}[/dim]")
+        
+        # Continue generation with remaining documents
+        return await self.run(selected_documents=pending_documents)
+
     def print_status_summary(self):
         """Print a summary of all document statuses"""
         table = Table(title=f"Requirements Generation Status - {self.project_name}")
@@ -3636,7 +4140,7 @@ This document contains the complete application interface specifications for the
             
             # Status with color coding
             if doc.status == DocumentStatus.VALIDATED:
-                status = "[green]✓ Validated[/green]"
+                status = "[green]VALIDATED[/green]"
             elif doc.status == DocumentStatus.GENERATED:
                 status = "[yellow]Generated[/yellow]"
             elif doc.status == DocumentStatus.IN_PROGRESS:
@@ -3657,3 +4161,69 @@ This document contains the complete application interface specifications for the
 
         console.print(table)
 
+
+def main():
+    """Main entry point for command-line usage"""
+    import argparse
+    import sys
+    
+    parser = argparse.ArgumentParser(description='Requirements Generation Orchestrator')
+    parser.add_argument('--config', type=str, required=True, help='Path to config.yaml file')
+    parser.add_argument('--model', type=str, default='openai', choices=['openai', 'anthropic', 'gemini'], 
+                       help='LLM provider to use')
+    parser.add_argument('--documents', type=str, help='Comma-separated list of document types to generate')
+    parser.add_argument('--resume', action='store_true', help='Resume from last checkpoint')
+    
+    args = parser.parse_args()
+    
+    try:
+        # Initialize orchestrator
+        config_path = Path(args.config)
+        if not config_path.exists():
+            print(f"Error: Config file not found: {config_path}")
+            sys.exit(1)
+            
+        # Load config to get project settings
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+        
+        project_name = config['project']['name']
+        base_path = Path(config['paths']['base_dir'])
+        
+        orchestrator = RequirementsOrchestrator(
+            project_name=project_name,
+            base_path=base_path,
+            config_path=config_path,
+            model_provider=args.model
+        )
+        
+        # Parse document types if specified
+        selected_documents = None
+        if args.documents:
+            doc_names = [doc.strip().upper() for doc in args.documents.split(',')]
+            selected_documents = []
+            for doc_name in doc_names:
+                try:
+                    doc_type = DocumentType[doc_name]
+                    selected_documents.append(doc_type)
+                except KeyError:
+                    print(f"Warning: Unknown document type '{doc_name}'. Available types: {[dt.name for dt in DocumentType]}")
+        
+        # Run orchestrator
+        if args.resume:
+            asyncio.run(orchestrator.resume())
+        else:
+            asyncio.run(orchestrator.run(selected_documents=selected_documents))
+            
+    except KeyboardInterrupt:
+        print("\nGeneration interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

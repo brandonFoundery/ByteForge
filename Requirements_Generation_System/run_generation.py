@@ -1393,11 +1393,11 @@ def main():
 
             if result.success:
                 console.print(f"\n[bold green][SUCCESS] All AI agent design documents generated successfully![/bold green]")
-                console.print(f"[green][OK] Documents saved to: generated_documents/design/[/green]")
+                console.print(f"[green][OK] Documents saved to: design/[/green]")
                 console.print(f"[green][OK] Total execution time: {result.total_execution_time:.2f} seconds[/green]")
 
                 # List generated files
-                design_dir = base_path / "generated_documents" / "design"
+                design_dir = base_path / "design"
                 if design_dir.exists():
                     design_files = list(design_dir.glob("*.md"))
                     console.print(f"\n[bold]Generated design documents:[/bold]")

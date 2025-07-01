@@ -448,9 +448,15 @@ Each agent must provide:
         return outputs.get((agent_id, phase_id), [f"{agent_id.title()} {phase_id} deliverables complete"])
 
     def _create_instruction_content(self, agent_id: str, phase_id: str, agent_info: Dict, phase_info: Dict) -> str:
-        """Create instruction content for a specific agent/phase"""
-        # This is a template - would be expanded with full instruction content
-        return f"""# {agent_info['name']} - {phase_info['name']}
+        """Create instruction content for a specific agent/phase using enhanced template"""
+        try:
+            # Import the enhanced template generator
+            from claude_instruction_template import generate_enhanced_instruction
+            return generate_enhanced_instruction(agent_id, phase_id, self.base_path)
+        except ImportError:
+            console.print(f"[yellow]⚠️ Enhanced template not available, using basic template[/yellow]")
+            # Fallback to basic template
+            return f"""# {agent_info['name']} - {phase_info['name']}
 
 ## Agent Information
 - **Agent ID**: {agent_id}-{phase_id}

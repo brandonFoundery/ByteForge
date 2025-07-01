@@ -10,6 +10,7 @@ import asyncio
 import json
 import subprocess
 import time
+import yaml
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -18,6 +19,22 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 console = Console()
+
+
+class SecurityError(Exception):
+    """Security validation error"""
+    pass
+
+
+try:
+    from execution_optimizer import ExecutionOptimizer, ExecutionPlan
+    from performance_monitor import PerformanceMonitor
+    from security_manager import SecurityManager
+except ImportError:
+    ExecutionOptimizer = None
+    ExecutionPlan = None
+    PerformanceMonitor = None
+    SecurityManager = None
 
 
 @dataclass
@@ -70,6 +87,51 @@ class ClaudeCodeExecutor:
             "1": {"id": "phase1", "name": "MVP Core Features"},
             "2": {"id": "phase2", "name": "Advanced Features"},
             "3": {"id": "phase3", "name": "Production Ready"}
+        }
+
+        # Load configuration
+        self.config = self._load_claude_config()
+        
+        # Initialize execution optimizer
+        if ExecutionOptimizer:
+            self.optimizer = ExecutionOptimizer(base_path)
+            self.execution_plan = None
+        else:
+            self.optimizer = None
+            self.execution_plan = None
+        
+        # Initialize performance monitor
+        if PerformanceMonitor:
+            self.performance_monitor = PerformanceMonitor(base_path)
+        else:
+            self.performance_monitor = None
+        
+        # Initialize security manager
+        if SecurityManager:
+            self.security_manager = SecurityManager(base_path)
+        else:
+            self.security_manager = None
+
+    def _load_claude_config(self) -> Dict:
+        """Load Claude Code configuration from config.yaml"""
+        try:
+            config_path = self.base_path / "Requirements_Generation_System" / "config.yaml"
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                return config.get('llm', {}).get('claude_code', {})
+            else:
+                console.print(f"[yellow]⚠️ Config file not found: {config_path}[/yellow]")
+        except Exception as e:
+            console.print(f"[red]❌ Error loading config: {e}[/red]")
+        
+        # Return default configuration
+        return {
+            'model': 'claude-sonnet-4-20250514',
+            'temperature': 0.1,
+            'timeout': 600,
+            'max_retries': 3,
+            'retry_delay': 10
         }
 
     def _load_execution_plan(self) -> Dict:
@@ -261,6 +323,145 @@ class ClaudeCodeExecutor:
 
         return results
 
+    async def execute_optimized_implementation(self, agent_choice: str, phase_choice: str) -> ExecutionResult:
+        """Execute Claude Code implementation using optimized execution plan with performance monitoring"""
+        if not self.optimizer:
+            console.print("[yellow]⚠️ Execution optimizer not available, falling back to standard execution[/yellow]")
+            return await self.execute_implementation(agent_choice, phase_choice)
+        
+        start_time = time.time()
+        
+        # Create optimized execution plan
+        if not self.execution_plan:
+            console.print("[cyan]🚀 Creating optimized execution plan...[/cyan]")
+            self.execution_plan = self.optimizer.create_execution_plan()
+        
+        # Start performance monitoring
+        if self.performance_monitor:
+            total_agents = 1 if agent_choice != "6" else len(self.agents)
+            total_estimated_time = self.execution_plan.total_estimated_time if agent_choice == "6" else 30
+            self.performance_monitor.start_session(total_agents, total_estimated_time)
+            self.performance_monitor.start_real_time_monitoring()
+        
+        phase_id = self.phases.get(phase_choice, self.phases["1"])["id"]
+        agent_results = []
+        errors = []
+        
+        if agent_choice == "6":  # All agents
+            agent_results = await self._execute_optimized_plan(phase_id)
+        else:
+            # Execute single agent with optimization
+            selected_agent = self.agents.get(agent_choice)
+            if selected_agent:
+                task_id = f"{selected_agent['id']}-{phase_id}"
+                if task_id in self.execution_plan.tasks:
+                    agent_results = [await self._execute_optimized_agent(selected_agent, phase_id)]
+                else:
+                    # Fallback to standard execution
+                    agent_results = [await self._execute_single_agent(selected_agent, phase_id)]
+        
+        total_time = time.time() - start_time
+        success = all(result.success for result in agent_results)
+        
+        # Stop performance monitoring and generate report
+        if self.performance_monitor:
+            self.performance_monitor.stop_real_time_monitoring()
+            performance_report = self.performance_monitor.generate_performance_report()
+            console.print("[green]📊 Performance report generated[/green]")
+        
+        # Create error summary if there were failures
+        error_summary = None
+        if not success:
+            failed_agents = [r.agent_name for r in agent_results if not r.success]
+            error_summary = f"Failed agents: {', '.join(failed_agents)}"
+        
+        return ExecutionResult(
+            success=success,
+            total_execution_time=total_time,
+            agent_results=agent_results,
+            errors=errors,
+            error_summary=error_summary
+        )
+
+    async def _execute_optimized_plan(self, phase_id: str) -> List[AgentResult]:
+        """Execute agents using optimized execution plan"""
+        results = []
+        completed_tasks = set()
+        
+        # Filter execution order for the specified phase
+        phase_batches = []
+        for batch in self.execution_plan.execution_order:
+            phase_batch = [task_id for task_id in batch if task_id.endswith(f"-{phase_id}")]
+            if phase_batch:
+                phase_batches.append(phase_batch)
+        
+        console.print(f"[cyan]📋 Executing {len(phase_batches)} optimized batches for {phase_id}[/cyan]")
+        
+        for batch_num, batch in enumerate(phase_batches, 1):
+            console.print(f"[cyan]🔄 Executing batch {batch_num}/{len(phase_batches)} ({len(batch)} agents in parallel)[/cyan]")
+            
+            # Execute batch in parallel
+            batch_tasks = []
+            for task_id in batch:
+                agent_id = task_id.split('-')[0]
+                agent_info = next((agent for agent in self.agents.values() if agent['id'] == agent_id), None)
+                if agent_info:
+                    batch_tasks.append(self._execute_optimized_agent(agent_info, phase_id))
+            
+            if batch_tasks:
+                batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
+                for i, result in enumerate(batch_results):
+                    if isinstance(result, AgentResult):
+                        results.append(result)
+                        if result.success:
+                            completed_tasks.add(batch[i])
+                        # Update optimizer with completion status
+                        self.optimizer.update_task_status(
+                            batch[i], 
+                            "completed" if result.success else "failed",
+                            end_time=time.time()
+                        )
+                    else:
+                        console.print(f"[red]❌ Batch execution error: {result}[/red]")
+        
+        return results
+
+    async def _execute_optimized_agent(self, agent: Dict, phase_id: str) -> AgentResult:
+        """Execute single agent with optimization and performance monitoring"""
+        task_id = f"{agent['id']}-{phase_id}"
+        agent_id = agent['id']
+        
+        # Get estimated duration from execution plan
+        estimated_duration = 30
+        if self.execution_plan and task_id in self.execution_plan.tasks:
+            estimated_duration = self.execution_plan.tasks[task_id].estimated_duration
+        
+        # Start performance monitoring
+        if self.performance_monitor:
+            self.performance_monitor.start_agent_monitoring(agent_id, phase_id, estimated_duration)
+        
+        # Update optimizer with start status
+        if self.optimizer:
+            self.optimizer.update_task_status(task_id, "in_progress", start_time=time.time())
+        
+        # Execute using standard method but with enhanced monitoring
+        result = await self._execute_single_agent(agent, phase_id)
+        
+        # Complete performance monitoring
+        if self.performance_monitor:
+            error_count = 1 if not result.success else 0
+            self.performance_monitor.complete_agent_monitoring(agent_id, phase_id, result.success, error_count)
+        
+        # Update optimizer with completion status
+        if self.optimizer:
+            self.optimizer.update_task_status(
+                task_id, 
+                "completed" if result.success else "failed",
+                end_time=time.time()
+            )
+        
+        return result
+
     async def _execute_single_agent(self, agent: Dict, phase_id: str) -> AgentResult:
         """Execute Claude Code for a single agent using instruction file"""
         start_time = time.time()
@@ -273,6 +474,13 @@ class ClaudeCodeExecutor:
         self._update_agent_status(agent_id, phase_id, "in_progress")
 
         try:
+            # Check rate limits
+            if self.security_manager:
+                if not self.security_manager.check_rate_limit("claude_api", agent_id):
+                    error_msg = f"Rate limit exceeded for {agent_id}"
+                    self._update_agent_status(agent_id, phase_id, "failed", error_msg)
+                    return AgentResult(agent_name, False, error_message=error_msg)
+            
             # Load instruction file
             instruction_content = self._load_instruction_file(agent_id, phase_id)
             if not instruction_content:
@@ -308,6 +516,13 @@ class ClaudeCodeExecutor:
                 self._update_agent_status(agent_id, phase_id, "failed", error_msg)
                 return AgentResult(agent_name, False, error_message=error_msg, execution_time=execution_time)
 
+        except SecurityError as e:
+            execution_time = time.time() - start_time
+            error_msg = f"Security violation: {str(e)}"
+            console.print(f"[red]🚨 {agent_name} execution blocked by security: {error_msg}[/red]")
+            self._update_agent_status(agent_id, phase_id, "failed", error_msg)
+            return AgentResult(agent_name, False, error_message=error_msg, execution_time=execution_time)
+            
         except Exception as e:
             execution_time = time.time() - start_time
             error_msg = str(e)
@@ -335,36 +550,34 @@ class ClaudeCodeExecutor:
             return f.read()
 
     def _create_claude_command_from_instruction(self, agent: Dict, phase_id: str, instruction_content: str) -> str:
-        """Create Claude Code command using instruction file content"""
+        """Create Claude Code command using instruction file reference with security validation"""
         wsl_base_path = self._convert_to_wsl_path(str(self.base_path))
-
-        # Create a shorter, focused prompt that references the instruction file
-        agent_name = agent.get('name', 'Unknown Agent')
+        
+        # Load configuration
+        config = self.config
+        
+        # Create instruction file path
         instruction_file_path = f"generated_documents/design/claude_instructions/{agent['id']}-{phase_id}.md"
-
-        short_prompt = f"""I need you to implement the {agent_name} for {phase_id}.
-
-Please read and follow the detailed instructions in the file: {instruction_file_path}
-
-This file contains:
-- Complete mission statement and objectives
-- Detailed deliverables and requirements
-- Build and test procedures
-- Completion criteria
-- Error handling guidelines
-
-Please implement all requirements specified in that instruction file. Focus on:
-1. Following the exact deliverables listed
-2. Building and testing the implementation
-3. Providing a completion report as specified
-4. Ensuring all dependencies are properly handled
-
-Start by reading the instruction file and then proceed with the implementation."""
-
-        # Escape the short prompt for shell safety
-        escaped_prompt = short_prompt.replace('"', '\\"').replace('`', '\\`')
-        command = f'cd {wsl_base_path} && claude --model sonnet --dangerously-skip-permissions -p "{escaped_prompt}"'
-
+        wsl_instruction_path = self._convert_to_wsl_path(str(self.base_path / instruction_file_path))
+        
+        # Validate file access
+        if self.security_manager:
+            if not self.security_manager.validate_file_access(str(self.base_path / instruction_file_path), "read"):
+                raise SecurityError(f"File access denied: {instruction_file_path}")
+        
+        # Use file-based prompting to avoid shell escaping
+        model_flag = config.get('model', 'sonnet').replace('claude-', '').replace('-20250514', '')
+        
+        command = f'cd {wsl_base_path} && claude --model {model_flag} --dangerously-skip-permissions --file {wsl_instruction_path}'
+        
+        # Validate command security
+        if self.security_manager:
+            if not self.security_manager.validate_command(command):
+                raise SecurityError(f"Command blocked by security policy: {command}")
+            
+            # Sanitize command for WSL
+            command = self.security_manager.sanitize_command_for_wsl(command)
+        
         return command
 
     def _convert_to_wsl_path(self, windows_path: str) -> str:
@@ -406,13 +619,14 @@ else
 fi
 """
 
-            # Execute the wrapper script
+            # Execute the wrapper script with configurable timeout
+            timeout_seconds = self.config.get('timeout', 600)
             result = await asyncio.to_thread(
                 subprocess.run,
                 ["wsl", "-d", "Ubuntu", "-e", "bash", "-c", wrapper_script],
                 capture_output=True,
                 text=True,
-                timeout=3600  # 1 hour timeout
+                timeout=timeout_seconds
             )
 
             return {

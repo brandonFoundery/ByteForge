@@ -16,7 +16,7 @@ async def test_simple_claude():
     
     console.print("[bold blue]🔍 Testing Simple Claude Code Execution[/bold blue]")
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     executor = ClaudeCodeExecutor(base_path)
     
     # Override the prompt creation to use a simple test prompt

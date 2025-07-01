@@ -561,7 +561,7 @@ if __name__ == '__main__':
                 # Simulate a document update response
                 return "This is a mock response for a document update."
 
-    base_path = Path("d:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     mock_orchestrator = MockOrchestrator()
     
     manager = ChangeManager(base_path, mock_orchestrator)

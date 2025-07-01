@@ -1,5 +1,5 @@
 # System Architecture Document (SAD)
-**Project FY.WB.Midway - Comprehensive Architecture Specification**  
+**Project LSOMigrator - Comprehensive Architecture Specification**  
 Version 1.0 | Generated: 2025-06-16
 
 ---
@@ -21,7 +21,7 @@ Version 1.0 | Generated: 2025-06-16
 ## 1. Executive Summary
 
 ### 1.1 Architecture Vision
-The FY.WB.Midway platform is designed as a modern, cloud-native SAAS solution built on Microsoft Azure, following Clean Architecture principles and CQRS patterns. The system provides a scalable, maintainable, and secure logistics management platform.
+The LSOMigrator platform is designed as a modern, cloud-native SAAS solution built on Microsoft Azure, following Clean Architecture principles and CQRS patterns. The system provides a scalable, maintainable, and secure logistics management platform.
 
 ### 1.2 Key Architectural Decisions
 - **Frontend**: Next.js with TypeScript and Tailwind CSS
@@ -522,4 +522,4 @@ services.AddAuthorization(options =>
 
 ---
 
-*This architecture document serves as the foundation for the FY.WB.Midway platform development and should be referenced throughout the implementation process.*
+*This architecture document serves as the foundation for the LSOMigrator platform development and should be referenced throughout the implementation process.*

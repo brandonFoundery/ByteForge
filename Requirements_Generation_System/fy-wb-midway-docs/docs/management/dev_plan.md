@@ -1,9 +1,9 @@
-# Development Plan: FY.WB.Midway
+# Development Plan: LSOMigrator
 
 ## 1. Executive Summary
 
 ### 1.1 Project Overview and Development Approach
-This document outlines the comprehensive development plan for the **FY.WB.Midway** project, a modern, cloud-native freight and logistics management platform. The objective is to deliver a scalable, secure, and user-friendly system that streamlines operations for load management, customer and carrier interactions, invoicing, and payment processing.
+This document outlines the comprehensive development plan for the **LSOMigrator** project, a modern, cloud-native freight and logistics management platform. The objective is to deliver a scalable, secure, and user-friendly system that streamlines operations for load management, customer and carrier interactions, invoicing, and payment processing.
 
 Our development approach is grounded in the **Agile/Scrum methodology**, utilizing 2-week sprints to facilitate iterative development, continuous feedback, and adaptability to changing requirements. The technical foundation will be a **CLEAN Architecture** with a **CQRS pattern** to ensure separation of concerns, maintainability, and performance.
 

@@ -363,7 +363,7 @@ if __name__ == "__main__":
     from pathlib import Path
 
     # Default paths
-    base_path = Path("d:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     config_path = base_path / "Requirements_Generation_System" / "config.yaml"
 
     # Run the resume process

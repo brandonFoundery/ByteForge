@@ -1,6 +1,6 @@
 # Interaction Flows and User Journeys
 
-This document defines the interaction patterns, user flows, and state management for the FY.WB.Midway platform.
+This document defines the interaction patterns, user flows, and state management for the LSOMigrator platform.
 
 ## Primary User Flows
 

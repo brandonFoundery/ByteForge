@@ -15,7 +15,7 @@ def test_line_endings():
     
     console.print("[bold blue]🔍 Testing Line Endings Fix[/bold blue]")
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     logs_path = base_path / "logs"
     
     # Ensure logs directory exists

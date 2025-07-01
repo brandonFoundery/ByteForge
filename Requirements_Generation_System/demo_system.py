@@ -21,7 +21,7 @@ async def demo_complete_system():
         border_style="blue"
     ))
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     
     # Demo 1: Show existing design documents
     console.print("\n[bold]📋 Demo 1: Design Documents (Option #10 Output)[/bold]")
@@ -56,7 +56,7 @@ async def demo_complete_system():
         import subprocess
         result = subprocess.run([
             "wsl", "-d", "Ubuntu", "-e", "bash", "-c",
-            'cd /mnt/d/Repository/@Clients/FY.WB.Midway && claude --model sonnet -p "Analyze the project structure and tell me what type of application this is and what the main business domain appears to be. Be concise."'
+            'cd project && claude --model sonnet -p "Analyze the project structure and tell me what type of application this is and what the main business domain appears to be. Be concise."'
         ], capture_output=True, text=True, timeout=30)
         
         if result.returncode == 0:

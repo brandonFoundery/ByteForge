@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-The FY.WB.Midway platform follows a microservices architecture pattern with clear domain boundaries and independent scaling capabilities.
+The LSOMigrator platform follows a microservices architecture pattern with clear domain boundaries and independent scaling capabilities.
 
 ### High-Level Architecture
 

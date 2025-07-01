@@ -215,10 +215,10 @@ Please fix these errors systematically and ensure the build will succeed.
                 f.write(bug_fix_prompt)
 
             # Execute Claude Code
-            wsl_prompt_path = f"/mnt/d/Repository/@Clients/FY.WB.Midway/claude_bug_fix_frontend.md"
+            wsl_prompt_path = f"project/claude_bug_fix_frontend.md"
             command = [
                 'wsl', '-d', 'Ubuntu', '-e', 'bash', '-c',
-                f'cd "/mnt/d/Repository/@Clients/FY.WB.Midway" && claude -p "{wsl_prompt_path}"'
+                f'cd "project" && claude -p "{wsl_prompt_path}"'
             ]
 
             result = await asyncio.to_thread(
@@ -282,10 +282,10 @@ Please fix these errors systematically and ensure the build will succeed.
                 f.write(bug_fix_prompt)
 
             # Execute Claude Code
-            wsl_prompt_path = f"/mnt/d/Repository/@Clients/FY.WB.Midway/claude_bug_fix_backend.md"
+            wsl_prompt_path = f"project/claude_bug_fix_backend.md"
             command = [
                 'wsl', '-d', 'Ubuntu', '-e', 'bash', '-c',
-                f'cd "/mnt/d/Repository/@Clients/FY.WB.Midway" && claude -p "{wsl_prompt_path}"'
+                f'cd "project" && claude -p "{wsl_prompt_path}"'
             ]
 
             result = await asyncio.to_thread(
@@ -348,10 +348,10 @@ Please fix these test errors systematically and ensure all tests will pass.
                 f.write(test_fix_prompt)
 
             # Execute Claude Code
-            wsl_prompt_path = f"/mnt/d/Repository/@Clients/FY.WB.Midway/claude_bug_fix_tests.md"
+            wsl_prompt_path = f"project/claude_bug_fix_tests.md"
             command = [
                 'wsl', '-d', 'Ubuntu', '-e', 'bash', '-c',
-                f'cd "/mnt/d/Repository/@Clients/FY.WB.Midway" && claude -p "{wsl_prompt_path}"'
+                f'cd "project" && claude -p "{wsl_prompt_path}"'
             ]
 
             result = await asyncio.to_thread(
@@ -480,10 +480,10 @@ Please fix this validation issue systematically.
                 f.write(validation_fix_prompt)
 
             # Execute Claude Code
-            wsl_prompt_path = f"/mnt/d/Repository/@Clients/FY.WB.Midway/claude_validation_fix_{issue['type']}.md"
+            wsl_prompt_path = f"project/claude_validation_fix_{issue['type']}.md"
             command = [
                 'wsl', '-d', 'Ubuntu', '-e', 'bash', '-c',
-                f'cd "/mnt/d/Repository/@Clients/FY.WB.Midway" && claude -p "{wsl_prompt_path}"'
+                f'cd "project" && claude -p "{wsl_prompt_path}"'
             ]
 
             result = await asyncio.to_thread(
@@ -751,7 +751,7 @@ Return ONLY the JSON object, no additional text.
             return {
                 'files': [
                     {
-                        'path': 'BackEnd/FY.WB.Midway/Controllers/SampleController.cs',
+                        'path': 'BackEnd/Controllers/SampleController.cs',
                         'type': 'controller',
                         'description': 'Sample controller generated from specifications',
                         'dependencies': []
@@ -940,7 +940,7 @@ Please generate this file with complete, production-ready code.
         
         backend_config = self.build_config.get('backend', {})
         build_command = backend_config.get('build_command', ['dotnet', 'build'])
-        working_dir = self.backend_path / backend_config.get('working_directory', 'FY.WB.Midway')
+        working_dir = self.backend_path / backend_config.get('working_directory', 'BackEnd')
         
         return await self._run_build_command(
             build_command,
@@ -965,7 +965,7 @@ Please generate this file with complete, production-ready code.
         # Run backend tests
         backend_config = self.build_config.get('backend', {})
         backend_test_cmd = backend_config.get('test_command', ['dotnet', 'test'])
-        working_dir = self.backend_path / backend_config.get('working_directory', 'FY.WB.Midway')
+        working_dir = self.backend_path / backend_config.get('working_directory', 'BackEnd')
         
         backend_tests = await self._run_build_command(
             backend_test_cmd,

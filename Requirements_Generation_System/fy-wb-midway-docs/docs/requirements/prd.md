@@ -6,7 +6,7 @@ Here is the enhanced version of the PRD, followed by my clarification questions.
 
 ## REVIEW CONTEXT:
 
-**Project Name:** FY.WB.Midway
+**Project Name:** LSOMigrator
 **Generation Date:** 2025-06-13
 
 ### EXISTING PRD CONTEXT:
@@ -165,7 +165,7 @@ This PRD serves as the foundation for detailed technical specifications and desi
 ## ENHANCED DOCUMENT:
 
 # Product Requirements Document
-**FY.WB.Midway**
+**LSOMigrator**
 
 ## Executive Summary (PRD-1)
 
@@ -173,7 +173,7 @@ This PRD serves as the foundation for detailed technical specifications and desi
 Mid-sized businesses in the manufacturing and retail sectors are currently encountering significant difficulties in managing their operations due to disparate systems, a lack of flexibility and scalability in their current tools, and an inability to access real-time analytics. This results in inefficient resource allocation, delayed decision-making, and an overall reduction in market competitiveness.
 
 ### Solution Overview
-The FY.WB.Midway platform will offer a comprehensive, cloud-native solution featuring:
+The LSOMigrator platform will offer a comprehensive, cloud-native solution featuring:
 - Adaptive user interfaces specifically designed for different user roles, providing relevant data and tools.
 - Advanced resource management tools to optimize the allocation of personnel, inventory, and equipment.
 - Real-time performance analytics, with data latency under 15 seconds, to support data-driven decision-making.

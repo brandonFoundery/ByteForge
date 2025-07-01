@@ -11,6 +11,15 @@ from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
+
+# Try to import dirty_json for robust JSON parsing from LLM responses  
+try:
+    import dirty_json
+    DIRTY_JSON_AVAILABLE = True
+except ImportError:
+    dirty_json = None
+    DIRTY_JSON_AVAILABLE = False
+    print("Warning: dirty-json not available. Install with: pip install dirty-json")
 from artifact_processor import ArtifactProcessor, create_artifact_enhanced_prompt
 from template_manager import TemplateManager, create_new_project_interactive
 
@@ -1688,6 +1697,7 @@ This log tracks the batch processing of code files for requirements generation.
         console.print(f"\n[yellow]Validating and repairing {doc_type.value}...[/yellow]")
 
         repair_attempts = 0
+        previous_errors = set()  # Track errors to detect infinite loops
         while repair_attempts < max_repair_attempts:
             # Perform validation
             validation_result = await self._perform_validation_checks(doc_type)
@@ -1697,6 +1707,13 @@ This log tracks the batch processing of code files for requirements generation.
                 await self.save_status_file(doc_type)
                 console.print(f"[green][OK] {doc_type.value} validated successfully[/green]")
                 return True
+
+            # Check for infinite repair loops - if same errors persist, stop trying
+            current_errors = set(validation_result.errors)
+            if repair_attempts > 0 and current_errors == previous_errors:
+                console.print(f"[red]Detected infinite repair loop for {doc_type.value} - same errors persist[/red]")
+                print(f"[DEBUG] Persistent errors: {current_errors}")
+                break
 
             # Attempt auto-repair
             repair_attempts += 1
@@ -1709,6 +1726,7 @@ This log tracks the batch processing of code files for requirements generation.
                 break
 
             console.print(f"[blue]Applied repairs to {doc_type.value}, re-validating...[/blue]")
+            previous_errors = current_errors  # Remember current errors for next iteration
 
         # If we get here, validation failed after all repair attempts
         doc.status = DocumentStatus.FAILED
@@ -1718,6 +1736,9 @@ This log tracks the batch processing of code files for requirements generation.
         console.print(f"[red][FAIL] Validation failed for {doc_type.value} after {repair_attempts} repair attempts:[/red]")
         for error in validation_result.errors:
             console.print(f"  [red]- {error}[/red]")
+        
+        console.print(f"[yellow][WARNING]  {doc_type.value} failed validation after auto-repair attempts[/yellow]")
+        console.print(f"[yellow]Document saved but may have issues. Manual review recommended.[/yellow]")
 
         return False
 
@@ -1774,7 +1795,11 @@ This log tracks the batch processing of code files for requirements generation.
         try:
             metadata = yaml.safe_load(yaml_content)
             if not isinstance(metadata, dict):
-                errors.append("YAML frontmatter is not a valid dictionary")
+                # Enhanced error logging to show what type was parsed
+                parsed_type = type(metadata).__name__
+                errors.append(f"YAML frontmatter is not a valid dictionary (parsed as {parsed_type})")
+                print(f"[DEBUG] YAML validation failed - parsed as {parsed_type}: {repr(metadata)}")
+                print(f"[DEBUG] Raw YAML content:\n{yaml_content}")
                 return errors
 
             # Check required fields
@@ -1785,6 +1810,8 @@ This log tracks the batch processing of code files for requirements generation.
 
         except yaml.YAMLError as e:
             errors.append(f"Invalid YAML syntax in frontmatter: {str(e)}")
+            print(f"[DEBUG] YAML syntax error: {str(e)}")
+            print(f"[DEBUG] Raw YAML content:\n{yaml_content}")
 
         return errors
 
@@ -2057,18 +2084,28 @@ This log tracks the batch processing of code files for requirements generation.
             if not skip_until_end:
                 cleaned_yaml_lines.append(line)
 
-        # Try to parse and fix the YAML
+        # Try to parse and fix the YAML with enhanced repair capabilities
         yaml_content = '\n'.join(cleaned_yaml_lines)
+        metadata = None
+        
         try:
             parsed_yaml = yaml.safe_load(yaml_content)
             # Ensure we have a dictionary, not a list or other type
             if isinstance(parsed_yaml, dict):
                 metadata = parsed_yaml
             else:
-                # If YAML parsed but isn't a dict, create new metadata
-                metadata = {}
-        except:
-            # If YAML is completely broken, create new metadata
+                print(f"[DEBUG] YAML parsed as {type(parsed_yaml).__name__}, not dict: {parsed_yaml}")
+        except yaml.YAMLError as e:
+            print(f"[DEBUG] YAML parsing failed: {e}")
+            
+        # If YAML parsing failed, try JSON repair utilities
+        if metadata is None:
+            print(f"[DEBUG] Attempting to repair YAML content using JSON utilities")
+            metadata = self._extract_yaml_from_llm_response(yaml_content)
+            
+        # If all repair attempts failed, create new metadata
+        if metadata is None or not isinstance(metadata, dict):
+            print(f"[DEBUG] All repair attempts failed, creating new metadata")
             metadata = {}
 
         # Ensure metadata is a dictionary before accessing it
@@ -2089,16 +2126,54 @@ This log tracks the batch processing of code files for requirements generation.
         if 'generated_at' not in metadata:
             metadata['generated_at'] = datetime.now().isoformat()
 
-        # Reconstruct the document
-        new_yaml = yaml.dump(metadata, default_flow_style=False)
+        # Reconstruct the document with safer YAML formatting
+        try:
+            new_yaml = yaml.dump(metadata, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            # Remove any YAML document separators that yaml.dump might add
+            new_yaml = new_yaml.replace('---\n', '').replace('\n---', '').strip()
+            
+            # Validate the reconstructed YAML by parsing it back
+            test_parse = yaml.safe_load(new_yaml)
+            if not isinstance(test_parse, dict):
+                raise ValueError("Reconstructed YAML is not a dictionary")
+                
+        except Exception as e:
+            # If YAML reconstruction fails, manually construct safe YAML
+            print(f"[DEBUG] YAML reconstruction failed: {e}, using manual construction")
+            yaml_lines = []
+            for key, value in metadata.items():
+                if isinstance(value, list):
+                    yaml_lines.append(f"{key}:")
+                    for item in value:
+                        yaml_lines.append(f"  - {item}")
+                elif isinstance(value, str):
+                    yaml_lines.append(f"{key}: \"{value}\"")
+                else:
+                    yaml_lines.append(f"{key}: {value}")
+            new_yaml = '\n'.join(yaml_lines)
 
         # Clean the content part (remove any stray YAML blocks)
         content_lines = lines[yaml_end + 1:]
         cleaned_content_lines = self._clean_content_yaml_blocks(content_lines)
 
         # Reconstruct the full document
-        result_lines = ['---'] + new_yaml.strip().split('\n') + ['---', ''] + cleaned_content_lines
-        return '\n'.join(result_lines)
+        result_lines = ['---'] + new_yaml.split('\n') + ['---', ''] + cleaned_content_lines
+        
+        # Final validation before returning
+        final_result = '\n'.join(result_lines)
+        try:
+            # Test parse the entire frontmatter section
+            test_lines = final_result.split('\n')
+            yaml_start_idx = next(i for i, line in enumerate(test_lines) if line.strip() == '---')
+            yaml_end_idx = next(i for i, line in enumerate(test_lines[yaml_start_idx + 1:], yaml_start_idx + 1) if line.strip() == '---')
+            test_yaml_content = '\n'.join(test_lines[yaml_start_idx + 1:yaml_end_idx])
+            test_parsed = yaml.safe_load(test_yaml_content)
+            if not isinstance(test_parsed, dict):
+                print(f"[WARNING] Final validation failed - YAML is not a dictionary: {type(test_parsed)}")
+        except Exception as validation_error:
+            print(f"[WARNING] Final validation failed: {validation_error}")
+            
+        return final_result
 
     def _clean_content_yaml_blocks(self, content_lines: List[str]) -> List[str]:
         """Remove problematic YAML blocks from document content"""
@@ -2241,6 +2316,107 @@ This log tracks the batch processing of code files for requirements generation.
 
         return '\n'.join(result_lines)
 
+    def _repair_malformed_json(self, json_str: str) -> Optional[dict]:
+        """
+        Repair malformed JSON from LLM responses using dirty_json
+        
+        Args:
+            json_str: The potentially malformed JSON string
+            
+        Returns:
+            Parsed dictionary if successful, None if repair failed
+        """
+        if not json_str or not json_str.strip():
+            return None
+            
+        # First try standard JSON parsing
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            pass
+            
+        # If dirty_json is available, use it for repair
+        if DIRTY_JSON_AVAILABLE:
+            try:
+                print(f"[DEBUG] Attempting JSON repair with dirty_json")
+                repaired = dirty_json.loads(json_str)
+                print(f"[DEBUG] JSON repair successful using dirty_json")
+                return repaired
+            except Exception as e:
+                print(f"[DEBUG] dirty_json repair failed: {e}")
+        
+        # Fallback: Try to extract JSON from common LLM response patterns
+        try:
+            # Look for JSON within code blocks
+            json_match = re.search(r'```json\s*\n(.*?)\n```', json_str, re.DOTALL | re.IGNORECASE)
+            if json_match:
+                json_content = json_match.group(1).strip()
+                return json.loads(json_content)
+                
+            # Look for JSON within triple backticks (no language specified)
+            json_match = re.search(r'```\s*\n(.*?)\n```', json_str, re.DOTALL)
+            if json_match:
+                json_content = json_match.group(1).strip()
+                if json_content.startswith(('{', '[')):
+                    return json.loads(json_content)
+                    
+            # Look for standalone JSON objects/arrays
+            json_match = re.search(r'(\{.*\}|\[.*\])', json_str, re.DOTALL)
+            if json_match:
+                json_content = json_match.group(1)
+                return json.loads(json_content)
+                
+        except json.JSONDecodeError:
+            pass
+            
+        print(f"[WARNING] Could not repair malformed JSON: {json_str[:100]}...")
+        return None
+
+    def _extract_yaml_from_llm_response(self, response_text: str) -> Optional[dict]:
+        """
+        Extract and repair YAML content from LLM responses
+        
+        Args:
+            response_text: Raw text response from LLM
+            
+        Returns:
+            Parsed YAML dictionary if successful, None if extraction failed
+        """
+        if not response_text or not response_text.strip():
+            return None
+            
+        # First try to parse as direct YAML
+        try:
+            return yaml.safe_load(response_text)
+        except yaml.YAMLError:
+            pass
+            
+        # Look for YAML within code blocks
+        yaml_match = re.search(r'```yaml\s*\n(.*?)\n```', response_text, re.DOTALL | re.IGNORECASE)
+        if yaml_match:
+            yaml_content = yaml_match.group(1).strip()
+            try:
+                return yaml.safe_load(yaml_content)
+            except yaml.YAMLError:
+                pass
+                
+        # Look for YAML within triple backticks (no language specified)
+        yaml_match = re.search(r'```\s*\n(.*?)\n```', response_text, re.DOTALL)
+        if yaml_match:
+            yaml_content = yaml_match.group(1).strip()
+            try:
+                return yaml.safe_load(yaml_content)
+            except yaml.YAMLError:
+                pass
+                
+        # If YAML parsing fails, try to treat it as JSON and convert
+        json_result = self._repair_malformed_json(response_text)
+        if json_result and isinstance(json_result, dict):
+            return json_result
+            
+        print(f"[WARNING] Could not extract YAML from LLM response: {response_text[:100]}...")
+        return None
+
     def _repair_missing_main_heading(self, content: str, doc_type: DocumentType) -> str:
         """Add missing main heading to document"""
         lines = content.split('\n')
@@ -2292,7 +2468,7 @@ This log tracks the batch processing of code files for requirements generation.
                 "",
                 "## Overview",
                 "",
-                "This document outlines the functional requirements for the FY.WB.Midway system.",
+                f"This document outlines the functional requirements for the {self.project_name} system.",
                 "",
                 "## Functional Requirements",
                 "",
@@ -2347,7 +2523,7 @@ This log tracks the batch processing of code files for requirements generation.
                 "",
                 "## API Overview",
                 "",
-                "RESTful API for the FY.WB.Midway system.",
+                f"RESTful API for the {self.project_name} system.",
                 "",
                 "## Endpoints",
                 "",
@@ -2365,7 +2541,7 @@ This log tracks the batch processing of code files for requirements generation.
                 "",
                 "## Executive Summary",
                 "",
-                "This document outlines the development plan for the FY.WB.Midway Enterprise Logistics Platform.",
+                f"This document outlines the development plan for the {self.project_name}.",
                 "",
                 "## Feature Analysis",
                 "",
@@ -2390,9 +2566,9 @@ This log tracks the batch processing of code files for requirements generation.
                 "## Feature Branch Strategy",
                 "",
                 "All feature branches should be created off the 'dev' branch using the naming convention:",
-                "- feature/customer-management-{feature-id}",
-                "- feature/payment-processing-{feature-id}",
-                "- feature/load-management-{feature-id}",
+                "- feature/{feature-name}-{feature-id}",
+                "- bugfix/{bug-description}-{bug-id}",
+                "- hotfix/{hotfix-description}-{hotfix-id}",
                 ""
             ]
 
@@ -2501,30 +2677,10 @@ This log tracks the batch processing of code files for requirements generation.
                 "id": "API_SPEC_COMMON",
                 "content": self._generate_common_patterns(content)
             },
-            "api_spec_customers.md": {
-                "title": "Customer Management API Endpoints",
-                "id": "API_SPEC_CUSTOMERS",
-                "content": self._extract_customer_endpoints(content)
-            },
-            "api_spec_payments.md": {
-                "title": "Payment Processing API Endpoints",
-                "id": "API_SPEC_PAYMENTS",
-                "content": self._extract_payment_endpoints(content)
-            },
-            "api_spec_loads.md": {
-                "title": "Load Booking and Tracking API Endpoints",
-                "id": "API_SPEC_LOADS",
-                "content": self._extract_load_endpoints(content)
-            },
-            "api_spec_invoices.md": {
-                "title": "Invoice Processing and Reporting API Endpoints",
-                "id": "API_SPEC_INVOICES",
-                "content": self._extract_invoice_endpoints(content)
-            },
-            "api_spec_carriers.md": {
-                "title": "Carrier Management API Endpoints",
-                "id": "API_SPEC_CARRIERS",
-                "content": self._extract_carrier_endpoints(content)
+            "api_spec_endpoints.md": {
+                "title": "API Endpoints",
+                "id": "API_SPEC_ENDPOINTS",
+                "content": self._extract_endpoints_section(content)
             }
         }
 
@@ -2570,11 +2726,11 @@ This log tracks the batch processing of code files for requirements generation.
 
         openapi_yaml = '\n'.join(openapi_section)
 
-        return f"""# FY.WB.Midway Enterprise Logistics Platform API
+        return f"""# {self.project_name} API
 
 ## Overview
 
-This is the master document for the FY.WB.Midway Enterprise Logistics Platform API specification. The complete API documentation is organized into multiple linked documents for better maintainability and navigation.
+This is the master document for the {self.project_name} API specification. The complete API documentation is organized into multiple linked documents for better maintainability and navigation.
 
 ## OpenAPI Specification
 
@@ -2594,45 +2750,22 @@ The complete API specification is organized into the following documents:
 - **[Error Handling](./api_spec_errors.md)** - Standardized error response patterns
 - **[Common Patterns](./api_spec_common.md)** - Shared parameters, headers, and response structures
 
-### Feature-Specific API Endpoints
-
-#### Customer Management
-- **[Customer APIs](./api_spec_customers.md)** - Customer onboarding and management endpoints
-
-#### Payment Processing
-- **[Payment APIs](./api_spec_payments.md)** - Secure payment processing endpoints
-
-#### Load Management
-- **[Load APIs](./api_spec_loads.md)** - Load booking and tracking endpoints
-
-#### Invoice Processing
-- **[Invoice APIs](./api_spec_invoices.md)** - Invoice generation and reporting endpoints
-
-#### Carrier Management
-- **[Carrier APIs](./api_spec_carriers.md)** - Carrier registration and self-service endpoints
+### API Endpoints
+- **[API Endpoints](./api_spec_endpoints.md)** - Complete API endpoint specifications
 
 ## Navigation
 
 - [← Back to Requirements](../Requirements/)
 - [Security Schemes →](./api_spec_security.md)
 - [Common Components →](./api_spec_components.md)
-
-## Traceability Matrix
-
-| Document | Requirements Covered | Endpoints |
-|----------|---------------------|-----------|
-| [Customer APIs](./api_spec_customers.md) | FRD-3.1.1, DRD-2.1 | /customers |
-| [Payment APIs](./api_spec_payments.md) | FRD-3.1.2 | /payments |
-| [Load APIs](./api_spec_loads.md) | FRD-3.2.1, FRD-3.2.2, DRD-2.2 | /loads, /loads/{{id}}/track |
-| [Invoice APIs](./api_spec_invoices.md) | FRD-3.3.1, FRD-3.3.2, DRD-2.3 | /invoices, /reports/financial |
-| [Carrier APIs](./api_spec_carriers.md) | FRD-3.4.1, FRD-3.4.2, DRD-2.4 | /carrier/* |
+- [API Endpoints →](./api_spec_endpoints.md)
 """
 
     def _extract_security_section(self, content):
         """Extract security schemes from the original content"""
-        return """# API Security Schemes and Authentication
+        return f"""# API Security Schemes and Authentication
 
-This document defines the security schemes and authentication patterns for the FY.WB.Midway Enterprise Logistics Platform API.
+This document defines the security schemes and authentication patterns for the {self.project_name} API.
 
 ## Security Schemes
 
@@ -2681,38 +2814,59 @@ All API endpoints require authentication by default using JWT bearer tokens.
 
     def _extract_components_section(self, content):
         """Extract component schemas from the original content"""
-        # This would extract the actual schemas from the generated content
-        # For now, return a basic structure that references the existing schemas
-        return """# API Common Components and Schemas
+        # Try to extract the components section from the OpenAPI spec
+        lines = content.split('\n')
+        components_section = []
+        in_components = False
+        current_indent = 0
+        
+        for i, line in enumerate(lines):
+            if line.strip() == 'components:':
+                in_components = True
+                components_section.append(line)
+                current_indent = len(line) - len(line.lstrip())
+                continue
+            
+            if in_components:
+                # Check if we've moved to the next top-level section
+                if line.strip() and not line.startswith(' ') and not line.startswith('\t'):
+                    if line.strip().endswith(':') and current_indent == 0:
+                        break
+                elif line.strip() and len(line) - len(line.lstrip()) <= current_indent and line.strip().endswith(':'):
+                    # Check if this is a sibling section at the same level as components
+                    if line.strip() in ['paths:', 'security:', 'tags:', 'externalDocs:', 'info:', 'servers:']:
+                        break
+                
+                components_section.append(line)
+        
+        # Format the extracted content
+        if components_section and len(components_section) > 1:
+            components_yaml = '\n'.join(components_section)
+            components_content = f"""## Reusable Components
 
-This document defines the reusable components and data schemas for the FY.WB.Midway Enterprise Logistics Platform API.
+The following components are defined for reuse across the API:
 
-## Customer Schemas
+```yaml
+{components_yaml}
+```
 
-### Customer
-[Customer schema definition extracted from generated content]
+## Usage Notes
 
-### CustomerResponse
-[CustomerResponse schema definition extracted from generated content]
+These components can be referenced throughout the API specification using `$ref` notation. Please refer to the OpenAPI specification for details on how to reference these components in your API endpoints.
+"""
+        else:
+            components_content = """## Reusable Components
 
-## Payment Schemas
+*Components will be extracted from the generated OpenAPI specification*
 
-### PaymentRequest
-[PaymentRequest schema definition extracted from generated content]
+Please refer to the master API specification document for the complete list of reusable components and schemas.
+"""
+        
+        return f"""# API Common Components and Schemas
 
-### PaymentResponse
-[PaymentResponse schema definition extracted from generated content]
+This document defines the reusable components and data schemas for the {self.project_name} API.
 
-## Load Management Schemas
-
-### LoadBookingRequest
-[LoadBookingRequest schema definition extracted from generated content]
-
-### LoadResponse
-[LoadResponse schema definition extracted from generated content]
-
-### LoadTrackingResponse
-[LoadTrackingResponse schema definition extracted from generated content]
+{components_content}
 
 ## Navigation
 
@@ -2723,9 +2877,9 @@ This document defines the reusable components and data schemas for the FY.WB.Mid
 
     def _generate_error_patterns(self, content):
         """Generate standardized error handling patterns"""
-        return """# API Error Handling and Response Patterns
+        return f"""# API Error Handling and Response Patterns
 
-This document defines standardized error handling patterns and response structures for the FY.WB.Midway Enterprise Logistics Platform API.
+This document defines standardized error handling patterns and response structures for the {self.project_name} API.
 
 ## Standard Error Schema
 
@@ -2816,117 +2970,72 @@ This document defines common patterns, shared parameters, headers, and response 
 
 - [← Back to Master Document](./api_spec.md)
 - [← Error Handling](./api_spec_errors.md)
-- [Customer APIs →](./api_spec_customers.md)
+- [API Endpoints →](./api_spec_endpoints.md)
 """
 
-    def _extract_customer_endpoints(self, content):
-        """Extract customer management endpoints from the original content"""
-        return """# Customer Management API Endpoints
+    def _extract_endpoints_section(self, content):
+        """Extract API endpoints from the generated content"""
+        # Try to extract the paths section from the OpenAPI spec
+        lines = content.split('\n')
+        paths_section = []
+        in_paths = False
+        current_indent = 0
+        
+        for i, line in enumerate(lines):
+            if line.strip() == 'paths:':
+                in_paths = True
+                paths_section.append(line)
+                current_indent = len(line) - len(line.lstrip())
+                continue
+            
+            if in_paths:
+                # Check if we've moved to the next top-level section
+                if line.strip() and not line.startswith(' ') and not line.startswith('\t'):
+                    if line.strip().endswith(':') and current_indent == 0:
+                        break
+                elif line.strip() and len(line) - len(line.lstrip()) <= current_indent and line.strip().endswith(':'):
+                    # Check if this is a sibling section at the same level as paths
+                    if line.strip() in ['components:', 'security:', 'tags:', 'externalDocs:']:
+                        break
+                
+                paths_section.append(line)
+        
+        # Format the extracted content
+        if paths_section:
+            paths_yaml = '\n'.join(paths_section)
+            endpoint_content = f"""## API Endpoints
 
-This document defines the API endpoints for customer onboarding and management operations.
+The following endpoints are available in this API:
 
-## Endpoints Overview
+```yaml
+{paths_yaml}
+```
 
-| Method | Endpoint | Description | Traceability |
-|--------|----------|-------------|--------------|
-| POST | `/customers` | Onboard a new customer | FRD-3.1.1, DRD-2.1 |
-| GET | `/customers` | List customers | FRD-3.1.1 |
+## Implementation Notes
 
-[Customer endpoint definitions extracted from generated content]
+Please refer to the complete OpenAPI specification in the master document for detailed request/response schemas, authentication requirements, and error handling patterns.
+"""
+        else:
+            endpoint_content = """## API Endpoints
+
+*Endpoints will be extracted from the generated OpenAPI specification*
+
+Please refer to the master API specification document for the complete list of available endpoints.
+"""
+        
+        return f"""# API Endpoints
+
+This document contains the complete API endpoint specifications for the {self.project_name}.
+
+{endpoint_content}
 
 ## Navigation
 
 - [← Back to Master Document](./api_spec.md)
-- [← Common Components](./api_spec_components.md)
-- [Payment APIs →](./api_spec_payments.md)
+- [← Common Patterns](./api_spec_common.md)
+- [Security Schemes →](./api_spec_security.md)
 """
 
-    def _extract_payment_endpoints(self, content):
-        """Extract payment processing endpoints from the original content"""
-        return """# Payment Processing API Endpoints
-
-This document defines the API endpoints for secure payment processing operations.
-
-## Endpoints Overview
-
-| Method | Endpoint | Description | Traceability |
-|--------|----------|-------------|--------------|
-| POST | `/payments` | Process payment transaction | FRD-3.1.2 |
-
-[Payment endpoint definitions extracted from generated content]
-
-## Navigation
-
-- [← Back to Master Document](./api_spec.md)
-- [← Customer APIs](./api_spec_customers.md)
-- [Load APIs →](./api_spec_loads.md)
-"""
-
-    def _extract_load_endpoints(self, content):
-        """Extract load booking and tracking endpoints from the original content"""
-        return """# Load Booking and Tracking API Endpoints
-
-This document defines the API endpoints for load booking and real-time tracking operations.
-
-## Endpoints Overview
-
-| Method | Endpoint | Description | Traceability |
-|--------|----------|-------------|--------------|
-| POST | `/loads` | Book a new load | FRD-3.2.1, DRD-2.2 |
-| GET | `/loads/{loadId}/track` | Track load status | FRD-3.2.2 |
-
-[Load endpoint definitions extracted from generated content]
-
-## Navigation
-
-- [← Back to Master Document](./api_spec.md)
-- [← Payment APIs](./api_spec_payments.md)
-- [Invoice APIs →](./api_spec_invoices.md)
-"""
-
-    def _extract_invoice_endpoints(self, content):
-        """Extract invoice processing endpoints from the original content"""
-        return """# Invoice Processing and Reporting API Endpoints
-
-This document defines the API endpoints for automated invoice generation and financial reporting operations.
-
-## Endpoints Overview
-
-| Method | Endpoint | Description | Traceability |
-|--------|----------|-------------|--------------|
-| POST | `/invoices` | Generate invoice | FRD-3.3.1, DRD-2.3 |
-| GET | `/reports/financial` | Generate financial reports | FRD-3.3.2 |
-
-[Invoice endpoint definitions extracted from generated content]
-
-## Navigation
-
-- [← Back to Master Document](./api_spec.md)
-- [← Load APIs](./api_spec_loads.md)
-- [Carrier APIs →](./api_spec_carriers.md)
-"""
-
-    def _extract_carrier_endpoints(self, content):
-        """Extract carrier management endpoints from the original content"""
-        return """# Carrier Management API Endpoints
-
-This document defines the API endpoints for carrier registration and self-service operations.
-
-## Endpoints Overview
-
-| Method | Endpoint | Description | Traceability |
-|--------|----------|-------------|--------------|
-| POST | `/carrier/register` | Register a new carrier | FRD-3.4.1, DRD-2.4 |
-| GET | `/carrier/portal` | Get carrier portal data | FRD-3.4.2 |
-
-[Carrier endpoint definitions extracted from generated content]
-
-## Navigation
-
-- [← Back to Master Document](./api_spec.md)
-- [← Invoice APIs](./api_spec_invoices.md)
-- [Common Patterns →](./api_spec_common.md)
-"""
 
     async def _save_uiux_spec_split_documents(self, doc):
         """Save UI/UX specification as split documents following UXDMD structure"""
@@ -2962,30 +3071,10 @@ This document defines the API endpoints for carrier registration and self-servic
                 "id": "UIUX_SPEC_DASHBOARD",
                 "content": self._extract_dashboard_views(content)
             },
-            "uiux_spec_customer_mgt.md": {
-                "title": "Customer Management Interface Design",
-                "id": "UIUX_SPEC_CUSTOMER_MGT",
-                "content": self._extract_customer_views(content)
-            },
-            "uiux_spec_payment_proc.md": {
-                "title": "Payment Processing Interface Design",
-                "id": "UIUX_SPEC_PAYMENT_PROC",
-                "content": self._extract_payment_views(content)
-            },
-            "uiux_spec_load_mgt.md": {
-                "title": "Load Management Interface Design",
-                "id": "UIUX_SPEC_LOAD_MGT",
-                "content": self._extract_load_views(content)
-            },
-            "uiux_spec_invoice_proc.md": {
-                "title": "Invoice Processing Interface Design",
-                "id": "UIUX_SPEC_INVOICE_PROC",
-                "content": self._extract_invoice_views(content)
-            },
-            "uiux_spec_carrier_mgt.md": {
-                "title": "Carrier Management Interface Design",
-                "id": "UIUX_SPEC_CARRIER_MGT",
-                "content": self._extract_carrier_views(content)
+            "uiux_spec_views.md": {
+                "title": "Application Views and Interface Designs",
+                "id": "UIUX_SPEC_VIEWS",
+                "content": self._extract_application_views(content)
             }
         }
 
@@ -3028,11 +3117,11 @@ This document defines the API endpoints for carrier registration and self-servic
 
         overview_content = '\n'.join(overview_section)
 
-        return f"""# FY.WB.Midway Enterprise Logistics Platform - UI/UX Design and Mapping Document (UXDMD)
+        return f"""# {self.project_name} - UI/UX Design and Mapping Document (UXDMD)
 
 ## Overview
 
-This is the master UI/UX Design and Mapping Document (UXDMD) for the FY.WB.Midway Enterprise Logistics Platform. The complete UI/UX specification follows the UXDMD structure and is organized into multiple linked documents for better maintainability and developer-ready implementation.
+This is the master UI/UX Design and Mapping Document (UXDMD) for the {self.project_name}. The complete UI/UX specification follows the UXDMD structure and is organized into multiple linked documents for better maintainability and developer-ready implementation.
 
 {overview_content}
 
@@ -3045,36 +3134,13 @@ The complete UXDMD specification is organized into the following documents:
 - **[Component Library](./uiux_spec_components.md)** - Design system integration and component specifications
 - **[Interaction Flows](./uiux_spec_interactions.md)** - User journeys, state charts, and sequence diagrams
 
-### Feature-Specific View Specifications
+### Application Interface Specifications
 
-#### Analytics and Reporting
+#### Dashboard and Analytics
 - **[Dashboard Views](./uiux_spec_dashboard.md)** - Main dashboard and analytics interface specifications
-  - `view-dashboard-main` - Primary analytics dashboard
-  - `view-dashboard-reports` - Reporting interface
 
-#### Customer Operations
-- **[Customer Management Views](./uiux_spec_customer_mgt.md)** - Customer onboarding and management interfaces
-  - `view-customer-list` - Customer listing and search
-  - `view-customer-detail` - Customer profile and management
-  - `view-customer-onboard` - New customer registration
-
-#### Financial Operations
-- **[Payment Processing Views](./uiux_spec_payment_proc.md)** - Secure payment processing interfaces
-  - `view-payment-process` - Payment form and processing
-  - `view-payment-history` - Payment history and receipts
-- **[Invoice Processing Views](./uiux_spec_invoice_proc.md)** - Invoice generation and management interfaces
-  - `view-invoice-list` - Invoice listing and filtering
-  - `view-invoice-detail` - Invoice details and actions
-  - `view-invoice-generate` - Invoice creation workflow
-
-#### Logistics Operations
-- **[Load Management Views](./uiux_spec_load_mgt.md)** - Load booking and tracking interfaces
-  - `view-load-list` - Load listing and search
-  - `view-load-book` - Load booking workflow
-  - `view-load-track` - Real-time load tracking
-- **[Carrier Management Views](./uiux_spec_carrier_mgt.md)** - Carrier registration and self-service interfaces
-  - `view-carrier-register` - Carrier registration workflow
-  - `view-carrier-portal` - Carrier self-service dashboard
+#### Application Views
+- **[Application Views](./uiux_spec_views.md)** - Complete application interface specifications and view definitions
 
 ## UXDMD Structure Overview
 
@@ -3120,9 +3186,9 @@ This UXDMD structure enables:
 
     def _extract_architecture_section(self, content):
         """Extract information architecture and navigation design"""
-        return """# Information Architecture and Navigation Design
+        return f"""# Information Architecture and Navigation Design
 
-This document defines the site structure, navigation patterns, and role-based access for the FY.WB.Midway platform.
+This document defines the site structure, navigation patterns, and role-based access for the {self.project_name} platform.
 
 ## Site Map Structure
 
@@ -3156,9 +3222,9 @@ This document defines the site structure, navigation patterns, and role-based ac
 | Role | Accessible Routes | Permissions |
 |------|------------------|-------------|
 | Admin | All routes | Full CRUD access |
-| Sales | /customers, /dashboard | Customer management |
-| Finance | /payments, /invoices, /reports | Financial operations |
-| Operations | /loads, /carriers | Logistics operations |
+| Manager | Most routes | Management operations |
+| User | Limited routes | Read/write access |
+| Viewer | Public routes | Read-only access |
 
 ## Breadcrumb Rules
 - Always show current location
@@ -3181,9 +3247,9 @@ This document defines the site structure, navigation patterns, and role-based ac
 
     def _extract_components_section(self, content):
         """Extract component library and design system integration"""
-        return """# Component Library and Design System Integration
+        return f"""# Component Library and Design System Integration
 
-This document defines the design system components and their integration patterns for the FY.WB.Midway platform.
+This document defines the design system components and their integration patterns for the {self.project_name} platform.
 
 ## Design System Reference
 
@@ -3279,9 +3345,9 @@ This document defines the design system components and their integration pattern
 
     def _extract_interactions_section(self, content):
         """Extract interaction flows and user journeys"""
-        return """# Interaction Flows and User Journeys
+        return f"""# Interaction Flows and User Journeys
 
-This document defines the interaction patterns, user flows, and state management for the FY.WB.Midway platform.
+This document defines the interaction patterns, user flows, and state management for the {self.project_name} platform.
 
 ## Primary User Flows
 
@@ -3450,277 +3516,86 @@ This document defines the dashboard and analytics view specifications following 
 - [Customer Management →](./uiux_spec_customer_mgt.md)
 """
 
-    def _extract_customer_views(self, content):
-        """Extract customer management view specifications"""
-        return """# Customer Management Interface Design
+    def _extract_application_views(self, content):
+        """Extract application view specifications from the generated content"""
+        # Try to extract view-related content from the UXDMD specification
+        lines = content.split('\n')
+        view_sections = []
+        
+        # Look for sections that contain view specifications
+        current_section = []
+        in_view_section = False
+        
+        for line in lines:
+            # Check for view-related section headers
+            if any(keyword in line.lower() for keyword in ['view', 'interface', 'screen', 'page']):
+                if line.startswith('#') and current_section:
+                    # Save previous section if it was a view section
+                    if in_view_section:
+                        view_sections.extend(current_section)
+                    current_section = [line]
+                    in_view_section = True
+                else:
+                    current_section.append(line)
+            elif current_section:
+                current_section.append(line)
+        
+        # Add the last section if it was a view section
+        if in_view_section and current_section:
+            view_sections.extend(current_section)
+        
+        # Format the extracted content
+        if view_sections:
+            extracted_content = '\n'.join(view_sections)
+            views_content = f"""## Application Interface Specifications
 
-This document defines the customer management view specifications following the UXDMD format.
+The following view specifications have been extracted from the generated UI/UX specification:
 
-## View Catalogue
+{extracted_content}
 
-| View-ID | Title | Route | Upstream FRD | Primary API Endpoint(s) | User Roles |
-|---------|-------|-------|--------------|-------------------------|------------|
-| `view-customer-list` | Customer List | `/customers` | FRD-3.1.1 | `GET /customers` | admin, sales |
-| `view-customer-detail` | Customer Detail | `/customers/:id` | FRD-3.1.1 | `GET /customers/{id}` | admin, sales |
-| `view-customer-onboard` | Customer Onboarding | `/customers/new` | FRD-3.1.1 | `POST /customers` | admin, sales |
+## Implementation Guidelines
 
-## Data Map
+Each view should follow the UXDMD (UI/UX Design and Mapping Document) structure with:
+- Purpose and scope definition
+- View catalogue with API mappings
+- Information architecture
+- Data mapping and state management
+- Interaction flows and user journeys
+- Visual guidelines and design system integration
+- Performance requirements
+- Security considerations
+"""
+        else:
+            views_content = """## Application Interface Specifications
 
-| Data Key | API Contract | Store Slice | Caching TTL | Loaded By (View-IDs) | Security |
-|----------|--------------|-------------|-------------|---------------------|----------|
-| `customers` | `GET /customers` | `state.customers.list` | 60s | customer-list | auth required |
-| `customer` | `GET /customers/{id}` | `state.customers.byId[id]` | 15s | customer-detail | auth required |
+*View specifications will be extracted from the generated UI/UX specification*
 
-## Per-View Specification
+Please refer to the master UI/UX specification document for complete view definitions and interface designs.
 
-### view-customer-list (UXDMD-2)
+## UXDMD Structure
 
-| Section | Detail |
-|---------|--------|
-| **Purpose** | Display paginated list of customers with search and filtering |
-| **Layout** | Data table with filters sidebar and action toolbar |
-| **Displayed Fields** | Name • Email • Account Type • Status • Created Date • Actions |
-| **Primary Actions** | Add Customer → `/customers/new`, View Details → `/customers/:id` |
-| **Secondary Actions** | Export CSV, bulk actions, column sorting |
-| **State Behavior** | Loading skeleton rows, empty state with CTA |
-| **API Mapping** | `GET /customers?page={n}&search={q}` (200/401/500) |
-| **Error UX** | Network errors show retry toast, empty results show help text |
-| **Security Notes** | Role-based column visibility, data filtering by permissions |
-| **Analytics** | Track `customer.list.viewed`, `customer.search` events |
-| **Accessibility** | Table headers, row selection, keyboard navigation |
-| **Design Tokens** | `--surface-base`, `--space-md` |
-| **Traceability Links** | FRD-3.1.1 • API-CUSTOMERS-1 • NFRD-A11Y-1 |
+Each view specification should follow the standardized UXDMD format:
+- **Purpose & Scope**: User goals, personas, accessibility standards
+- **View Catalogue**: Complete table of all views with API mappings
+- **Information Architecture**: Navigation, breadcrumbs, role-based access
+- **Data Map**: API contracts, state management, caching
+- **Per-View Specification**: Detailed specs for each view
+- **Interaction Flows**: Sequence diagrams and state charts
+- **Visual Guidelines**: Design system and motion specifications
+- **Performance & Offline**: Loading, caching, offline behavior
+- **Security Requirements**: Auth, validation, data protection
+"""
+        
+        return f"""# Application Views and Interface Designs
 
-### view-customer-detail (UXDMD-3)
+This document contains the complete application interface specifications for the {self.project_name}.
 
-| Section | Detail |
-|---------|--------|
-| **Purpose** | Display and edit detailed customer information |
-| **Layout** | Card-based layout with tabs for different data sections |
-| **Displayed Fields** | Profile Info • Contact Details • Payment History • Load History |
-| **Primary Actions** | Edit Customer, View Loads, Process Payment |
-| **Secondary Actions** | Export data, send communication, archive customer |
-| **State Behavior** | Loading states for each tab, optimistic updates |
-| **API Mapping** | `GET /customers/{id}`, `PATCH /customers/{id}` |
-| **Error UX** | Validation errors inline, save conflicts with merge UI |
-| **Security Notes** | Field-level permissions, audit trail for changes |
-| **Analytics** | Track `customer.detail.viewed`, `customer.edited` events |
-| **Accessibility** | Tab navigation, form labels, error announcements |
-| **Design Tokens** | `--surface-elevated-2`, `--space-lg` |
-| **Traceability Links** | FRD-3.1.1 • API-CUSTOMERS-2 • NFRD-SEC-2 |
+{views_content}
 
 ## Navigation
 
 - [← Back to Master Document](./uiux_spec.md)
 - [← Dashboard Views](./uiux_spec_dashboard.md)
-- [Payment Processing →](./uiux_spec_payment_proc.md)
-"""
-
-    def _extract_payment_views(self, content):
-        """Extract payment processing view specifications"""
-        return """# Payment Processing Interface Design
-
-This document defines the payment processing view specifications following the UXDMD format.
-
-## View Catalogue
-
-| View-ID | Title | Route | Upstream FRD | Primary API Endpoint(s) | User Roles |
-|---------|-------|-------|--------------|-------------------------|------------|
-| `view-payment-process` | Payment Processing | `/payments/new` | FRD-3.1.2 | `POST /payments` | admin, finance |
-| `view-payment-history` | Payment History | `/payments` | FRD-3.1.2 | `GET /payments` | admin, finance |
-
-## Data Map
-
-| Data Key | API Contract | Store Slice | Caching TTL | Loaded By (View-IDs) | Security |
-|----------|--------------|-------------|-------------|---------------------|----------|
-| `payments` | `GET /payments` | `state.payments.list` | 30s | payment-history | auth required |
-| `payment` | `POST /payments` | `state.payments.processing` | 0s | payment-process | PCI compliant |
-
-## Per-View Specification
-
-### view-payment-process (UXDMD-4)
-
-| Section | Detail |
-|---------|--------|
-| **Purpose** | Secure payment processing with multiple payment methods |
-| **Layout** | Multi-step form with progress indicator and security badges |
-| **Displayed Fields** | Amount • Payment Method • Card Details • Billing Address |
-| **Primary Actions** | Process Payment, Save for Later |
-| **Secondary Actions** | Change payment method, apply discount codes |
-| **State Behavior** | Loading during processing, success/failure states |
-| **API Mapping** | `POST /payments` (200/400/402/500) |
-| **Error UX** | Inline validation, payment declined messaging |
-| **Security Notes** | PCI DSS compliance, tokenized card data, HTTPS only |
-| **Analytics** | Track `payment.started`, `payment.completed` events |
-| **Accessibility** | Form validation announcements, secure input labels |
-| **Design Tokens** | `--color-success`, `--color-error`, `--space-md` |
-| **Traceability Links** | FRD-3.1.2 • API-PAYMENTS-1 • NFRD-SEC-1 |
-
-## Security Requirements
-
-| Topic | Requirement |
-|-------|-------------|
-| Data Protection | All payment data encrypted in transit and at rest |
-| PCI Compliance | Tokenized card storage, no plain text card numbers |
-| Input Validation | Client and server-side validation for all fields |
-| Session Security | Payment sessions expire after 15 minutes |
-
-## Navigation
-
-- [← Back to Master Document](./uiux_spec.md)
-- [← Customer Management](./uiux_spec_customer_mgt.md)
-- [Load Management →](./uiux_spec_load_mgt.md)
-"""
-
-    def _extract_load_views(self, content):
-        """Extract load management view specifications"""
-        return """# Load Management Interface Design
-
-This document defines the load management view specifications following the UXDMD format.
-
-## View Catalogue
-
-| View-ID | Title | Route | Upstream FRD | Primary API Endpoint(s) | User Roles |
-|---------|-------|-------|--------------|-------------------------|------------|
-| `view-load-list` | Load List | `/loads` | FRD-3.2.1 | `GET /loads` | admin, operations |
-| `view-load-book` | Load Booking | `/loads/book` | FRD-3.2.1 | `POST /loads` | admin, operations |
-| `view-load-track` | Load Tracking | `/loads/:id/track` | FRD-3.2.2 | `GET /loads/{id}/track` | admin, operations, customer |
-
-## Data Map
-
-| Data Key | API Contract | Store Slice | Caching TTL | Loaded By (View-IDs) | Security |
-|----------|--------------|-------------|-------------|---------------------|----------|
-| `loads` | `GET /loads` | `state.loads.list` | 60s | load-list | auth required |
-| `tracking` | `GET /loads/{id}/track` | `state.loads.tracking[id]` | 5s | load-track | auth required |
-
-## Per-View Specification
-
-### view-load-track (UXDMD-5)
-
-| Section | Detail |
-|---------|--------|
-| **Purpose** | Real-time load tracking with GPS location and milestone updates |
-| **Layout** | Map view with timeline sidebar and status indicators |
-| **Displayed Fields** | Current Location • Status • ETA • Milestones • Driver Info |
-| **Primary Actions** | Refresh Location, Contact Driver, Update Status |
-| **Secondary Actions** | Export tracking report, share tracking link |
-| **State Behavior** | Auto-refresh every 30s, offline indicator |
-| **API Mapping** | `GET /loads/{id}/track` (200/404/500) |
-| **Error UX** | Connection lost indicator, manual refresh option |
-| **Security Notes** | Load access permissions, customer data filtering |
-| **Analytics** | Track `load.tracking.viewed`, `location.updated` events |
-| **Accessibility** | Map alternative text, status announcements |
-| **Design Tokens** | `--color-primary`, `--space-lg` |
-| **Traceability Links** | FRD-3.2.2 • API-LOADS-2 • NFRD-PERF-2 |
-
-## Navigation
-
-- [← Back to Master Document](./uiux_spec.md)
-- [← Payment Processing](./uiux_spec_payment_proc.md)
-- [Invoice Processing →](./uiux_spec_invoice_proc.md)
-"""
-
-    def _extract_invoice_views(self, content):
-        """Extract invoice processing view specifications"""
-        return """# Invoice Processing Interface Design
-
-This document defines the invoice processing view specifications following the UXDMD format.
-
-## View Catalogue
-
-| View-ID | Title | Route | Upstream FRD | Primary API Endpoint(s) | User Roles |
-|---------|-------|-------|--------------|-------------------------|------------|
-| `view-invoice-list` | Invoice List | `/invoices` | FRD-3.3.1 | `GET /invoices` | admin, finance |
-| `view-invoice-detail` | Invoice Detail | `/invoices/:id` | FRD-3.3.1 | `GET /invoices/{id}` | admin, finance |
-| `view-invoice-generate` | Invoice Generation | `/invoices/generate` | FRD-3.3.1 | `POST /invoices` | admin, finance |
-
-## Data Map
-
-| Data Key | API Contract | Store Slice | Caching TTL | Loaded By (View-IDs) | Security |
-|----------|--------------|-------------|-------------|---------------------|----------|
-| `invoices` | `GET /invoices` | `state.invoices.list` | 60s | invoice-list | auth required |
-| `invoice` | `GET /invoices/{id}` | `state.invoices.byId[id]` | 30s | invoice-detail | auth required |
-
-## Per-View Specification
-
-### view-invoice-generate (UXDMD-6)
-
-| Section | Detail |
-|---------|--------|
-| **Purpose** | Automated invoice generation from completed loads |
-| **Layout** | Multi-step wizard with preview and confirmation |
-| **Displayed Fields** | Load Details • Line Items • Tax Calculations • Total Amount |
-| **Primary Actions** | Generate Invoice, Save Draft, Send to Customer |
-| **Secondary Actions** | Apply discounts, add custom line items |
-| **State Behavior** | Auto-calculation, preview updates, generation progress |
-| **API Mapping** | `POST /invoices` (201/400/500) |
-| **Error UX** | Validation errors with field highlighting |
-| **Security Notes** | Financial data access controls, audit logging |
-| **Analytics** | Track `invoice.generated`, `invoice.sent` events |
-| **Accessibility** | Form progression announcements, calculation summaries |
-| **Design Tokens** | `--surface-elevated-3`, `--space-xl` |
-| **Traceability Links** | FRD-3.3.1 • API-INVOICES-1 • NFRD-AUDIT-1 |
-
-## Navigation
-
-- [← Back to Master Document](./uiux_spec.md)
-- [← Load Management](./uiux_spec_load_mgt.md)
-- [Carrier Management →](./uiux_spec_carrier_mgt.md)
-"""
-
-    def _extract_carrier_views(self, content):
-        """Extract carrier management view specifications"""
-        return """# Carrier Management Interface Design
-
-This document defines the carrier management view specifications following the UXDMD format.
-
-## View Catalogue
-
-| View-ID | Title | Route | Upstream FRD | Primary API Endpoint(s) | User Roles |
-|---------|-------|-------|--------------|-------------------------|------------|
-| `view-carrier-register` | Carrier Registration | `/carriers/register` | FRD-3.4.1 | `POST /carrier/register` | public, admin |
-| `view-carrier-portal` | Carrier Portal | `/carrier/portal` | FRD-3.4.2 | `GET /carrier/portal` | carrier, admin |
-
-## Data Map
-
-| Data Key | API Contract | Store Slice | Caching TTL | Loaded By (View-IDs) | Security |
-|----------|--------------|-------------|-------------|---------------------|----------|
-| `carrierPortal` | `GET /carrier/portal` | `state.carrier.portal` | 30s | carrier-portal | carrier auth |
-| `registration` | `POST /carrier/register` | `state.carrier.registration` | 0s | carrier-register | public access |
-
-## Per-View Specification
-
-### view-carrier-portal (UXDMD-7)
-
-| Section | Detail |
-|---------|--------|
-| **Purpose** | Self-service portal for carriers to manage loads and payments |
-| **Layout** | Dashboard layout with widgets for key metrics and actions |
-| **Displayed Fields** | Active Loads • Payment History • Performance Metrics • Notifications |
-| **Primary Actions** | View Load Details, Update Status, Submit Documents |
-| **Secondary Actions** | Download reports, contact support, update profile |
-| **State Behavior** | Real-time updates, notification badges |
-| **API Mapping** | `GET /carrier/portal` (200/401/500) |
-| **Error UX** | Session timeout warnings, offline mode indicators |
-| **Security Notes** | Carrier-specific data isolation, secure document upload |
-| **Analytics** | Track `carrier.portal.viewed`, `load.status.updated` events |
-| **Accessibility** | Dashboard navigation, status announcements |
-| **Design Tokens** | `--surface-carrier`, `--space-md` |
-| **Traceability Links** | FRD-3.4.2 • API-CARRIERS-2 • NFRD-SEC-3 |
-
-## Security Requirements
-
-| Topic | Requirement |
-|-------|-------------|
-| Data Isolation | Carriers only see their own data |
-| Document Security | Encrypted file uploads with virus scanning |
-| Session Management | Auto-logout after 30 minutes of inactivity |
-| Access Control | Role-based permissions for portal features |
-
-## Navigation
-
-- [← Back to Master Document](./uiux_spec.md)
-- [← Invoice Processing](./uiux_spec_invoice_proc.md)
 - [Information Architecture →](./uiux_spec_architecture.md)
 """
 
@@ -3732,567 +3607,53 @@ This document defines the carrier management view specifications following the U
         self.status_path.mkdir(parents=True, exist_ok=True)
 
         status_file = self.status_path / f"status_{doc_type.name.lower()}.json"
-
-        # Calculate file size
-        file_size = 0
-        doc_file = self.output_path / f"{doc_type.name.lower()}.md"
-        if doc_file.exists():
-            file_size = doc_file.stat().st_size
-
+        
         status_data = {
-            "id": doc_type.name,
-            "title": doc_type.value,
+            "document_type": doc_type.name,
             "status": doc.status.value,
-            "file_size": file_size,
-            "refined_count": doc.refined_count,
             "generated_at": doc.generated_at.isoformat() if doc.generated_at else None,
-            "elapsed_time": None,
-            "error_message": "; ".join(doc.validation_errors) if doc.validation_errors else None,
-            "dependencies": [dep.name for dep in doc.dependencies]
+            "refined_count": doc.refined_count,
+            "validation_errors": doc.validation_errors,
+            "content_preview": doc.content[:500] if doc.content else None
         }
+        
+        try:
+            with open(status_file, 'w', encoding='utf-8') as f:
+                json.dump(status_data, f, indent=2, ensure_ascii=False)
+            logger.info(f"Saved status file: {status_file}")
+        except Exception as e:
+            logger.error(f"Failed to save status file: {e}")
 
-        with open(status_file, 'w', encoding='utf-8') as f:
-            json.dump(status_data, f, indent=2)
-
-    def detect_resume_state(self) -> Dict[str, Any]:
-        """Detect current state for resume functionality"""
-        resume_info = {
-            "can_resume": False,
-            "completed_documents": [],
-            "in_progress_documents": [],
-            "failed_documents": [],
-            "not_started_documents": [],
-            "next_document": None,
-            "total_progress": 0
-        }
-
-        for doc_type in DocumentType:
-            doc_status = DocumentStatus.NOT_STARTED
-
-            status_file = self.status_path / f"status_{doc_type.name.lower()}.json"
-            if status_file.exists():
-                try:
-                    with open(status_file, 'r', encoding='utf-8') as f:
-                        status_data = json.load(f)
-                        doc_status = DocumentStatus(status_data.get("status", "not_started"))
-                except Exception as e:
-                    logger.warning(f"Error reading status file for {doc_type.name}: {e}")
-
-            # Categorize document based on status
-            if doc_status in [DocumentStatus.VALIDATED, DocumentStatus.REFINED, DocumentStatus.GENERATED]:
-                resume_info["completed_documents"].append(doc_type.name)
-            elif doc_status == DocumentStatus.IN_PROGRESS:
-                resume_info["in_progress_documents"].append(doc_type.name)
-            elif doc_status == DocumentStatus.FAILED:
-                resume_info["failed_documents"].append(doc_type.name)
-            else:
-                resume_info["not_started_documents"].append(doc_type.name)
-
-        # Calculate progress
-        total_docs = len(DocumentType)
-        completed_count = len(resume_info["completed_documents"])
-        resume_info["total_progress"] = (completed_count / total_docs) * 100
-
-        resume_info["can_resume"] = completed_count > 0
-
-        if resume_info["not_started_documents"]:
-            resume_info["next_document"] = resume_info["not_started_documents"][0]
-
-        return resume_info
-
-    async def load_existing_documents(self):
-        """Load existing document states for resume functionality"""
-        console.print("[cyan]Loading existing document states...[/cyan]")
-
-        for doc_type in DocumentType:
-            doc_file = self.output_path / f"{doc_type.name.lower()}.md"
-            status_file = self.status_path / f"status_{doc_type.name.lower()}.json"
-
-            if doc_type not in self.documents:
-                self.documents[doc_type] = Document(doc_type)
-
-            doc = self.documents[doc_type]
-
-            # Load from status file first
-            if status_file.exists():
-                try:
-                    with open(status_file, 'r', encoding='utf-8') as f:
-                        status_data = json.load(f)
-                        doc.status = DocumentStatus(status_data.get("status", "not_started"))
-                        doc.refined_count = status_data.get("refined_count", 0)
-                        if status_data.get("generated_at"):
-                            doc.generated_at = datetime.fromisoformat(status_data["generated_at"])
-                except Exception as e:
-                    logger.warning(f"Error loading status for {doc_type.name}: {e}")
-
-            # Load document content if file exists
-            if doc_file.exists():
-                try:
-                    content = doc_file.read_text(encoding='utf-8')
-                    if content.startswith("---"):
-                        metadata_end = content.find("---", 3)
-                        if metadata_end > 0:
-                            doc.content = content[metadata_end + 3:].strip()
-                    else:
-                        doc.content = content
-                        if doc.status == DocumentStatus.NOT_STARTED:
-                            doc.status = DocumentStatus.GENERATED
-
-                    console.print(f"[dim]Loaded {doc_type.value}: {doc.status.value}[/dim]")
-
-                except Exception as e:
-                    logger.warning(f"Error loading document content for {doc_type.name}: {e}")
-
-        console.print("[green]+ Existing document states loaded[/green]")
-
-    def generate_status_report(self) -> str:
-        """Generate a status report of all documents"""
+    def print_status_summary(self):
+        """Print a summary of all document statuses"""
         table = Table(title=f"Requirements Generation Status - {self.project_name}")
-        
-        table.add_column("Document", style="cyan", no_wrap=True)
-        table.add_column("Status", style="magenta")
-        table.add_column("Generated At", style="green")
-        table.add_column("Refined", style="yellow")
-        table.add_column("Reviewed", style="blue")
-        table.add_column("LLMs Used", style="white")
-        table.add_column("Errors", style="red")
-        
-        for doc_type, doc in self.documents.items():
-            status_emoji = {
-                DocumentStatus.NOT_STARTED: "[NS]",
-                DocumentStatus.IN_PROGRESS: "[IP]",
-                DocumentStatus.GENERATED: "[GN]",
-                DocumentStatus.REFINED: "[RF]",
-                DocumentStatus.VALIDATED: "[VL]",
-                DocumentStatus.FAILED: "[FL]"
-            }
+        table.add_column("Document", style="cyan")
+        table.add_column("Status", style="bold")
+        table.add_column("Generated At", style="dim")
+
+        for doc_type in DocumentType:
+            doc = self.documents[doc_type]
             
-            status = f"{status_emoji.get(doc.status, '')} {doc.status.value}"
-            generated_at = doc.generated_at.strftime("%Y-%m-%d %H:%M") if doc.generated_at else "N/A"
-            refined = f"{doc.refined_count} times" if doc.refined_count > 0 else "No"
-            reviewed = f"{doc.review_count} times" if doc.review_count > 0 else "No"
-
-            # Build LLMs used string
-            llms_used = []
-            if doc.primary_llm_used:
-                llms_used.append(f"Primary: {doc.primary_llm_used}")
-            if doc.reviewer_llm_used:
-                llms_used.append(f"Reviewer: {doc.reviewer_llm_used}")
-            llms_str = "; ".join(llms_used) if llms_used else "N/A"
-
-            errors = len(doc.validation_errors) + len(doc.review_errors)
-
+            # Status with color coding
+            if doc.status == DocumentStatus.VALIDATED:
+                status = "[green]✓ Validated[/green]"
+            elif doc.status == DocumentStatus.GENERATED:
+                status = "[yellow]Generated[/yellow]"
+            elif doc.status == DocumentStatus.IN_PROGRESS:
+                status = "[blue]In Progress[/blue]"
+            elif doc.status == DocumentStatus.FAILED:
+                status = "[red]Failed[/red]"
+            else:
+                status = "[dim]Not Started[/dim]"
+            
+            # Generated at timestamp
+            generated_at = doc.generated_at.strftime("%H:%M:%S") if doc.generated_at else "-"
+            
             table.add_row(
                 doc_type.value,
                 status,
-                generated_at,
-                refined,
-                reviewed,
-                llms_str,
-                str(errors) if errors > 0 else "None"
+                generated_at
             )
-        
+
         console.print(table)
-        
-        # Save status report
-        report_path = self.output_path / "status_report.txt"
-        with open(report_path, "w", encoding='utf-8') as f:
-            from rich.console import Console
-            file_console = Console(file=f)
-            file_console.print(table)
-        
-        return str(table)
-    
-    def generate_rtm_data(self) -> Dict[str, Any]:
-        """Generate data structure for RTM"""
-        rtm_data = {
-            "project_name": self.project_name,
-            "generated_at": datetime.now().isoformat(),
-            "documents": {},
-            "traceability_links": []
-        }
-        
-        for doc_type, doc in self.documents.items():
-            if doc.status in [DocumentStatus.GENERATED, DocumentStatus.REFINED, DocumentStatus.VALIDATED]:
-                import re
-                id_pattern = rf"{doc_type.name.replace('_', '-')}-\d+"
-                ids = re.findall(id_pattern, doc.content) if doc.content else []
-                
-                rtm_data["documents"][doc_type.name] = {
-                    "title": doc_type.value,
-                    "status": doc.status.value,
-                    "requirement_ids": list(set(ids)),
-                    "dependencies": [dep.name for dep in doc.dependencies]
-                }
-        
-        return rtm_data
 
-    async def run_review_only_mode(self):
-        """Run review-only mode on existing documents"""
-        console.print(Panel.fit(
-            f"[bold cyan]Requirements Review-Only Mode[/bold cyan]\n"
-            f"Project: {self.project_name}\n"
-            f"Output: {self.output_path}\n"
-            f"Reviewer LLM: {self.review_config.get('reviewer_llm', {}).get('provider', 'gemini').upper()}\n"
-            f"Mode: Review Existing Documents Only",
-            title="Starting Review Process"
-        ))
-
-        if not self.review_config.get('enabled', False):
-            console.print("[red][ERROR] Review system is disabled. Cannot run review-only mode.[/red]")
-            console.print("[yellow]Enable review system in config.yaml or remove --no-review flag[/yellow]")
-            return
-
-        if not self.reviewer_llm_client:
-            console.print("[red][ERROR] Reviewer LLM client not available. Check API keys.[/red]")
-            return
-
-        # Load existing documents
-        await self.load_existing_documents()
-
-        # Find documents that exist and can be reviewed
-        reviewable_docs = []
-        for doc_type, doc in self.documents.items():
-            if doc.status in [DocumentStatus.GENERATED, DocumentStatus.REFINED, DocumentStatus.VALIDATED]:
-                reviewable_docs.append(doc_type)
-
-        if not reviewable_docs:
-            console.print("[yellow][WARNING]  No existing documents found that can be reviewed.[/yellow]")
-            console.print("[cyan]Documents must be in GENERATED, REFINED, or VALIDATED status to be reviewed.[/cyan]")
-            return
-
-        console.print(f"\n[cyan]Found {len(reviewable_docs)} documents ready for review:[/cyan]")
-        for doc_type in reviewable_docs:
-            doc = self.documents[doc_type]
-            console.print(f"  • {doc_type.value} (Status: {doc.status.value})")
-
-        console.print(f"\n[cyan]Starting review process...[/cyan]\n")
-
-        # Review each document
-        reviewed_count = 0
-        failed_count = 0
-
-        for doc_type in reviewable_docs:
-            try:
-                console.print(f"[cyan]Reviewing {doc_type.value}...[/cyan]")
-
-                # Review document with reviewer LLM
-                review_success = await self.review_document(doc_type)
-
-                if review_success:
-                    console.print(f"[green][OK] {doc_type.value} reviewed and improved[/green]")
-                    reviewed_count += 1
-                else:
-                    console.print(f"[red][FAIL] Review failed for {doc_type.value}[/red]")
-                    failed_count += 1
-
-            except Exception as e:
-                console.print(f"[red]Error reviewing {doc_type.value}: {str(e)}[/red]")
-                logger.error(f"Review failed for {doc_type.value}", exc_info=True)
-                failed_count += 1
-
-        # Generate final status report
-        console.print("\n" + "="*80 + "\n")
-        console.print(Panel.fit(
-            f"[bold green]Review Process Complete![/bold green]\n"
-            f"Documents reviewed: {reviewed_count}\n"
-            f"Review failures: {failed_count}\n"
-            f"Total processed: {len(reviewable_docs)}\n"
-            f"Updated documents saved to: {self.output_path}",
-            title="Review Summary"
-        ))
-
-        # Generate updated status report
-        self.generate_status_report()
-
-    async def run(self, skip_existing: bool = False, max_refinements: int = 2, model_provider: str = "openai", resume: bool = False, auto_repair: bool = True, review_only: bool = False):
-        """Run the complete document generation process"""
-
-        # Handle review-only mode
-        if review_only:
-            return await self.run_review_only_mode()
-
-        # Handle resume mode
-        if resume:
-            resume_info = self.detect_resume_state()
-
-            if not resume_info["can_resume"]:
-                console.print("[yellow]No previous generation found to resume from.[/yellow]")
-                console.print("[cyan]Starting fresh generation instead...[/cyan]")
-                resume = False
-            else:
-                # Load existing document states
-                await self.load_existing_documents()
-                skip_existing = True
-
-        # Build LLM configuration display
-        llm_config_display = f"Primary: {model_provider.upper()} ({self.model_names[model_provider.lower()]})"
-        if self.review_config.get('enabled', False) and self.reviewer_llm_client:
-            reviewer_provider = self.review_config.get('reviewer_llm', {}).get('provider', 'gemini')
-            reviewer_model = self.review_config.get('reviewer_llm', {}).get('model', 'unknown')
-            llm_config_display += f"\nReviewer: {reviewer_provider.upper()} ({reviewer_model})"
-        elif self.review_config.get('enabled', False):
-            llm_config_display += "\nReviewer: [red]DISABLED (API key missing)[/red]"
-        else:
-            llm_config_display += "\nReviewer: [yellow]DISABLED[/yellow]"
-
-        console.print(Panel.fit(
-            f"[bold cyan]Requirements Generation System[/bold cyan]\n"
-            f"Project: {self.project_name}\n"
-            f"Output: {self.output_path}\n"
-            f"LLM Configuration:\n{llm_config_display}\n"
-            f"Mode: {'Resume' if resume else 'Full Generation'}",
-            title="Starting Generation Process"
-        ))
-        
-        # Visualize initial state
-        self.visualize_dependencies("initial_state.png")
-        
-        # Get generation order
-        generation_order = self.get_generation_order()
-        console.print(f"\n[cyan]Generation order: {' -> '.join([dt.name for dt in generation_order])}[/cyan]\n")
-        
-        # Generate documents in order
-        for doc_type in generation_order:
-            doc = self.documents[doc_type]
-            
-            # Skip if already generated and skip_existing is True
-            if skip_existing and doc.status != DocumentStatus.NOT_STARTED:
-                console.print(f"[yellow]Skipping {doc_type.value} (already generated)[/yellow]")
-                continue
-            
-            try:
-                # Generate document
-                await self.generate_document(doc_type, model_provider)
-                
-                # Refine document
-                for i in range(1, max_refinements + 1):
-                    await self.refine_document(doc_type, i, model_provider)
-
-                # Validate document (with optional automatic repair)
-                if auto_repair:
-                    validation_success = await self.validate_and_repair_document(doc_type, max_repair_attempts=3)
-
-                    if not validation_success:
-                        console.print(f"[red][WARNING]  {doc_type.value} failed validation after auto-repair attempts[/red]")
-                        console.print(f"[yellow]Document saved but may have issues. Manual review recommended.[/yellow]")
-                else:
-                    # Use basic validation without auto-repair
-                    await self.validate_document(doc_type)
-
-                # Review document with reviewer LLM (if enabled)
-                review_success = await self.review_document(doc_type)
-                if review_success:
-                    console.print(f"[green][OK] {doc_type.value} reviewed and improved[/green]")
-                else:
-                    console.print(f"[yellow][WARNING]  Review step failed for {doc_type.value}, using original version[/yellow]")
-
-                # Update visualization after each document
-                self.visualize_dependencies(f"state_after_{doc_type.name.lower()}.png")
-                
-            except Exception as e:
-                console.print(f"[red]Failed to process {doc_type.value}: {str(e)}[/red]")
-                logger.error(f"Document generation failed for {doc_type.value}", exc_info=True)
-                
-                # Ask user if they want to continue
-                if input(f"\nContinue with remaining documents? (y/n): ").lower() != 'y':
-                    break
-        
-        # Generate final status report
-        console.print("\n" + "="*80 + "\n")
-        self.generate_status_report()
-        
-        # Generate RTM data
-        rtm_data = self.generate_rtm_data()
-        rtm_path = self.output_path / "rtm_data.json"
-        rtm_path.write_text(json.dumps(rtm_data, indent=2), encoding='utf-8')
-        console.print(f"\n[green]RTM data saved to {rtm_path}[/green]")
-        
-        # Final visualization
-        self.visualize_dependencies("final_state.png")
-        
-        console.print(Panel.fit(
-            "[bold green]Generation Process Complete![/bold green]\n"
-            f"Documents saved to: {self.output_path}",
-            title="Success"
-        ))
-
-    async def _save_trd_split_documents(self, doc):
-        """Save Technical Requirements Document as split documents"""
-        logger.info("Generating split Technical Requirements documents")
-
-        # Define the split document structure
-        split_docs = {
-            "trd.md": {
-                "title": "Technical Requirements Document - Master Document",
-                "id": "TRD",
-                "content": generate_master_trd_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "trd_architecture.md": {
-                "title": "System Architecture and Design Decisions",
-                "id": "TRD_ARCHITECTURE",
-                "content": generate_trd_architecture_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "trd_technology_stack.md": {
-                "title": "Technology Stack and Component Design",
-                "id": "TRD_TECHNOLOGY",
-                "content": generate_trd_technology_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "trd_security.md": {
-                "title": "Security Architecture and Requirements",
-                "id": "TRD_SECURITY",
-                "content": generate_trd_security_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "trd_infrastructure.md": {
-                "title": "Infrastructure and Deployment Requirements",
-                "id": "TRD_INFRASTRUCTURE",
-                "content": generate_trd_infrastructure_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "trd_performance.md": {
-                "title": "Performance Engineering and Optimization",
-                "id": "TRD_PERFORMANCE",
-                "content": generate_trd_performance_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "trd_operations.md": {
-                "title": "Operational Requirements and DevOps",
-                "id": "TRD_OPERATIONS",
-                "content": generate_trd_operations_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            }
-        }
-
-        # Save each split document
-        for filename, doc_info in split_docs.items():
-            filepath = self.output_path / filename
-
-            # Create metadata for each split document
-            metadata = {
-                "dependencies": [dep.name for dep in doc.dependencies],
-                "generated_at": doc.generated_at.isoformat() if doc.generated_at else None,
-                "id": doc_info["id"],
-                "refined_count": doc.refined_count,
-                "status": doc.status.value,
-                "title": doc_info["title"],
-                "version": "1.0"
-            }
-
-            # Create full document content
-            full_content = f"""---
-{yaml.dump(metadata, default_flow_style=False)}---
-
-{doc_info["content"]}
-"""
-
-            filepath.write_text(full_content, encoding='utf-8')
-            logger.info(f"Saved TRD split document: {filename}")
-
-    async def _save_test_plan_split_documents(self, doc):
-        """Save Test Plan as split documents"""
-        logger.info("Generating split Test Plan documents")
-
-        # Define the split document structure
-        split_docs = {
-            "test_plan.md": {
-                "title": "Test Plan - Master Document",
-                "id": "TEST_PLAN",
-                "content": generate_master_test_plan_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "test_strategy.md": {
-                "title": "Test Strategy and Approach",
-                "id": "TEST_STRATEGY",
-                "content": generate_test_strategy_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "test_cases_functional.md": {
-                "title": "Functional Test Cases",
-                "id": "TEST_CASES_FUNCTIONAL",
-                "content": generate_functional_test_cases_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "test_cases_performance.md": {
-                "title": "Performance Test Cases",
-                "id": "TEST_CASES_PERFORMANCE",
-                "content": generate_performance_test_cases_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "test_cases_security.md": {
-                "title": "Security Test Cases",
-                "id": "TEST_CASES_SECURITY",
-                "content": generate_security_test_cases_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            },
-            "test_automation.md": {
-                "title": "Test Automation Framework and Scripts",
-                "id": "TEST_AUTOMATION",
-                "content": generate_test_automation_doc(doc.content) if SPLIT_GENERATORS_AVAILABLE else doc.content
-            }
-        }
-
-        # Save each split document
-        for filename, doc_info in split_docs.items():
-            filepath = self.output_path / filename
-
-            # Create metadata for each split document
-            metadata = {
-                "dependencies": [dep.name for dep in doc.dependencies],
-                "generated_at": doc.generated_at.isoformat() if doc.generated_at else None,
-                "id": doc_info["id"],
-                "refined_count": doc.refined_count,
-                "status": doc.status.value,
-                "title": doc_info["title"],
-                "version": "1.0"
-            }
-
-            # Create full document content
-            full_content = f"""---
-{yaml.dump(metadata, default_flow_style=False)}---
-
-{doc_info["content"]}
-"""
-
-            filepath.write_text(full_content, encoding='utf-8')
-            logger.info(f"Saved Test Plan split document: {filename}")
-
-
-async def main():
-    """Main entry point"""
-    import argparse
-    
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description="Requirements Generation System")
-    parser.add_argument("--model", choices=["openai", "anthropic", "gemini"], default="openai",
-                        help="LLM provider to use (default: openai)")
-    parser.add_argument("--config", type=str, help="Path to configuration file")
-    parser.add_argument("--skip-existing", action="store_true", help="Skip documents that have already been generated")
-    parser.add_argument("--max-refinements", type=int, default=2, help="Maximum number of refinement rounds per document")
-    parser.add_argument("--resume", action="store_true", help="Resume from last checkpoint")
-    parser.add_argument("--no-auto-repair", action="store_true", help="Disable automatic document repair (use basic validation only)")
-    parser.add_argument("--no-review", action="store_true", help="Disable dual-LLM review system")
-    parser.add_argument("--review-only", action="store_true", help="Review existing documents only (no generation)")
-    
-    args = parser.parse_args()
-    
-    # Configuration - Use project folder instead of hardcoded client path
-    project_name = "LSOMigrator"
-    # Get the current script directory and navigate to project folder
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent / "project"
-    base_path = project_root
-
-    # Create orchestrator with optional config
-    config_path = Path(args.config) if args.config else None
-    orchestrator = RequirementsOrchestrator(project_name, base_path, config_path, model_provider=args.model)
-
-    # Override review system if disabled via command line
-    if args.no_review:
-        orchestrator.review_config['enabled'] = False
-        console.print("[yellow]Review system disabled via command line argument[/yellow]")
-    
-    # Run the generation process
-    await orchestrator.run(
-        skip_existing=args.skip_existing,
-        max_refinements=args.max_refinements,
-        model_provider=args.model,
-        resume=args.resume,
-        auto_repair=not args.no_auto_repair,  # Enable auto-repair by default, disable with --no-auto-repair
-        review_only=args.review_only
-    )
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

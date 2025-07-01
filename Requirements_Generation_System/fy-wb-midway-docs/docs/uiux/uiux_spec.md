@@ -1,22 +1,22 @@
-# FY.WB.Midway Enterprise Logistics Platform - UI/UX Design and Mapping Document (UXDMD)
+# LSOMigrator Enterprise Logistics Platform - UI/UX Design and Mapping Document (UXDMD)
 
 ## Overview
 
-This is the master UI/UX Design and Mapping Document (UXDMD) for the FY.WB.Midway Enterprise Logistics Platform. The complete UI/UX specification follows the UXDMD structure and is organized into multiple linked documents for better maintainability and developer-ready implementation.
+This is the master UI/UX Design and Mapping Document (UXDMD) for the LSOMigrator Enterprise Logistics Platform. The complete UI/UX specification follows the UXDMD structure and is organized into multiple linked documents for better maintainability and developer-ready implementation.
 
 # UI/UX Design and Mapping Document (UXDMD)
 
 ## 1. Purpose & Scope
 
-The FY.WB.Midway platform is specifically crafted to innovate operational management processes for mid-sized enterprises, with a focus on the manufacturing and retail sectors. This document outlines a detailed UI/UX design framework that is in full alignment with the functional requirements specified in the FRD and PRD documents. The primary goal is to ensure the user interface and user experience are intuitive, efficient, and strategically aligned with business objectives, thereby enhancing resource management and operational efficiency.
+The LSOMigrator platform is specifically crafted to innovate operational management processes for mid-sized enterprises, with a focus on the manufacturing and retail sectors. This document outlines a detailed UI/UX design framework that is in full alignment with the functional requirements specified in the FRD and PRD documents. The primary goal is to ensure the user interface and user experience are intuitive, efficient, and strategically aligned with business objectives, thereby enhancing resource management and operational efficiency.
 
 Key objectives include equipping operations managers with tools for real-time inventory tracking and automated resource allocation, and providing IT specialists with seamless integration and monitoring capabilities. The design must cater to user-centric interactions, ensuring accessibility and usability across multiple user roles. The scope includes detailed specifications for all interface components, ensuring they comply with defined requirements and significantly enhance user satisfaction. By concentrating on user needs and business goals, the UI/UX design targets a 50% reduction in operational overhead and a 70% improvement in resource utilization efficiency, as outlined in the PRD.
 
-The FY.WB.Midway platform is designed to go beyond technical compliance by delivering a seamless user experience that promotes strategic growth. This document provides a detailed methodology to achieve these objectives, ensuring all design elements are cohesive and traceable back to the functional and product requirements. This comprehensive guide includes visual guidelines, interaction flows, and specifications for each view and component, serving as a roadmap for developers to create an intuitive and effective user interface.
+The LSOMigrator platform is designed to go beyond technical compliance by delivering a seamless user experience that promotes strategic growth. This document provides a detailed methodology to achieve these objectives, ensuring all design elements are cohesive and traceable back to the functional and product requirements. This comprehensive guide includes visual guidelines, interaction flows, and specifications for each view and component, serving as a roadmap for developers to create an intuitive and effective user interface.
 
 ## 2. Screen/View Catalogue
 
-The screen/view catalogue for FY.WB.Midway is methodically crafted to meet the varied needs of operations managers and IT specialists. Each view is designed to deliver specific functionalities, ensuring ease of use and alignment with the platform's objectives. Below is a comprehensive catalogue of all screens and views, with detailed specifications and traceability to the functional requirements.
+The screen/view catalogue for LSOMigrator is methodically crafted to meet the varied needs of operations managers and IT specialists. Each view is designed to deliver specific functionalities, ensuring ease of use and alignment with the platform's objectives. Below is a comprehensive catalogue of all screens and views, with detailed specifications and traceability to the functional requirements.
 
 ### 2.1 Dashboard View
 - **Description**: Functions as the central hub for users to access key metrics and insights.
@@ -43,7 +43,7 @@ The screen/view catalogue for FY.WB.Midway is methodically crafted to meet the v
 - **FRD Traceability**: FRD-3.3.1, FRD-3.3.2
 - **Key Features**: API management, performance alerts, integration status.
 
-Each screen is designed with user-centric design principles, ensuring that all interactions are intuitive and efficient. The catalogue supports the strategic objectives of FY.WB.Midway by facilitating seamless operations and informed decision-making through well-structured and accessible interfaces.
+Each screen is designed with user-centric design principles, ensuring that all interactions are intuitive and efficient. The catalogue supports the strategic objectives of LSOMigrator by facilitating seamless operations and informed decision-making through well-structured and accessible interfaces.
 
 ## 3. Information Architecture
 

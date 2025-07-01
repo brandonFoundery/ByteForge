@@ -10,7 +10,7 @@ def check_development_status():
     """Check the current development status of all requirements."""
     
     # Load the requirements tracker
-    tracker_path = Path('d:/Repository/@Clients/FY.WB.Midway/Requirements_Traceable/cross-cutting/requirements_tracker.json')
+    tracker_path = Path('project/Requirements_Traceable/cross-cutting/requirements_tracker.json')
     
     with open(tracker_path, 'r', encoding='utf-8') as f:
         data = json.load(f)

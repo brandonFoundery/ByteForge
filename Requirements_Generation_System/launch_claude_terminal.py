@@ -15,7 +15,7 @@ console = Console()
 def create_monitoring_script():
     """Create a script that launches Claude Code with real implementation"""
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     logs_path = base_path / "logs"
     
     # Ensure logs directory exists
@@ -206,7 +206,7 @@ def check_current_directories():
     console.print("\n" + "="*60)
     console.print("[bold]📁 Current Directory Analysis[/bold]")
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     
     # Check FrontEnd directory
     frontend_path = base_path / "FrontEnd"

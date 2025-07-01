@@ -974,7 +974,7 @@ fi
 
 def main():
     """Main function to generate Claude instructions"""
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     generator = ClaudeInstructionGenerator(base_path)
     
     success = generator.generate_all_instructions()

@@ -74,7 +74,7 @@ def test_claude_command():
         # Test working directory
         console.print("\n[cyan]Testing working directory access...[/cyan]")
         
-        project_root = "/mnt/d/Repository/@Clients/FY.WB.Midway"
+        project_root = "project"
         
         if sys.platform == "win32":
             result = subprocess.run([
@@ -110,7 +110,7 @@ def show_manual_commands():
         console.print("wsl -d Ubuntu")
         console.print("claude --version")
         console.print("claude --help")
-        console.print("cd /mnt/d/Repository/@Clients/FY.WB.Midway")
+        console.print("cd project")
         console.print("ls -la FrontEnd/src/pages/")
     else:
         console.print("\n[cyan]In Terminal:[/cyan]")

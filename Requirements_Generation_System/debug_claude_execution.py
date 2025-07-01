@@ -16,7 +16,7 @@ async def debug_claude_execution():
     
     console.print("[bold blue]🔍 Debugging Claude Code Execution[/bold blue]")
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     logs_path = base_path / "logs"
     
     # Ensure logs directory exists

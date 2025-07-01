@@ -1,8 +1,8 @@
-# Requirements Traceability Matrix (RTM) for FY.WB.Midway
+# Requirements Traceability Matrix (RTM) for LSOMigrator
 
 ## 1. RTM Overview
 
-The Requirements Traceability Matrix (RTM) for the FY.WB.Midway project serves as a comprehensive framework to manage and track the interconnections between various project requirements and deliverables. This matrix ensures that all business, product, functional, non-functional, and technical requirements are meticulously addressed throughout the project lifecycle. It provides detailed mapping from the initial business needs captured in the Business Requirements Document (BRD) through the detailed product specifications in the Product Requirements Document (PRD), down to the Functional and Non-Functional Requirements Documents (FRD, NFRD), and the Technical Requirements Document (TRD). By ensuring complete bidirectional traceability, it maintains alignment between stakeholder expectations and the delivered product.
+The Requirements Traceability Matrix (RTM) for the LSOMigrator project serves as a comprehensive framework to manage and track the interconnections between various project requirements and deliverables. This matrix ensures that all business, product, functional, non-functional, and technical requirements are meticulously addressed throughout the project lifecycle. It provides detailed mapping from the initial business needs captured in the Business Requirements Document (BRD) through the detailed product specifications in the Product Requirements Document (PRD), down to the Functional and Non-Functional Requirements Documents (FRD, NFRD), and the Technical Requirements Document (TRD). By ensuring complete bidirectional traceability, it maintains alignment between stakeholder expectations and the delivered product.
 
 ### Purpose and Scope
 
@@ -11,7 +11,7 @@ The purpose of this RTM is to:
 - Offer a structured framework for identifying dependencies, impact, and compliance issues.
 - Enhance stakeholder communication by clearly documenting the relationships between requirements and project deliverables.
 
-The RTM encompasses all identified requirements and ensures they are linked to corresponding design specifications, test cases, and implementation artifacts. This document is essential for project management, quality assurance, and compliance verification, ensuring that the FY.WB.Midway platform meets its defined objectives and delivers value to its users.
+The RTM encompasses all identified requirements and ensures they are linked to corresponding design specifications, test cases, and implementation artifacts. This document is essential for project management, quality assurance, and compliance verification, ensuring that the LSOMigrator platform meets its defined objectives and delivers value to its users.
 
 ### Importance of Traceability
 
@@ -211,4 +211,4 @@ Ongoing maintenance of the RTM is crucial for adapting to project changes and en
 - **Feedback Loops**: Establish feedback loops with project teams to identify areas for improvement in traceability practices.
 - **Process Refinement**: Continuously refine RTM processes to enhance efficiency and effectiveness in managing requirements.
 
-This comprehensive RTM ensures that the FY.WB.Midway project remains aligned with business objectives, stakeholder expectations, and industry standards, facilitating successful project delivery and user satisfaction.
+This comprehensive RTM ensures that the LSOMigrator project remains aligned with business objectives, stakeholder expectations, and industry standards, facilitating successful project delivery and user satisfaction.

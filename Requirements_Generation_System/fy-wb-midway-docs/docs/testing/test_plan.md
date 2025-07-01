@@ -1,8 +1,8 @@
-# Test Plan - FY.WB.Midway Enterprise Logistics Platform
+# Test Plan - LSOMigrator Enterprise Logistics Platform
 
 ## Overview
 
-This is the master document for the FY.WB.Midway Enterprise Logistics Platform Test Plan. The complete testing strategy and test cases are organized into multiple linked documents for better maintainability and execution tracking.
+This is the master document for the LSOMigrator Enterprise Logistics Platform Test Plan. The complete testing strategy and test cases are organized into multiple linked documents for better maintainability and execution tracking.
 
 ## Test Objectives
 

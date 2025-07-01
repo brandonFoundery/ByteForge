@@ -356,7 +356,7 @@ def main():
     command = sys.argv[1]
     
     if command == "analyze":
-        path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("d:/Repository/@Clients/FY.WB.Midway/generated_documents")
+        path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("project/requirements")
         analyzer = TraceabilityAnalyzer(path)
         analyzer.analyze_traceability()
         
@@ -368,13 +368,13 @@ def main():
         validate_document_structure(doc_path)
         
     elif command == "export":
-        path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("d:/Repository/@Clients/FY.WB.Midway/generated_documents")
+        path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("project/requirements")
         analyzer = TraceabilityAnalyzer(path)
         analyzer.load_documents()
         analyzer.export_traceability_matrix(path / "traceability_matrix.csv")
         
     elif command == "graph":
-        path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("d:/Repository/@Clients/FY.WB.Midway/generated_documents")
+        path = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("project/requirements")
         analyzer = TraceabilityAnalyzer(path)
         analyzer.load_documents()
         analyzer.visualize_traceability_graph(path / "traceability_graph.png")

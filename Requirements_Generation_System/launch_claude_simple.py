@@ -14,7 +14,7 @@ console = Console()
 def create_simple_monitoring_script():
     """Create a simple monitoring script without Unicode issues"""
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     logs_path = base_path / "logs"
     
     # Ensure logs directory exists
@@ -179,7 +179,7 @@ def analyze_existing_structure():
     
     console.print("\n[bold]Analyzing existing project structure...[/bold]")
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     frontend_path = base_path / "FrontEnd"
     
     if frontend_path.exists():
@@ -258,7 +258,7 @@ def main():
             
             # Monitor the log file
             console.print("\n[yellow]Monitoring log file for updates...[/yellow]")
-            log_file = Path("D:/Repository/@Clients/FY.WB.Midway/logs/claude_terminal_execution.log")
+            log_file = Path("project/logs/claude_terminal_execution.log")
             
             for i in range(30):  # Monitor for 30 seconds
                 if log_file.exists():

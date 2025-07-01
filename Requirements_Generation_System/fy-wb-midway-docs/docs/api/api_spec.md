@@ -1,8 +1,8 @@
-# FY.WB.Midway Enterprise Logistics Platform API
+# LSOMigrator Enterprise Logistics Platform API
 
 ## Overview
 
-This is the master document for the FY.WB.Midway Enterprise Logistics Platform API specification. The complete API documentation is organized into multiple linked documents for better maintainability and navigation.
+This is the master document for the LSOMigrator Enterprise Logistics Platform API specification. The complete API documentation is organized into multiple linked documents for better maintainability and navigation.
 
 ## OpenAPI Specification
 

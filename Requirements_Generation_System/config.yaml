@@ -356,7 +356,7 @@ application_builder:
       run_command: ["dotnet", "run"]
       restore_command: ["dotnet", "restore"]
       clean_command: ["dotnet", "clean"]
-      working_directory: "BackEnd/FY.WB.Midway"
+      working_directory: "BackEnd"
 
   # Git Configuration
   git:

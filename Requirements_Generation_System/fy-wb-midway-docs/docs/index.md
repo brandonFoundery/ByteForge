@@ -1,15 +1,15 @@
-# FY.WB.Midway Enterprise Logistics Platform
+# LSOMigrator Enterprise Logistics Platform
 
 ## Project Overview
 
-Welcome to the comprehensive documentation for the **FY.WB.Midway Enterprise Logistics Platform** - a cutting-edge, cloud-native solution designed to revolutionize logistics operations for mid-sized enterprises.
+Welcome to the comprehensive documentation for the **LSOMigrator Enterprise Logistics Platform** - a cutting-edge, cloud-native solution designed to revolutionize logistics operations for mid-sized enterprises.
 
 !!! info "Project Status"
-    This documentation represents the complete requirements, technical specifications, and implementation guidelines for the FY.WB.Midway platform as of **June 2025**.
+    This documentation represents the complete requirements, technical specifications, and implementation guidelines for the LSOMigrator platform as of **June 2025**.
 
 ## Platform Capabilities
 
-The FY.WB.Midway platform provides:
+The LSOMigrator platform provides:
 
 - **🚚 Load Management** - Advanced booking, tracking, and optimization
 - **💳 Payment Processing** - Secure, PCI-compliant financial transactions
@@ -166,4 +166,4 @@ To explore the documentation:
 
 ---
 
-*This documentation is automatically generated from the FY.WB.Midway requirements generation system and is kept up-to-date with the latest project specifications.*
+*This documentation is automatically generated from the LSOMigrator requirements generation system and is kept up-to-date with the latest project specifications.*

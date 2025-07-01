@@ -8,72 +8,72 @@
       "theme_id": 1,
       "theme_name": "Modern Minimal",
       "description": "Clean, professional design with subtle shadows",
-      "html_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_1.html",
-      "screenshot_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_1_screenshot.png",
+      "html_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_1.html",
+      "screenshot_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_1_screenshot.png",
       "success": true
     },
     {
       "theme_id": 2,
       "theme_name": "Vibrant Gradient",
       "description": "Colorful gradients with purple accents",
-      "html_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_2.html",
-      "screenshot_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_2_screenshot.png",
+      "html_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_2.html",
+      "screenshot_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_2_screenshot.png",
       "success": true
     },
     {
       "theme_id": 3,
       "theme_name": "Dark Professional",
       "description": "Dark theme with cyan highlights",
-      "html_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_3.html",
-      "screenshot_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_3_screenshot.png",
+      "html_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_3.html",
+      "screenshot_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_3_screenshot.png",
       "success": true
     },
     {
       "theme_id": 4,
       "theme_name": "Warm Earth Tones",
       "description": "Warm yellows and browns, organic feel",
-      "html_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_4.html",
-      "screenshot_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_4_screenshot.png",
+      "html_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_4.html",
+      "screenshot_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_4_screenshot.png",
       "success": true
     },
     {
       "theme_id": 5,
       "theme_name": "Cool Blue Corporate",
       "description": "Traditional corporate blue styling",
-      "html_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_5.html",
-      "screenshot_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_5_screenshot.png",
+      "html_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_5.html",
+      "screenshot_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_5_screenshot.png",
       "success": true
     },
     {
       "theme_id": 6,
       "theme_name": "Nature Green",
       "description": "Fresh green theme with rounded corners",
-      "html_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_6.html",
-      "screenshot_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_6_screenshot.png",
+      "html_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_6.html",
+      "screenshot_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_6_screenshot.png",
       "success": true
     },
     {
       "theme_id": 7,
       "theme_name": "Elegant Monochrome",
       "description": "Sophisticated grayscale design",
-      "html_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_7.html",
-      "screenshot_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_7_screenshot.png",
+      "html_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_7.html",
+      "screenshot_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_7_screenshot.png",
       "success": true
     },
     {
       "theme_id": 8,
       "theme_name": "Sunset Orange",
       "description": "Warm gradient with orange sunset colors",
-      "html_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_8.html",
-      "screenshot_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_8_screenshot.png",
+      "html_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_8.html",
+      "screenshot_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_8_screenshot.png",
       "success": true
     },
     {
       "theme_id": 9,
       "theme_name": "Tech Neon",
       "description": "Futuristic neon green on black",
-      "html_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_9.html",
-      "screenshot_path": "d:\\Repository\\@Clients\\FY.WB.Midway\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_9_screenshot.png",
+      "html_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\temp_pages\\dashboard_theme_9.html",
+      "screenshot_path": "d:\\Repository\\@Clients\\LSOMigrator\\Requirements_Generation_System\\ui_style_system\\screenshots\\ui_style_9_screenshot.png",
       "success": true
     }
   ]

@@ -24,7 +24,7 @@ async def test_basic_workflow():
     
     # Initialize the application builder
     project_name = "FY.WB.Midway"
-    base_path = Path("d:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     config_path = Path(__file__).parent / "config.yaml"
     
     try:
@@ -128,7 +128,7 @@ async def test_logging_system():
     try:
         from multi_terminal_logger import MultiTerminalLogger, LogLevel
         
-        base_path = Path("d:/Repository/@Clients/FY.WB.Midway")
+        base_path = Path("project")
         workflow_id = "test_workflow_123"
         
         logger = MultiTerminalLogger(base_path, workflow_id)

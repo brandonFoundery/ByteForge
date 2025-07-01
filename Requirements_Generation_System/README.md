@@ -1,6 +1,6 @@
-# FY.WB.Midway Requirements Generation System
+# LSOMigrator Requirements Generation System
 
-An automated system for generating comprehensive, traceable requirements documentation for the FY.WB.Midway enterprise logistics and payment platform.
+An automated system for generating comprehensive, traceable requirements documentation for the LSOMigrator enterprise logistics and payment platform.
 
 ## 🚀 Overview
 
@@ -65,7 +65,7 @@ python orchestrator.py --config config.yaml
 python orchestrator.py
 
 # Terminal 2: Run the monitor
-python monitor.py d:/Repository/@Clients/FY.WB.Midway/generated_documents
+python monitor.py d:/Repository/@Clients/LSOMigrator/generated_documents
 ```
 
 ## 📊 Monitoring Progress

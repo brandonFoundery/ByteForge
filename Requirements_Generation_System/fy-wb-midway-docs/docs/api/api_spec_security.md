@@ -1,6 +1,6 @@
 # API Security Schemes and Authentication
 
-This document defines the security schemes and authentication patterns for the FY.WB.Midway Enterprise Logistics Platform API.
+This document defines the security schemes and authentication patterns for the LSOMigrator Enterprise Logistics Platform API.
 
 ## Security Schemes
 

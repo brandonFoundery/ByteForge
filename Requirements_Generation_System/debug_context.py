@@ -5,9 +5,9 @@ from pathlib import Path
 import asyncio
 
 async def debug_context():
-    base_path = Path('d:/Repository/@Clients/FY.WB.Midway')
+    base_path = Path('project')
     config_path = base_path / 'Requirements_Generation_System' / 'config.yaml'
-    orchestrator = RequirementsOrchestrator('FY.WB.Midway', base_path, config_path, 'openai')
+    orchestrator = RequirementsOrchestrator('LSOMigrator', base_path, config_path, 'openai')
     
     # Get context for UI/UX generation
     context = await orchestrator.gather_context(DocumentType.UIUX_SPEC)

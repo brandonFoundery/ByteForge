@@ -169,7 +169,7 @@ class DesignPass:
 
     def _create_design_prompt(self, feature_spec: str, context: str, codebase_analysis: str) -> str:
         """Create the design prompt for OpenAI o3"""
-        return f"""You are an expert software architect tasked with designing a new feature for the FY.WB.Midway enterprise logistics and payment platform.
+        return f"""You are an expert software architect tasked with designing a new feature for the LSOMigrator enterprise logistics and payment platform.
 
 ## Feature Specification
 {feature_spec}

@@ -16,7 +16,7 @@ async def test_current_executor():
     
     console.print("[bold blue]🔍 Testing Current Claude Code Executor[/bold blue]")
     
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     executor = ClaudeCodeExecutor(base_path)
     
     console.print(f"[cyan]Base path: {base_path}[/cyan]")

@@ -12,7 +12,7 @@ def test_existing_design_documents():
     print("🧪 Testing Existing Design Documents...")
     
     # Base paths
-    base_path = Path("D:/Repository/@Clients/FY.WB.Midway")
+    base_path = Path("project")
     design_path = base_path / "generated_documents" / "design"
     
     print(f"📁 Base path: {base_path}")

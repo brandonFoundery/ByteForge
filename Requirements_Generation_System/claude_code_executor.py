@@ -640,9 +640,23 @@ class ClaudeCodeExecutor:
         else:
             model_flag = 'sonnet'  # Default fallback
         
-        # Claude Code doesn't support --file, so we need to pass content directly
-        # We'll read the file content and pass it as a prompt
-        command = f'cd {working_dir} && claude --model {model_flag} --dangerously-skip-permissions --print "$(cat {full_instruction_path})"'
+        # Debug: Show environment detection
+        console.print(f"[dim]Environment detection: Windows={self.is_windows}, WSL={self.is_wsl}, Needs WSL={self.needs_wsl}[/dim]")
+        console.print(f"[dim]Working dir: {working_dir}[/dim]")
+        console.print(f"[dim]Instruction file: {full_instruction_path}[/dim]")
+        
+        # FIXED: Generate WSL-native command when wrapper will execute inside WSL
+        if self.needs_wsl:
+            # We will call wrapper through `wsl`, so the inner command must be native to WSL - no extra `wsl`
+            command = f'cd {working_dir} && claude code --dangerously-skip-permissions --print "$(cat {full_instruction_path})"'
+            console.print(f"[dim]Using WSL-native command (wrapper will execute in WSL)[/dim]")
+        else:
+            # Already in WSL or Linux, run Claude Code directly
+            command = f'cd {working_dir} && claude code --dangerously-skip-permissions --print "$(cat {full_instruction_path})"'
+            console.print(f"[dim]Using direct command (already in WSL/Linux)[/dim]")
+        
+        # Debug: Show generated command
+        console.print(f"[dim]Generated Claude command: {command}[/dim]")
         
         # Validate command security
         if self.security_manager:
@@ -705,7 +719,12 @@ fi
             # Execute based on environment
             timeout_seconds = self.config.get('timeout', 600)
             
-            if self.needs_wsl:
+            # Force re-check environment for execution path
+            current_platform = platform.system()
+            current_is_wsl = self._is_running_in_wsl()
+            current_needs_wsl = current_platform == "Windows" and not current_is_wsl
+            
+            if current_needs_wsl:
                 # Windows calling WSL
                 console.print("[dim]Executing via WSL...[/dim]")
                 result = await asyncio.to_thread(

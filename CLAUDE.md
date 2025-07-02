@@ -504,3 +504,410 @@ You are an expert requirements analyst. Your task is to update a section of a re
 ---
 ```
 This structured approach ensures that the LLM acts as a precise surgical tool, modifying only what is necessary while preserving the integrity of the surrounding document.
+
+## ByteForge UI Styling Reference (Metronic Template)
+
+ByteForge includes a comprehensive Metronic React template (`metronic-react/`) that provides a complete design system and component library for building professional web applications. This section serves as a reference guide for future Claude Code instances when developing UIs for ByteForge-generated applications.
+
+### 🎨 **Design System Architecture**
+
+#### **Technology Stack**
+- **Framework**: Next.js 15.3.3 with TypeScript 5.7.3
+- **Styling**: Tailwind CSS 4.1.8 with custom design tokens
+- **Component Library**: Radix UI primitives + custom components
+- **State Management**: React Query (TanStack Query)
+- **Forms**: React Hook Form with Zod validation
+- **Charts**: ApexCharts and Recharts integration
+- **Icons**: Lucide React (5,000+ icons)
+- **Animations**: Tailwind CSS Animate
+
+#### **Color System & Theme Architecture**
+Uses CSS custom properties for dynamic theming with OKLCH color space:
+
+```css
+/* Light Theme */
+:root {
+  --primary: #1379f0;                    /* Brand blue */
+  --background: oklch(1 0 0);            /* Pure white */
+  --foreground: oklch(27.4% 0.006 286.033); /* Dark zinc */
+  --secondary: oklch(96.7% 0.003 264.542);  /* Light zinc */
+  --muted: oklch(96.7% 0.003 264.542);      /* Subtle background */
+  --destructive: oklch(57.7% 0.245 27.325); /* Red for errors */
+  --border: oklch(94% 0.004 286.32);        /* Subtle borders */
+  --radius: 0.5rem;                         /* Base border radius */
+}
+
+/* Dark Theme */
+.dark {
+  --background: oklch(14.1% 0.005 285.823); /* Dark zinc */
+  --foreground: oklch(98.5% 0 0);           /* Off-white */
+  --border: oklch(27.4% 0.006 286.033);     /* Dark borders */
+  /* ...other dark theme variables */
+}
+```
+
+#### **Component Variant System**
+Uses **Class Variance Authority (CVA)** for systematic component variants:
+
+```typescript
+const buttonVariants = cva(
+  'cursor-pointer group whitespace-nowrap focus-visible:outline-hidden inline-flex items-center justify-center',
+  {
+    variants: {
+      variant: {
+        primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
+        outline: 'bg-background text-accent-foreground border border-input hover:bg-accent',
+        ghost: 'text-accent-foreground hover:bg-accent hover:text-accent-foreground',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+      },
+      size: {
+        sm: 'h-7 rounded-md px-2.5 gap-1.25 text-xs',
+        md: 'h-8.5 rounded-md px-3 gap-1.5 text-[0.8125rem]',
+        lg: 'h-10 rounded-md px-4 text-sm gap-1.5',
+        icon: 'size-8.5 rounded-md shrink-0'
+      }
+    }
+  }
+);
+```
+
+### 🏗️ **Layout Architecture**
+
+#### **Available Layout Patterns**
+ByteForge includes 10+ pre-built layout variations:
+
+1. **Demo1**: Classic sidebar + header (most common)
+2. **Demo2**: Top navigation with sticky header
+3. **Demo3**: Navbar + sidebar combination
+4. **Demo4**: Dual sidebar (primary + secondary)
+5. **Demo8**: Dark sidebar variant
+6. **Custom Layouts**: Authentication, public pages
+
+#### **Layout Configuration**
+```css
+/* Sidebar Layout Variables */
+:root {
+  --sidebar-width: 270px;
+  --sidebar-width-collapsed: 80px;
+  --header-height: 60px;
+  --toolbar-height: 60px;
+}
+
+/* Responsive Behavior */
+.demo1.sidebar-fixed .wrapper {
+  padding-inline-start: var(--sidebar-width) !important;
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+}
+```
+
+#### **Layout Components**
+- **Sidebar**: Collapsible navigation with hover-expand
+- **Header**: Sticky header with search, notifications, user menu
+- **Toolbar**: Secondary action bar
+- **Footer**: Optional footer with branding
+- **Content**: Main content area with proper spacing
+
+### 🧩 **Core UI Components Reference**
+
+#### **Button System**
+Comprehensive button system with 8 variants × 4 sizes × multiple modes:
+
+```tsx
+<Button variant="primary" size="md">Primary Action</Button>
+<Button variant="outline" size="sm">Secondary</Button>
+<Button variant="ghost" mode="icon" size="icon">
+  <Icon className="size-4" />
+</Button>
+<Button variant="primary" mode="link" underline="solid">Link Style</Button>
+```
+
+**Button Variants**: `primary`, `secondary`, `outline`, `ghost`, `destructive`, `mono`, `dim`, `foreground`
+**Button Sizes**: `sm`, `md`, `lg`, `icon`
+**Button Modes**: `default`, `icon`, `link`, `input`
+
+#### **Card System**
+Flexible card components with context-aware styling:
+
+```tsx
+<Card variant="default">
+  <CardHeader>
+    <CardHeading>
+      <CardTitle>Dashboard Overview</CardTitle>
+      <CardDescription>Monthly analytics summary</CardDescription>
+    </CardHeading>
+    <CardToolbar>
+      <Button variant="ghost" size="icon">
+        <MoreVertical className="size-4" />
+      </Button>
+    </CardToolbar>
+  </CardHeader>
+  <CardContent>
+    {/* Main content */}
+  </CardContent>
+  <CardFooter>
+    <Button variant="primary">View Details</Button>
+  </CardFooter>
+</Card>
+```
+
+**Card Variants**: `default` (bordered), `accent` (highlighted with inner spacing)
+
+#### **Data Display Components**
+
+**DataGrid (Advanced Tables)**:
+```tsx
+<DataGrid
+  table={table}
+  recordCount={totalRecords}
+  isLoading={isLoading}
+  tableLayout={{
+    dense: false,
+    cellBorder: true,
+    rowBorder: true,
+    headerSticky: true,
+    columnsVisibility: true,
+    columnsResizable: true
+  }}
+/>
+```
+
+**Features**: Sorting, filtering, pagination, column visibility, resizing, row selection
+
+#### **Form Components**
+
+**Input System**:
+```tsx
+<Input 
+  size="md" 
+  placeholder="Enter text..." 
+  addon={{
+    start: <Search className="size-4" />,
+    end: <Button variant="ghost" size="icon"><X /></Button>
+  }}
+/>
+```
+
+**Form Integration**:
+```tsx
+<Form {...form}>
+  <FormField
+    control={form.control}
+    name="email"
+    render={({ field }) => (
+      <FormItem>
+        <FormLabel>Email</FormLabel>
+        <FormControl>
+          <Input placeholder="Enter email" {...field} />
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    )}
+  />
+</Form>
+```
+
+#### **Navigation Components**
+
+**Accordion Menu** (Sidebar):
+```tsx
+<AccordionMenu>
+  <AccordionMenuItem>
+    <AccordionMenuTrigger>
+      <Users className="size-4" />
+      User Management
+    </AccordionMenuTrigger>
+    <AccordionMenuContent>
+      <AccordionMenuLink href="/users">All Users</AccordionMenuLink>
+      <AccordionMenuLink href="/users/create">Add User</AccordionMenuLink>
+    </AccordionMenuContent>
+  </AccordionMenuItem>
+</AccordionMenu>
+```
+
+**Breadcrumb Navigation**:
+```tsx
+<Breadcrumb>
+  <BreadcrumbItem>
+    <BreadcrumbLink href="/">Home</BreadcrumbLink>
+  </BreadcrumbItem>
+  <BreadcrumbSeparator />
+  <BreadcrumbItem>
+    <BreadcrumbPage>Current Page</BreadcrumbPage>
+  </BreadcrumbItem>
+</Breadcrumb>
+```
+
+#### **Feedback Components**
+
+**Alert System**:
+```tsx
+<Alert variant="default">
+  <AlertCircle className="size-4" />
+  <AlertTitle>Information</AlertTitle>
+  <AlertDescription>This is an informational message.</AlertDescription>
+</Alert>
+```
+
+**Toast Notifications**:
+```tsx
+import { toast } from "sonner";
+
+toast.success("Operation completed successfully!");
+toast.error("An error occurred", {
+  description: "Please try again later"
+});
+```
+
+### 📊 **Chart & Visualization Components**
+
+#### **Chart Container System**:
+```tsx
+<ChartContainer
+  config={{
+    revenue: { label: "Revenue", color: "hsl(var(--primary))" },
+    profit: { label: "Profit", color: "hsl(var(--secondary))" }
+  }}
+  className="h-[300px]"
+>
+  <BarChart data={chartData}>
+    <XAxis dataKey="month" />
+    <YAxis />
+    <ChartTooltip content={<ChartTooltipContent />} />
+    <Bar dataKey="revenue" fill="var(--color-revenue)" />
+  </BarChart>
+</ChartContainer>
+```
+
+#### **ApexCharts Integration**:
+```tsx
+<Chart
+  options={{
+    chart: { type: 'area' },
+    theme: { mode: 'light' }, // Automatically switches with theme
+    colors: ['var(--primary)', 'var(--secondary)']
+  }}
+  series={seriesData}
+  height={300}
+/>
+```
+
+### 🎯 **Design Token System**
+
+#### **Spacing Scale**:
+```css
+--spacing-0: 0px;
+--spacing-1: 0.25rem;    /* 4px */
+--spacing-2: 0.5rem;     /* 8px */
+--spacing-3: 0.75rem;    /* 12px */
+--spacing-4: 1rem;       /* 16px */
+--spacing-5: 1.25rem;    /* 20px */
+--spacing-6: 1.5rem;     /* 24px */
+--spacing-8: 2rem;       /* 32px */
+--spacing-10: 2.5rem;    /* 40px */
+```
+
+#### **Typography Scale**:
+```css
+--text-2xs: 0.6875rem;   /* 11px */
+--text-xs: 0.75rem;      /* 12px */
+--text-sm: 0.875rem;     /* 14px */
+--text-2sm: 0.8125rem;   /* 13px */
+--text-base: 1rem;       /* 16px */
+--text-lg: 1.125rem;     /* 18px */
+--text-xl: 1.25rem;      /* 20px */
+```
+
+#### **Border Radius System**:
+```css
+--radius-xs: 0.125rem;   /* 2px */
+--radius-sm: calc(var(--radius) - 4px);  /* 4px */
+--radius-md: calc(var(--radius) - 2px);  /* 6px */
+--radius-lg: var(--radius);              /* 8px */
+--radius-xl: calc(var(--radius) + 4px);  /* 12px */
+```
+
+### 🔧 **Component Usage Guidelines**
+
+#### **Layout Development Pattern**:
+1. **Choose Layout**: Select appropriate demo layout (Demo1 for admin, Demo2 for public)
+2. **Configure Sidebar**: Use accordion menu for navigation
+3. **Set Header**: Include search, notifications, user menu
+4. **Content Structure**: Use card-based layout for content sections
+
+#### **Form Development Pattern**:
+1. **Form Setup**: Use React Hook Form with Zod validation
+2. **Input Components**: Consistent sizing and styling
+3. **Validation Display**: Built-in error states and messages
+4. **Submit Actions**: Primary button for submit, secondary for cancel
+
+#### **Data Display Pattern**:
+1. **Simple Lists**: Use Card components with structured content
+2. **Complex Tables**: Use DataGrid with sorting/filtering
+3. **Metrics**: Use chart components with consistent theming
+4. **Status Indicators**: Use badges and alerts for status display
+
+#### **Responsive Design Guidelines**:
+- **Mobile-First**: All components responsive by default
+- **Breakpoints**: `sm: 640px`, `md: 768px`, `lg: 1024px`, `xl: 1280px`
+- **Sidebar Behavior**: Hidden on mobile, slide-over on tablet
+- **Content Adaptation**: Stack cards on small screens
+
+### 🚀 **Implementation Best Practices**
+
+#### **Component Composition**:
+```tsx
+// Good: Composable component usage
+<Card>
+  <CardHeader>
+    <CardTitle>Users</CardTitle>
+    <CardToolbar>
+      <Button variant="primary">Add User</Button>
+    </CardToolbar>
+  </CardHeader>
+  <CardContent>
+    <DataGrid table={usersTable} />
+  </CardContent>
+</Card>
+```
+
+#### **Theme Integration**:
+```tsx
+// Use CSS variables for dynamic theming
+<div className="bg-background text-foreground border-border">
+  <Button variant="primary">Themed Button</Button>
+</div>
+```
+
+#### **Icon Usage**:
+```tsx
+import { Users, Plus, Search } from 'lucide-react';
+
+// Consistent icon sizing
+<Users className="size-4" />        // 16px (standard)
+<Plus className="size-3.5" />       // 14px (small)
+<Search className="size-5" />       // 20px (large)
+```
+
+#### **State Management Integration**:
+```tsx
+// Form state with validation
+const form = useForm<UserSchema>({
+  resolver: zodResolver(userSchema),
+  defaultValues: { name: '', email: '' }
+});
+
+// Data fetching with React Query
+const { data: users, isLoading } = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});
+```
+
+This Metronic template provides a comprehensive foundation for building professional React applications with consistent design patterns, extensive component library, and flexible theming system. When building applications with ByteForge, reference these components and patterns to ensure consistency and professional quality.

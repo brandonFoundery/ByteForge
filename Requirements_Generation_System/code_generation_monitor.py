@@ -21,7 +21,15 @@ class CodeGenerationMonitor:
     
     def __init__(self, base_path: Path):
         self.base_path = base_path
-        self.code_path = base_path / "project" / "code"
+        
+        # CORRECTED: Monitor the actual ByteForge project code directory
+        if base_path.name == "Requirements_Generation_System":
+            # We're in Requirements_Generation_System, so ByteForge project is parent
+            self.byteforge_path = base_path.parent
+        else:
+            self.byteforge_path = base_path
+            
+        self.code_path = self.byteforge_path / "project" / "code"  # CORRECT path
         self.logs_path = base_path / "logs"
         
         # Ensure directories exist

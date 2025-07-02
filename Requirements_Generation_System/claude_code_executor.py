@@ -8,6 +8,8 @@ parallel execution according to the execution plan.
 
 import asyncio
 import json
+import os
+import platform
 import subprocess
 import time
 import yaml
@@ -63,12 +65,34 @@ class ClaudeCodeExecutor:
     """Enhanced Claude Code executor using instruction files"""
 
     def __init__(self, base_path: Path):
-        self.base_path = base_path
-        self.instructions_path = base_path / "design" / "claude_instructions"
-        self.logs_path = base_path / "logs"
+        # Load config first to get ByteForge path
+        self.temp_config = self._load_claude_config_temp(base_path)
+        
+        # Use ByteForge path from config or fallback to base_path
+        byteforge_path = self.temp_config.get('byteforge_path')
+        if byteforge_path:
+            self.byteforge_path = Path(byteforge_path)
+        else:
+            self.byteforge_path = base_path.parent if base_path.name == "Requirements_Generation_System" else base_path
+        
+        self.base_path = base_path  # Keep original for relative operations
+        self.instructions_path = base_path / "project" / "design" / "claude_instructions"  # Design docs stay in Requirements_Generation_System
+        self.logs_path = base_path / "logs"  # Logs stay in Requirements_Generation_System
+        
+        # IMPORTANT: Code output goes to ByteForge project directory
+        self.code_output_path = self.byteforge_path / "project" / "code"
+        
+        # Detect execution environment
+        self.is_windows = platform.system() == "Windows"
+        self.is_wsl = self._is_running_in_wsl()
+        self.needs_wsl = self.is_windows and not self.is_wsl
 
         # Ensure directories exist
         self.logs_path.mkdir(parents=True, exist_ok=True)
+        
+        console.print(f"[dim]Environment: Windows={self.is_windows}, WSL={self.is_wsl}, Needs WSL={self.needs_wsl}[/dim]")
+        console.print(f"[dim]ByteForge project path: {self.byteforge_path}[/dim]")
+        console.print(f"[dim]Code output path: {self.code_output_path}[/dim]")
 
         # Load configuration first
         self.config = self._load_claude_config()
@@ -100,6 +124,30 @@ class ClaudeCodeExecutor:
             self.security_manager = SecurityManager(base_path)
         else:
             self.security_manager = None
+    
+    def _is_running_in_wsl(self) -> bool:
+        """Detect if we're running inside WSL"""
+        try:
+            # Check for WSL indicators
+            if os.path.exists('/proc/version'):
+                with open('/proc/version', 'r') as f:
+                    version_info = f.read().lower()
+                    return 'microsoft' in version_info or 'wsl' in version_info
+            return False
+        except:
+            return False
+    
+    def _load_claude_config_temp(self, base_path: Path) -> Dict:
+        """Temporary method to load config for initialization"""
+        try:
+            config_path = base_path / "config.yaml"
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                return config.get('paths', {})
+        except:
+            pass
+        return {}
 
     def _load_claude_config(self) -> Dict:
         """Load Claude Code configuration from config.yaml"""
@@ -249,7 +297,7 @@ class ClaudeCodeExecutor:
                 status = self.progress_tracker[phase_key]["agents"][agent_key]["status"]
                 console.print(f"[dim]Agent {agent_key} status: {status}[/dim]")
 
-                if status == "not_started" and self._check_dependencies(agent_id, phase_id):
+                if status in ["not_started", "pending"] and self._check_dependencies(agent_id, phase_id):
                     available.append(agent_id)
                     console.print(f"[green]✅ {agent_id} is available[/green]")
             else:
@@ -494,15 +542,19 @@ class ClaudeCodeExecutor:
             # Create log file for this execution
             log_file = self.logs_path / f"{agent_id}_{phase_id}_claude_execution.log"
 
-            # Convert Windows path to WSL path properly
-            wsl_log_file = self._convert_to_wsl_path(str(log_file))
+            # Handle log file path based on execution environment
+            # IMPORTANT: Use absolute path for log file since working directory is ByteForge project
+            if self.needs_wsl:
+                # Windows calling WSL - convert log file path
+                log_file_path = self._convert_to_wsl_path(str(log_file.absolute()))
+                console.print(f"[dim]Using WSL log path: {log_file_path}[/dim]")
+            else:
+                # Already in WSL or Linux - use absolute path
+                log_file_path = str(log_file.absolute())
+                console.print(f"[dim]Using direct log path: {log_file_path}[/dim]")
 
-            # Ensure log directory exists in WSL
-            wsl_logs_dir = self._convert_to_wsl_path(str(self.logs_path))
-            console.print(f"[dim]Creating log directory: {wsl_logs_dir}[/dim]")
-
-            # Execute Claude Code in WSL
-            result = await self._run_claude_code_wsl(command, wsl_log_file)
+            # Execute Claude Code
+            result = await self._run_claude_code(command, log_file_path)
 
             execution_time = time.time() - start_time
 
@@ -551,24 +603,44 @@ class ClaudeCodeExecutor:
 
     def _create_claude_command_from_instruction(self, agent: Dict, phase_id: str, instruction_content: str) -> str:
         """Create Claude Code command using instruction file reference with security validation"""
-        wsl_base_path = self._convert_to_wsl_path(str(self.base_path))
-        
         # Load configuration
         config = self.config
         
         # Create instruction file path
-        instruction_file_path = f"generated_documents/design/claude_instructions/{agent['id']}-{phase_id}.md"
-        wsl_instruction_path = self._convert_to_wsl_path(str(self.base_path / instruction_file_path))
+        instruction_file_path = f"project/design/claude_instructions/{agent['id']}-{phase_id}-mvp-core-features.md"
+        
+        # Handle paths based on execution environment
+        if self.needs_wsl:
+            # Windows calling WSL - need to convert paths
+            # IMPORTANT: Use ByteForge path as working directory, instruction file from Requirements_Generation_System
+            working_dir = self._convert_to_wsl_path(str(self.byteforge_path))
+            full_instruction_path = self._convert_to_wsl_path(str(self.base_path / instruction_file_path))
+        else:
+            # Already in WSL or Linux - use paths directly
+            # IMPORTANT: Use ByteForge path as working directory, instruction file from Requirements_Generation_System
+            working_dir = str(self.byteforge_path)
+            full_instruction_path = str(self.base_path / instruction_file_path)
         
         # Validate file access
         if self.security_manager:
             if not self.security_manager.validate_file_access(str(self.base_path / instruction_file_path), "read"):
                 raise SecurityError(f"File access denied: {instruction_file_path}")
         
-        # Use file-based prompting to avoid shell escaping
-        model_flag = config.get('model', 'sonnet').replace('claude-', '').replace('-20250514', '')
+        # Use file-based prompting to avoid shell escaping  
+        # Convert config model to Claude Code model alias
+        model_name = config.get('model', 'claude-sonnet-4-20250514')
+        if 'sonnet-4' in model_name or 'claude-sonnet-4' in model_name:
+            model_flag = 'sonnet'
+        elif 'opus' in model_name:
+            model_flag = 'opus' 
+        elif 'haiku' in model_name:
+            model_flag = 'haiku'
+        else:
+            model_flag = 'sonnet'  # Default fallback
         
-        command = f'cd {wsl_base_path} && claude --model {model_flag} --dangerously-skip-permissions --file {wsl_instruction_path}'
+        # Claude Code doesn't support --file, so we need to pass content directly
+        # We'll read the file content and pass it as a prompt
+        command = f'cd {working_dir} && claude --model {model_flag} --dangerously-skip-permissions --print "$(cat {full_instruction_path})"'
         
         # Validate command security
         if self.security_manager:
@@ -592,8 +664,8 @@ class ClaudeCodeExecutor:
 
         return wsl_path
 
-    async def _run_claude_code_wsl(self, command: str, wsl_log_file: str) -> Dict:
-        """Run Claude Code command in WSL and capture results"""
+    async def _run_claude_code(self, command: str, log_file_path: str) -> Dict:
+        """Run Claude Code command with appropriate execution method"""
         try:
             # Create a wrapper script that includes notification
             wrapper_script = f"""
@@ -601,33 +673,47 @@ class ClaudeCodeExecutor:
 set -e
 
 # Create log directory if it doesn't exist
-mkdir -p "$(dirname "{wsl_log_file}")"
+mkdir -p "$(dirname "{log_file_path}")"
 
-echo "Starting Claude Code execution at $(date)" >> {wsl_log_file}
+echo "Starting Claude Code execution at $(date)" >> {log_file_path}
 
-{command} 2>&1 | tee -a {wsl_log_file}
+{command} 2>&1 | tee -a {log_file_path}
 
 CLAUDE_EXIT_CODE=${{PIPESTATUS[0]}}
-echo "Claude exit code: $CLAUDE_EXIT_CODE" >> {wsl_log_file}
+echo "Claude exit code: $CLAUDE_EXIT_CODE" >> {log_file_path}
 
 if [ $CLAUDE_EXIT_CODE -eq 0 ]; then
-    echo "SUCCESS" >> {wsl_log_file}
+    echo "SUCCESS" >> {log_file_path}
     exit 0
 else
-    echo "FAILED:Exit code $CLAUDE_EXIT_CODE" >> {wsl_log_file}
+    echo "FAILED:Exit code $CLAUDE_EXIT_CODE" >> {log_file_path}
     exit $CLAUDE_EXIT_CODE
 fi
 """
 
-            # Execute the wrapper script with configurable timeout
+            # Execute based on environment
             timeout_seconds = self.config.get('timeout', 600)
-            result = await asyncio.to_thread(
-                subprocess.run,
-                ["wsl", "-d", "Ubuntu", "-e", "bash", "-c", wrapper_script],
-                capture_output=True,
-                text=True,
-                timeout=timeout_seconds
-            )
+            
+            if self.needs_wsl:
+                # Windows calling WSL
+                console.print("[dim]Executing via WSL...[/dim]")
+                result = await asyncio.to_thread(
+                    subprocess.run,
+                    ["wsl", "-d", "Ubuntu", "-e", "bash", "-c", wrapper_script],
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout_seconds
+                )
+            else:
+                # Already in WSL or Linux - execute directly
+                console.print("[dim]Executing directly with bash...[/dim]")
+                result = await asyncio.to_thread(
+                    subprocess.run,
+                    ["bash", "-c", wrapper_script],
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout_seconds
+                )
 
             return {
                 "success": result.returncode == 0,

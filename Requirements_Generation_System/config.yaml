@@ -10,20 +10,23 @@ project:
 
 # Input/Output Paths (all relative to ByteForge root directory)
 paths:
-  # Base directory of the project - now uses project folder
-  base_dir: "project"
+  # Base directory of the project - CORRECTED to point to main ByteForge project directory
+  base_dir: "/mnt/d/Repository/ContractLogix/LSOMitigator/ByteForge"
+  
+  # ByteForge project path for code generation
+  byteforge_path: "/mnt/d/Repository/ContractLogix/LSOMitigator/ByteForge"
 
   # Source requirements directory
-  requirements_dir: "project/requirements"
+  requirements_dir: "/mnt/d/Repository/ContractLogix/LSOMitigator/ByteForge/project/requirements"
 
   # Prompt templates directory
   prompts_dir: "Requirements_Generation_Prompts"
 
   # Output directory for generated documents
-  output_dir: "project/requirements"
+  output_dir: "/mnt/d/Repository/ContractLogix/LSOMitigator/ByteForge/project/requirements"
 
   # Status tracking directory
-  status_dir: "project/generation_status"
+  status_dir: "/mnt/d/Repository/ContractLogix/LSOMitigator/ByteForge/project/generation_status"
 
   # Source code directories for full regeneration
   frontend_dir: "FrontEnd"

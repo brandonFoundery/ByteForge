@@ -662,14 +662,14 @@ class ClaudeCodeExecutor:
         console.print(f"[dim]Working dir: {working_dir}[/dim]")
         console.print(f"[dim]Instruction file: {full_instruction_path}[/dim]")
         
-        # FIXED: Generate WSL-native command when wrapper will execute inside WSL
+        # FIXED: Use proper Claude Code command with -f flag and model
         if self.needs_wsl:
             # We will call wrapper through `wsl`, so the inner command must be native to WSL - no extra `wsl`
-            command = f'cd {working_dir} && claude code --dangerously-skip-permissions "$(cat {full_instruction_path})"'
+            command = f'cd {working_dir} && claude code --model {model_flag} --dangerously-skip-permissions -f {full_instruction_path}'
             console.print(f"[dim]Using WSL-native command (wrapper will execute in WSL)[/dim]")
         else:
             # Already in WSL or Linux, run Claude Code directly
-            command = f'cd {working_dir} && claude code --dangerously-skip-permissions "$(cat {full_instruction_path})"'
+            command = f'cd {working_dir} && claude code --model {model_flag} --dangerously-skip-permissions -f {full_instruction_path}'
             console.print(f"[dim]Using direct command (already in WSL/Linux)[/dim]")
         
         # Debug: Show generated command

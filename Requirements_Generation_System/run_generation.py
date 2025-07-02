@@ -875,10 +875,14 @@ def main():
     console.print("  7. [bold yellow]Modify Existing Requirement[/bold yellow]")
     console.print("  8. [bold yellow]Introduce New Requirement(s)[/bold yellow]")
     console.print("  9. [bold orange]Resume Downstream Document Generation[/bold orange]")
-    console.print("  10. [bold cyan]Generate Development Plan[/bold cyan]")
+    console.print("")
+    console.print("  [bold yellow]Quick AI Build (Rapid Prototyping):[/bold yellow]")
+    console.print("  10. [bold magenta]Build Application (AI-Driven 4-Pass System)[/bold magenta]")
+    console.print("")
+    console.print("  [bold yellow]Controlled Development (Production Apps):[/bold yellow]")
     console.print("  11. [bold green]Generate AI Agent Design Documents[/bold green]")
-    console.print("  12. [bold blue]Execute Claude Code Implementation[/bold blue]")
-    console.print("  13. [bold magenta]Build Application (AI-Driven 4-Pass System)[/bold magenta]")
+    console.print("  12. [bold cyan]Generate Development Plan[/bold cyan]")
+    console.print("  13. [bold blue]Execute Claude Code Implementation[/bold blue]")
     console.print("")
     console.print("  [bold cyan]Quick Phase Launch:[/bold cyan]")
     console.print("  14. [bold cyan]Phase 1 - All Agents[/bold cyan]")
@@ -1295,7 +1299,7 @@ def main():
         except Exception as e:
             console.print(f"[red]Error running downstream resume: {e}[/red]")
 
-    elif choice == "10":
+    elif choice == "12":
         # Generate Development Plan
         console.print("\n[bold cyan]Generate Development Plan[/bold cyan]")
         console.print("This will analyze all existing requirements documents and create a comprehensive development plan.")
@@ -1358,7 +1362,7 @@ def main():
         dev_plan_path = Path(config['paths']['output_dir']) / "dev_plan.md"
         if not dev_plan_path.exists():
             console.print(f"[red]Development plan not found: {dev_plan_path}[/red]")
-            console.print("[red]Please generate the development plan first (option 9)[/red]")
+            console.print("[red]Please generate the development plan first (option 12)[/red]")
             return 1
 
         console.print(f"\n[green][OK] Found development plan: {dev_plan_path}[/green]")
@@ -1418,7 +1422,7 @@ def main():
             traceback.print_exc()
             return 1
 
-    elif choice == "12":
+    elif choice == "13":
         # Execute Claude Code Implementation
         console.print("\n[bold blue]Execute Claude Code Implementation[/bold blue]")
         console.print("Choose implementation method:")
@@ -1437,16 +1441,16 @@ def main():
             console.print("  [cyan]• Creates pull requests automatically[/cyan]")
 
             # Check if design documents exist
-            design_dir = Path(config['paths']['base_dir']) / "generated_documents" / "design"
+            design_dir = Path(config['paths']['base_dir']) / "design"
             if not design_dir.exists():
                 console.print(f"[red]Design documents directory not found: {design_dir}[/red]")
-                console.print("[red]Please generate design documents first (option 10)[/red]")
+                console.print("[red]Please generate design documents first (option 11)[/red]")
                 return 1
 
             design_files = list(design_dir.glob("*-agent-design.md"))
             if not design_files:
                 console.print(f"[red]No agent design documents found in {design_dir}[/red]")
-                console.print("[red]Please generate design documents first (option 10)[/red]")
+                console.print("[red]Please generate design documents first (option 11)[/red]")
                 return 1
 
             console.print(f"\n[green][OK] Found {len(design_files)} agent design documents:[/green]")
@@ -1530,16 +1534,16 @@ def main():
             console.print("  [cyan]• Safe demonstration mode (no actual changes)[/cyan]")
 
             # Check if design documents exist
-            design_dir = Path(config['paths']['base_dir']) / "generated_documents" / "design"
+            design_dir = Path(config['paths']['base_dir']) / "design"
             if not design_dir.exists():
                 console.print(f"[red]Design documents directory not found: {design_dir}[/red]")
-                console.print("[red]Please generate design documents first (option 10)[/red]")
+                console.print("[red]Please generate design documents first (option 11)[/red]")
                 return 1
 
             design_files = list(design_dir.glob("*-agent-design.md"))
             if not design_files:
                 console.print(f"[red]No agent design documents found in {design_dir}[/red]")
-                console.print("[red]Please generate design documents first (option 10)[/red]")
+                console.print("[red]Please generate design documents first (option 11)[/red]")
                 return 1
 
             console.print(f"\n[green][OK] Found {len(design_files)} agent design documents[/green]")
@@ -1632,7 +1636,7 @@ def main():
             console.print("[red]Invalid choice. Please select 1 or 2.[/red]")
             return 1
 
-    elif choice == "13":
+    elif choice == "10":
         # AI-Driven Application Builder
         console.print("\n[bold magenta]🚀 AI-Driven Application Builder[/bold magenta]")
         console.print("This will use a 4-pass AI system to build your application based on existing requirements:")
@@ -1766,7 +1770,7 @@ def main():
         console.print("  [cyan]• Automatic dependency resolution[/cyan]")
 
         # Check if design documents exist
-        design_dir = Path(config['paths']['base_dir']) / "generated_documents" / "design"
+        design_dir = Path(config['paths']['base_dir']) / "design"
         if not design_dir.exists():
             console.print(f"[red]Design documents directory not found: {design_dir}[/red]")
             console.print("[red]Please generate design documents first (option 10)[/red]")

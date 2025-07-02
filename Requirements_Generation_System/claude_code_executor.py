@@ -12,6 +12,7 @@ import subprocess
 import time
 import yaml
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -63,34 +64,22 @@ class ClaudeCodeExecutor:
 
     def __init__(self, base_path: Path):
         self.base_path = base_path
-        self.instructions_path = base_path / "generated_documents" / "design" / "claude_instructions"
+        self.instructions_path = base_path / "design" / "claude_instructions"
         self.logs_path = base_path / "logs"
 
         # Ensure directories exist
         self.logs_path.mkdir(parents=True, exist_ok=True)
 
-        # Load execution plan and progress tracker
+        # Load configuration first
+        self.config = self._load_claude_config()
+
+        # Load agents and phases dynamically from config
+        self.agents = self._load_agents_from_config()
+        self.phases = self._load_phases_from_config()
+
+        # Load execution plan and progress tracker (after agents/phases are loaded)
         self.execution_plan = self._load_execution_plan()
         self.progress_tracker = self._load_progress_tracker()
-
-        # Agent configurations
-        self.agents = {
-            "1": {"id": "backend", "name": "Backend Agent", "dir": "BackEnd"},
-            "2": {"id": "frontend", "name": "Frontend Agent", "dir": "FrontEnd"},
-            "3": {"id": "infrastructure", "name": "Infrastructure Agent", "dir": "Infrastructure"},
-            "4": {"id": "security", "name": "Security Agent", "dir": "BackEnd"},
-            "5": {"id": "integration", "name": "Integration Agent", "dir": "BackEnd"}
-        }
-
-        # Phase configurations
-        self.phases = {
-            "1": {"id": "phase1", "name": "MVP Core Features"},
-            "2": {"id": "phase2", "name": "Advanced Features"},
-            "3": {"id": "phase3", "name": "Production Ready"}
-        }
-
-        # Load configuration
-        self.config = self._load_claude_config()
         
         # Initialize execution optimizer
         if ExecutionOptimizer:
@@ -115,7 +104,7 @@ class ClaudeCodeExecutor:
     def _load_claude_config(self) -> Dict:
         """Load Claude Code configuration from config.yaml"""
         try:
-            config_path = self.base_path / "Requirements_Generation_System" / "config.yaml"
+            config_path = Path(__file__).parent / "config.yaml"
             if config_path.exists():
                 with open(config_path, 'r', encoding='utf-8') as f:
                     config = yaml.safe_load(f)
@@ -143,14 +132,25 @@ class ClaudeCodeExecutor:
         return {"loaded": True}  # Would parse markdown if needed
 
     def _load_progress_tracker(self) -> Dict:
-        """Load the progress tracker"""
+        """Load the progress tracker or generate it dynamically"""
         tracker_file = self.instructions_path / "progress_tracker.json"
+        
         if not tracker_file.exists():
             console.print(f"[yellow]⚠️ Progress tracker not found: {tracker_file}[/yellow]")
-            return {}
+            console.print("[yellow]📝 Generating progress tracker dynamically from configuration...[/yellow]")
+            tracker = self._generate_progress_tracker()
+            self._save_progress_tracker_file(tracker, tracker_file)
+            return tracker
 
-        with open(tracker_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        try:
+            with open(tracker_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            console.print(f"[red]❌ Error loading progress tracker: {e}[/red]")
+            console.print("[yellow]📝 Generating new progress tracker...[/yellow]")
+            tracker = self._generate_progress_tracker()
+            self._save_progress_tracker_file(tracker, tracker_file)
+            return tracker
 
     def _save_progress_tracker(self):
         """Save the progress tracker"""
@@ -643,3 +643,159 @@ fi
                 "error": str(e),
                 "returncode": -1
             }
+
+    def _load_agents_from_config(self) -> Dict:
+        """Load agent configurations dynamically from config.yaml"""
+        try:
+            config_path = Path(__file__).parent / "config.yaml"
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                
+                # Look for agents in claude_code_execution.agents
+                agents_config = config.get('claude_code_execution', {}).get('agents', {})
+                agents = {}
+                
+                # Convert config format to expected format
+                for i, (agent_id, agent_data) in enumerate(agents_config.items(), 1):
+                    agents[str(i)] = {
+                        "id": agent_id,
+                        "name": agent_data.get("name", f"{agent_id.title()} Agent"),
+                        "dir": agent_data.get("directory", "BackEnd")
+                    }
+                
+                return agents
+            else:
+                console.print("[yellow]⚠️ Config file not found, using default agents[/yellow]")
+                return self._get_default_agents()
+                
+        except Exception as e:
+            console.print(f"[yellow]⚠️ Error loading agents from config: {e}[/yellow]")
+            return self._get_default_agents()
+
+    def _load_phases_from_config(self) -> Dict:
+        """Load phase configurations dynamically from config.yaml"""
+        try:
+            config_path = Path(__file__).parent / "config.yaml"
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                
+                # Look for phases in claude_code_execution.phases
+                phases_config = config.get('claude_code_execution', {}).get('phases', {})
+                phases = {}
+                
+                # Convert config format to expected format
+                for i, (phase_id, phase_data) in enumerate(phases_config.items(), 1):
+                    phases[str(i)] = {
+                        "id": phase_id,
+                        "name": phase_data.get("name", f"{phase_id.title()}")
+                    }
+                
+                return phases
+            else:
+                console.print("[yellow]⚠️ Config file not found, using default phases[/yellow]")
+                return self._get_default_phases()
+                
+        except Exception as e:
+            console.print(f"[yellow]⚠️ Error loading phases from config: {e}[/yellow]")
+            return self._get_default_phases()
+
+    def _get_default_agents(self) -> Dict:
+        """Fallback default agents if config loading fails"""
+        return {
+            "1": {"id": "backend", "name": "Backend Agent", "dir": "BackEnd"},
+            "2": {"id": "frontend", "name": "Frontend Agent", "dir": "FrontEnd"},
+            "3": {"id": "infrastructure", "name": "Infrastructure Agent", "dir": "Infrastructure"},
+            "4": {"id": "security", "name": "Security Agent", "dir": "BackEnd"},
+            "5": {"id": "integration", "name": "Integration Agent", "dir": "BackEnd"}
+        }
+
+    def _get_default_phases(self) -> Dict:
+        """Fallback default phases if config loading fails"""
+        return {
+            "1": {"id": "phase1", "name": "MVP Core Features"},
+            "2": {"id": "phase2", "name": "Advanced Features"},
+            "3": {"id": "phase3", "name": "Production Ready"}
+        }
+
+    def _generate_progress_tracker(self) -> Dict:
+        """Generate progress tracker dynamically from agents and phases configuration"""
+        tracker = {
+            "project": "LSOMigrator",
+            "created": datetime.now().isoformat(),
+            "overall_progress": {
+                "total_phases": len(self.phases),
+                "completed_phases": 0,
+                "current_phase": "phase1_mvp_core_features",
+                "completion_percentage": 0
+            }
+        }
+        
+        # Generate phases with agents
+        for phase_key, phase_config in self.phases.items():
+            phase_id = phase_config["id"]
+            phase_name = phase_config["name"]
+            
+            # Create phase key in expected format
+            phase_tracker_key = f"{phase_id}_mvp_core_features" if phase_id == "phase1" else f"{phase_id}_advanced_features"
+            
+            tracker[phase_tracker_key] = {
+                "name": phase_name,
+                "status": "pending",
+                "agents": {}
+            }
+            
+            # Add agents for this phase
+            for agent_key, agent_config in self.agents.items():
+                agent_id = agent_config["id"]
+                agent_name = agent_config["name"]
+                
+                # Create agent key in expected format
+                agent_tracker_key = f"{agent_id}-{phase_id}"
+                
+                tracker[phase_tracker_key]["agents"][agent_tracker_key] = {
+                    "name": f"{agent_name} - {phase_name}",
+                    "status": "pending",
+                    "instruction_file": f"{agent_id}-{phase_id}-mvp-core-features.md",
+                    "features": [
+                        f"{agent_name} implementation for {phase_name}",
+                        f"Core {agent_id} functionality",
+                        f"Integration and testing"
+                    ],
+                    "dependencies": self._get_agent_dependencies(agent_id, phase_id),
+                    "started_at": None,
+                    "completed_at": None,
+                    "retry_count": 0
+                }
+        
+        return tracker
+
+    def _get_agent_dependencies(self, agent_id: str, phase_id: str) -> List[str]:
+        """Get dependencies for an agent based on logical dependencies"""
+        dependencies = []
+        
+        # Define logical dependencies
+        if agent_id == "frontend":
+            dependencies.append(f"backend-{phase_id}")
+        elif agent_id == "security":
+            dependencies.append(f"infrastructure-{phase_id}")
+        elif agent_id == "integration":
+            dependencies.append(f"security-{phase_id}")
+            if phase_id != "phase1":  # Integration depends on backend in later phases
+                dependencies.append(f"backend-{phase_id}")
+        
+        return dependencies
+
+    def _save_progress_tracker_file(self, tracker: Dict, file_path: Path):
+        """Save progress tracker to file"""
+        try:
+            # Ensure directory exists
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(tracker, f, indent=2, ensure_ascii=False)
+                
+            console.print(f"[green]✅ Progress tracker saved to: {file_path}[/green]")
+        except Exception as e:
+            console.print(f"[red]❌ Error saving progress tracker: {e}[/red]")

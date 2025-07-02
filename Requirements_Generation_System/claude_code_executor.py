@@ -636,7 +636,8 @@ class ClaudeCodeExecutor:
         instruction_file = self.instructions_path / f"{agent['id']}-{phase_id}-{phase_name}.md"
 
         # Get cross-platform paths for execution
-        working_dir = self._get_cross_platform_path(self.byteforge_path, for_execution=True)
+        # Claude Code should run in the code output directory where it will generate files
+        working_dir = self._get_cross_platform_path(self.code_output_path, for_execution=True)
         full_instruction_path = self._get_cross_platform_path(instruction_file, for_execution=True)
         
         # Validate file access
@@ -664,11 +665,11 @@ class ClaudeCodeExecutor:
         # FIXED: Generate WSL-native command when wrapper will execute inside WSL
         if self.needs_wsl:
             # We will call wrapper through `wsl`, so the inner command must be native to WSL - no extra `wsl`
-            command = f'cd {working_dir} && claude code --dangerously-skip-permissions --print "$(cat {full_instruction_path})"'
+            command = f'cd {working_dir} && claude code --dangerously-skip-permissions "$(cat {full_instruction_path})"'
             console.print(f"[dim]Using WSL-native command (wrapper will execute in WSL)[/dim]")
         else:
             # Already in WSL or Linux, run Claude Code directly
-            command = f'cd {working_dir} && claude code --dangerously-skip-permissions --print "$(cat {full_instruction_path})"'
+            command = f'cd {working_dir} && claude code --dangerously-skip-permissions "$(cat {full_instruction_path})"'
             console.print(f"[dim]Using direct command (already in WSL/Linux)[/dim]")
         
         # Debug: Show generated command

@@ -2296,31 +2296,36 @@ read
             with open(progress_tracker_path, 'r', encoding='utf-8') as f:
                 progress_data = json.load(f)
 
-            # Count failed agents
-            failed_agents = []
+            # Count all non-not_started agents (failed, completed, in_progress)
+            resetable_agents = []
             for phase_name, phase_data in progress_data.items():
                 if phase_name == "execution_metadata":
                     continue
                 
                 if "agents" in phase_data:
                     for agent_key, agent_data in phase_data["agents"].items():
-                        if agent_data.get("status") == "failed":
-                            failed_agents.append(agent_key)
+                        status = agent_data.get("status")
+                        if status in ["failed", "completed", "in_progress"]:
+                            resetable_agents.append((agent_key, status))
 
-            if not failed_agents:
-                console.print("[green]No failed agents found. All agents are in good status.[/green]")
+            if not resetable_agents:
+                console.print("[green]All agents are already in 'not_started' status. Nothing to reset.[/green]")
                 return 0
 
-            console.print(f"\n[yellow]Found {len(failed_agents)} failed agents:[/yellow]")
-            for agent in failed_agents:
-                console.print(f"  • {agent}")
+            console.print(f"\n[yellow]Found {len(resetable_agents)} agents that can be reset:[/yellow]")
+            for agent, status in resetable_agents:
+                status_color = "red" if status == "failed" else "green" if status == "completed" else "yellow"
+                console.print(f"  • {agent}: [{status_color}]{status}[/{status_color}]")
 
-            confirm = Prompt.ask(f"\nReset {len(failed_agents)} failed agents to 'not_started' status?", choices=["y", "n"], default="y")
+            console.print(f"\n[cyan]This will reset all agents back to 'not_started' so they can run again.[/cyan]")
+            console.print(f"[cyan]This is useful when agents completed but didn't actually generate code.[/cyan]")
+
+            confirm = Prompt.ask(f"\nReset {len(resetable_agents)} agents to 'not_started' status?", choices=["y", "n"], default="y")
             if confirm.lower() != "y":
                 console.print("[yellow]Reset cancelled.[/yellow]")
                 return 0
 
-            # Reset failed agents
+            # Reset all non-not_started agents
             reset_count = 0
             for phase_name, phase_data in progress_data.items():
                 if phase_name == "execution_metadata":
@@ -2328,7 +2333,8 @@ read
                 
                 if "agents" in phase_data:
                     for agent_key, agent_data in phase_data["agents"].items():
-                        if agent_data.get("status") == "failed":
+                        status = agent_data.get("status")
+                        if status in ["failed", "completed", "in_progress"]:
                             agent_data["status"] = "not_started"
                             agent_data["started_at"] = None
                             agent_data["completed_at"] = None

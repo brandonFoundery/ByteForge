@@ -24,8 +24,8 @@ paths:
   design_dir: "../project/design"
   code_dir: "../project/code"
 
-  # Prompt templates directory (stays in Requirements_Generation_System)
-  prompts_dir: "Requirements_Generation_Prompts"
+  # Prompt templates directory (relative to Requirements_Generation_System)
+  prompts_dir: "../Requirements_Generation_Prompts"
 
   # Source code directories for full regeneration
   frontend_dir: "FrontEnd"

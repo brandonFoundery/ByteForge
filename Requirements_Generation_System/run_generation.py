@@ -56,6 +56,12 @@ def load_config(config_path: Path) -> dict:
         return yaml.safe_load(f)
 
 
+def get_universal_base_path() -> Path:
+    """Get the universal base path (ByteForge directory) for cross-platform compatibility"""
+    script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+    return script_dir.parent  # ByteForge directory
+
+
 def check_environment(config: dict, model_provider: str = None, prompt_for_keys: bool = True) -> bool:
     """Check if environment is properly configured"""
     console.print("\n[cyan]Checking environment...[/cyan]")
@@ -83,13 +89,20 @@ def check_environment(config: dict, model_provider: str = None, prompt_for_keys:
             else:
                 issues.append(f"No API key found for {key_info['name']}")
     
-    # Check paths (resolve relative to ByteForge root)
-    script_dir = Path(__file__).parent  # Requirements_Generation_System directory
-    byteforge_root = script_dir.parent   # ByteForge directory
+    # Check paths - Universal Path Structure (Cross-platform)
+    script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory (absolute)
+    byteforge_path = script_dir.parent  # ByteForge directory
+
+    # Handle relative paths in config (remove ../ prefix for cross-platform compatibility)
+    requirements_dir = config['paths']['requirements_dir']
+    if requirements_dir.startswith('../'):
+        requirements_dir = requirements_dir[3:]  # Remove '../'
+
+    prompts_dir = config['paths']['prompts_dir']
 
     paths_to_check = [
-        ('Requirements Directory', byteforge_root / config['paths']['requirements_dir']),
-        ('Prompts Directory', byteforge_root / config['paths']['prompts_dir'])
+        ('Requirements Directory', byteforge_path / requirements_dir),
+        ('Prompts Directory', script_dir / prompts_dir)
     ]
 
     for name, path in paths_to_check:
@@ -586,12 +599,16 @@ async def full_regeneration_workflow(config_path: Path, model_provider: str = "o
         with open(config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
 
-        # Get paths
-        base_path = Path(config['paths']['base_dir'])
+        # Get paths - Universal Path Structure
+        script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+        byteforge_path = script_dir.parent  # ByteForge directory
+        byteforge_project_path = byteforge_path / "project"  # ByteForgeProjectPath
+
+        base_path = byteforge_path  # For compatibility with existing code
         frontend_dir = Path(config['paths']['frontend_dir'])
         backend_dir = Path(config['paths']['backend_dir'])
-        output_dir = Path(config['paths']['output_dir'])
-        status_dir = Path(config['paths']['status_dir'])
+        output_dir = byteforge_project_path / "requirements"
+        status_dir = byteforge_project_path / "generation_status"
 
         # Resolve relative paths
         if not frontend_dir.is_absolute():
@@ -1006,7 +1023,7 @@ def main():
             os.environ[key_info["env_var"]] = api_key
 
             from design_document_generator import DesignDocumentGenerator
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
             design_generator = DesignDocumentGenerator(config['project']['name'], base_path, model_provider)
 
             import asyncio
@@ -1212,7 +1229,7 @@ def main():
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator and change manager
-        base_path = Path(config['paths']['base_dir'])
+        base_path = get_universal_base_path()  # Universal Path Structure
         orchestrator = RequirementsOrchestrator(config['project']['name'], base_path, config_path, model_provider=model_provider)
         change_manager = ChangeManager(base_path, orchestrator)
 
@@ -1256,7 +1273,7 @@ def main():
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator and change manager
-        base_path = Path(config['paths']['base_dir'])
+        base_path = get_universal_base_path()  # Universal Path Structure
         orchestrator = RequirementsOrchestrator(config['project']['name'], base_path, config_path, model_provider=model_provider)
         change_manager = ChangeManager(base_path, orchestrator)
 
@@ -1288,7 +1305,7 @@ def main():
             from downstream_resume_manager import run_downstream_resume
             import asyncio
 
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
             success = asyncio.run(run_downstream_resume(base_path, config_path, model_provider))
 
             if success:
@@ -1322,7 +1339,7 @@ def main():
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator
-        base_path = Path(config['paths']['base_dir'])
+        base_path = get_universal_base_path()  # Universal Path Structure
         orchestrator = RequirementsOrchestrator(config['project']['name'], base_path, config_path, model_provider=model_provider)
 
         try:
@@ -1386,7 +1403,7 @@ def main():
         try:
             from design_document_generator import DesignDocumentGenerator
 
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
             design_generator = DesignDocumentGenerator(config['project']['name'], base_path, model_provider)
 
             console.print(f"\n[yellow]Generating AI agent design documents...[/yellow]")
@@ -1440,8 +1457,11 @@ def main():
             console.print("  [cyan]• Implements real application code[/cyan]")
             console.print("  [cyan]• Creates pull requests automatically[/cyan]")
 
-            # Check if design documents exist
-            design_dir = Path(config['paths']['base_dir']) / "design"
+            # Check if design documents exist - Universal Path Structure (Cross-platform)
+            script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory (absolute)
+            byteforge_path = script_dir.parent  # ByteForge directory
+            byteforge_project_path = byteforge_path / "project"  # ByteForgeProjectPath
+            design_dir = byteforge_project_path / "design"
             if not design_dir.exists():
                 console.print(f"[red]Design documents directory not found: {design_dir}[/red]")
                 console.print("[red]Please generate design documents first (option 11)[/red]")
@@ -1488,8 +1508,9 @@ def main():
             try:
                 from claude_code_executor import ClaudeCodeExecutor
 
-                base_path = Path(config['paths']['base_dir'])
-                claude_executor = ClaudeCodeExecutor(base_path)
+                # Universal Path Structure - Use Requirements_Generation_System as base
+                script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+                claude_executor = ClaudeCodeExecutor(script_dir)
 
                 console.print(f"\n[yellow]Launching Claude Code implementation...[/yellow]")
 
@@ -1533,8 +1554,11 @@ def main():
             console.print("  [cyan]• Demonstrates branch creation and testing[/cyan]")
             console.print("  [cyan]• Safe demonstration mode (no actual changes)[/cyan]")
 
-            # Check if design documents exist
-            design_dir = Path(config['paths']['base_dir']) / "design"
+            # Check if design documents exist - Universal Path Structure (Cross-platform)
+            script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory (absolute)
+            byteforge_path = script_dir.parent  # ByteForge directory
+            byteforge_project_path = byteforge_path / "project"  # ByteForgeProjectPath
+            design_dir = byteforge_project_path / "design"
             if not design_dir.exists():
                 console.print(f"[red]Design documents directory not found: {design_dir}[/red]")
                 console.print("[red]Please generate design documents first (option 11)[/red]")
@@ -1598,7 +1622,7 @@ def main():
             try:
                 from claude_code_simulator import ClaudeCodeSimulator
 
-                base_path = Path(config['paths']['base_dir'])
+                base_path = get_universal_base_path()  # Universal Path Structure
                 simulator = ClaudeCodeSimulator(base_path)
 
                 console.print(f"\n[cyan]🧪 Starting Claude Code simulation...[/cyan]")
@@ -1705,7 +1729,7 @@ def main():
         try:
             from application_builder import ApplicationBuilder
 
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
             app_builder = ApplicationBuilder(config['project']['name'], base_path, config_path)
 
             console.print(f"\n[yellow]Starting 4-pass AI workflow...[/yellow]")
@@ -1769,8 +1793,11 @@ def main():
         console.print("  [cyan]• Real Claude Code execution[/cyan]")
         console.print("  [cyan]• Automatic dependency resolution[/cyan]")
 
-        # Check if design documents exist
-        design_dir = Path(config['paths']['base_dir']) / "design"
+        # Check if design documents exist - Universal Path Structure (Cross-platform)
+        script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory (absolute)
+        byteforge_path = script_dir.parent  # ByteForge directory
+        byteforge_project_path = byteforge_path / "project"  # ByteForgeProjectPath
+        design_dir = byteforge_project_path / "design"
         if not design_dir.exists():
             console.print(f"[red]Design documents directory not found: {design_dir}[/red]")
             console.print("[red]Please generate design documents first (option 10)[/red]")
@@ -1790,8 +1817,8 @@ def main():
             # Auto-detect next available phase
             try:
                 from claude_code_executor import ClaudeCodeExecutor
-                base_path = Path(config['paths']['base_dir'])
-                claude_executor = ClaudeCodeExecutor(base_path)
+                script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+                claude_executor = ClaudeCodeExecutor(script_dir)
 
                 # Check which phases are completed
                 progress_tracker = claude_executor.progress_tracker
@@ -1821,8 +1848,8 @@ def main():
         try:
             from claude_code_executor import ClaudeCodeExecutor
 
-            base_path = Path(config['paths']['base_dir'])
-            claude_executor = ClaudeCodeExecutor(base_path)
+            script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+            claude_executor = ClaudeCodeExecutor(script_dir)
 
             console.print(f"\n[yellow]🚀 Quick launching Phase {target_phase} with all agents...[/yellow]")
 
@@ -1863,7 +1890,7 @@ def main():
 
         try:
             # Get the project root path
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
 
             # Handle the UI style choice
             success = handle_ui_style_menu_choice(choice, base_path)
@@ -1887,7 +1914,7 @@ def main():
         try:
             from frontend_test_generator import FrontendTestGenerator
 
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
 
             # Get API key and set environment
             key_info = get_api_key_info(model_provider)
@@ -2233,13 +2260,13 @@ read
     elif choice == "25":
         # Browse Application Templates
         from template_manager import TemplateManager
-        template_manager = TemplateManager(Path(config['paths']['base_dir']))
+        template_manager = TemplateManager(get_universal_base_path())  # Universal Path Structure
         template_manager.display_template_catalog()
 
     elif choice == "26":
         # Create New Project from Template
         from template_manager import create_new_project_interactive
-        project_name = create_new_project_interactive(Path(config['paths']['base_dir']))
+        project_name = create_new_project_interactive(get_universal_base_path())  # Universal Path Structure
         if project_name:
             console.print(f"\n[green][OK] Project '{project_name}' created successfully![/green]")
             console.print("[dim]You can now navigate to the project directory and run the AI generation system.[/dim]")

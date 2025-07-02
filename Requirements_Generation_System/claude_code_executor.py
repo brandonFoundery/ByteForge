@@ -65,30 +65,39 @@ class ClaudeCodeExecutor:
     """Enhanced Claude Code executor using instruction files"""
 
     def __init__(self, base_path: Path):
-        # Load config first to get ByteForge path
-        self.temp_config = self._load_claude_config_temp(base_path)
-        
-        # Use ByteForge path from config or fallback to base_path
-        byteforge_path = self.temp_config.get('byteforge_path')
-        if byteforge_path:
-            self.byteforge_path = Path(byteforge_path)
-        else:
-            self.byteforge_path = base_path.parent if base_path.name == "Requirements_Generation_System" else base_path
-        
-        self.base_path = base_path  # Keep original for relative operations
-        self.instructions_path = base_path / "project" / "design" / "claude_instructions"  # Design docs stay in Requirements_Generation_System
-        self.logs_path = base_path / "logs"  # Logs stay in Requirements_Generation_System
-        
-        # IMPORTANT: Code output goes to ByteForge project directory
-        self.code_output_path = self.byteforge_path / "project" / "code"
-        
+        # Universal Path Structure - Cross-platform compatible
+        self.base_path = Path(base_path).resolve()  # Requirements_Generation_System directory (absolute)
+
         # Detect execution environment
         self.is_windows = platform.system() == "Windows"
         self.is_wsl = self._is_running_in_wsl()
+
+        # ByteForgePath = {relative_path}\ByteForge (cross-platform)
+        self.byteforge_path = self.base_path.parent  # ByteForge directory (parent of Requirements_Generation_System)
+
+        # ByteForgeProjectPath = {ByteForgePath}\project (cross-platform)
+        self.byteforge_project_path = self.byteforge_path / "project"
+
+        # All generated content goes under ByteForgeProjectPath (cross-platform)
+        self.instructions_path = self.byteforge_project_path / "design" / "claude_instructions"
+        self.code_output_path = self.byteforge_project_path / "code"
+        self.design_path = self.byteforge_project_path / "design"
+        self.requirements_path = self.byteforge_project_path / "requirements"
+
+        # Logs stay in Requirements_Generation_System (cross-platform)
+        self.logs_path = self.base_path / "logs"
+
+        # Load config after paths are established
+        self.temp_config = self._load_claude_config_temp(self.base_path)
+
+        # Complete environment detection
         self.needs_wsl = self.is_windows and not self.is_wsl
 
-        # Ensure directories exist
+        # Ensure directories exist (cross-platform)
         self.logs_path.mkdir(parents=True, exist_ok=True)
+        self.byteforge_project_path.mkdir(parents=True, exist_ok=True)
+        self.instructions_path.mkdir(parents=True, exist_ok=True)
+        self.code_output_path.mkdir(parents=True, exist_ok=True)
         
         console.print(f"[dim]Environment: Windows={self.is_windows}, WSL={self.is_wsl}, Needs WSL={self.needs_wsl}[/dim]")
         console.print(f"[dim]ByteForge project path: {self.byteforge_path}[/dim]")
@@ -606,25 +615,18 @@ class ClaudeCodeExecutor:
         # Load configuration
         config = self.config
         
-        # Create instruction file path
-        instruction_file_path = f"project/design/claude_instructions/{agent['id']}-{phase_id}-mvp-core-features.md"
-        
-        # Handle paths based on execution environment
-        if self.needs_wsl:
-            # Windows calling WSL - need to convert paths
-            # IMPORTANT: Use ByteForge path as working directory, instruction file from Requirements_Generation_System
-            working_dir = self._convert_to_wsl_path(str(self.byteforge_path))
-            full_instruction_path = self._convert_to_wsl_path(str(self.base_path / instruction_file_path))
-        else:
-            # Already in WSL or Linux - use paths directly
-            # IMPORTANT: Use ByteForge path as working directory, instruction file from Requirements_Generation_System
-            working_dir = str(self.byteforge_path)
-            full_instruction_path = str(self.base_path / instruction_file_path)
+        # Universal Path Structure - Cross-platform compatible
+        phase_name = "mvp-core-features" if phase_id == "phase1" else "advanced-features" if phase_id == "phase2" else "production-ready"
+        instruction_file = self.instructions_path / f"{agent['id']}-{phase_id}-{phase_name}.md"
+
+        # Get cross-platform paths for execution
+        working_dir = self._get_cross_platform_path(self.byteforge_path, for_execution=True)
+        full_instruction_path = self._get_cross_platform_path(instruction_file, for_execution=True)
         
         # Validate file access
         if self.security_manager:
-            if not self.security_manager.validate_file_access(str(self.base_path / instruction_file_path), "read"):
-                raise SecurityError(f"File access denied: {instruction_file_path}")
+            if not self.security_manager.validate_file_access(str(instruction_file), "read"):
+                raise SecurityError(f"File access denied: {instruction_file}")
         
         # Use file-based prompting to avoid shell escaping  
         # Convert config model to Claude Code model alias
@@ -651,6 +653,15 @@ class ClaudeCodeExecutor:
             command = self.security_manager.sanitize_command_for_wsl(command)
         
         return command
+
+    def _get_cross_platform_path(self, path: Path, for_execution: bool = False) -> str:
+        """Get cross-platform compatible path for the current execution environment"""
+        if for_execution and self.needs_wsl:
+            # Windows calling WSL - convert to WSL format
+            return self._convert_to_wsl_path(str(path.absolute()))
+        else:
+            # Direct execution (WSL, Linux, or Windows native)
+            return str(path.absolute())
 
     def _convert_to_wsl_path(self, windows_path: str) -> str:
         """Convert Windows path to WSL path format"""

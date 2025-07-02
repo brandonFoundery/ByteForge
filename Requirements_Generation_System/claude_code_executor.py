@@ -299,16 +299,32 @@ class ClaudeCodeExecutor:
 
         console.print(f"[cyan]🔍 Checking available agents for {phase_key}[/cyan]")
 
+        # Configuration for retries
+        max_retries = self.config.get('max_retries', 3)
+
         for agent_id in ["backend", "frontend", "security", "infrastructure", "integration"]:
             agent_key = f"{agent_id}-{phase_id}"
 
             if phase_key in self.progress_tracker and agent_key in self.progress_tracker[phase_key]["agents"]:
-                status = self.progress_tracker[phase_key]["agents"][agent_key]["status"]
-                console.print(f"[dim]Agent {agent_key} status: {status}[/dim]")
+                agent_data = self.progress_tracker[phase_key]["agents"][agent_key]
+                status = agent_data["status"]
+                retry_count = agent_data.get("retry_count", 0)
+                
+                console.print(f"[dim]Agent {agent_key} status: {status}, retries: {retry_count}/{max_retries}[/dim]")
 
-                if status in ["not_started", "pending"] and self._check_dependencies(agent_id, phase_id):
+                # Allow agents that are not_started, pending, or failed (if under retry limit)
+                can_run = False
+                if status in ["not_started", "pending"]:
+                    can_run = True
+                elif status == "failed" and retry_count < max_retries:
+                    can_run = True
+                    console.print(f"[yellow]🔄 {agent_key} failed but can retry ({retry_count}/{max_retries})[/yellow]")
+
+                if can_run and self._check_dependencies(agent_id, phase_id):
                     available.append(agent_id)
                     console.print(f"[green]✅ {agent_id} is available[/green]")
+                elif status == "failed" and retry_count >= max_retries:
+                    console.print(f"[red]❌ {agent_key} permanently failed (max retries exceeded)[/red]")
             else:
                 console.print(f"[yellow]⚠️ Agent {agent_key} not found in {phase_key}[/yellow]")
 

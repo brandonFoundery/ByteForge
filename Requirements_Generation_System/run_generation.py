@@ -921,8 +921,11 @@ def main():
     console.print("  [bold green]Application Templates:[/bold green]")
     console.print("  25. [bold green]Browse Application Templates[/bold green]")
     console.print("  26. [bold green]Create New Project from Template[/bold green]")
+    console.print("")
+    console.print("  [bold red]Troubleshooting:[/bold red]")
+    console.print("  27. [bold red]Reset Failed Claude Code Agents[/bold red]")
 
-    choice = input("\nEnter choice (1-26): ").strip()
+    choice = input("\nEnter choice (1-27): ").strip()
 
     # Model selection for generation modes (UI style options don't need LLM)
     model_provider = None
@@ -2270,6 +2273,83 @@ read
         if project_name:
             console.print(f"\n[green][OK] Project '{project_name}' created successfully![/green]")
             console.print("[dim]You can now navigate to the project directory and run the AI generation system.[/dim]")
+
+    elif choice == "27":
+        # Reset Failed Claude Code Agents
+        console.print("\n[bold red]Reset Failed Claude Code Agents[/bold red]")
+        console.print("This will reset all failed Claude Code agents back to 'not_started' status,")
+        console.print("allowing them to be retried in the next execution.")
+
+        # Check if progress tracker exists
+        script_dir = Path(__file__).parent.resolve()
+        byteforge_path = script_dir.parent
+        byteforge_project_path = byteforge_path / "project"
+        progress_tracker_path = byteforge_project_path / "design" / "claude_instructions" / "progress_tracker.json"
+
+        if not progress_tracker_path.exists():
+            console.print(f"[yellow]No progress tracker found: {progress_tracker_path}[/yellow]")
+            console.print("[yellow]Nothing to reset.[/yellow]")
+            return 0
+
+        try:
+            # Load progress tracker
+            with open(progress_tracker_path, 'r', encoding='utf-8') as f:
+                progress_data = json.load(f)
+
+            # Count failed agents
+            failed_agents = []
+            for phase_name, phase_data in progress_data.items():
+                if phase_name == "execution_metadata":
+                    continue
+                
+                if "agents" in phase_data:
+                    for agent_key, agent_data in phase_data["agents"].items():
+                        if agent_data.get("status") == "failed":
+                            failed_agents.append(agent_key)
+
+            if not failed_agents:
+                console.print("[green]No failed agents found. All agents are in good status.[/green]")
+                return 0
+
+            console.print(f"\n[yellow]Found {len(failed_agents)} failed agents:[/yellow]")
+            for agent in failed_agents:
+                console.print(f"  • {agent}")
+
+            confirm = Prompt.ask(f"\nReset {len(failed_agents)} failed agents to 'not_started' status?", choices=["y", "n"], default="y")
+            if confirm.lower() != "y":
+                console.print("[yellow]Reset cancelled.[/yellow]")
+                return 0
+
+            # Reset failed agents
+            reset_count = 0
+            for phase_name, phase_data in progress_data.items():
+                if phase_name == "execution_metadata":
+                    continue
+                
+                if "agents" in phase_data:
+                    for agent_key, agent_data in phase_data["agents"].items():
+                        if agent_data.get("status") == "failed":
+                            agent_data["status"] = "not_started"
+                            agent_data["started_at"] = None
+                            agent_data["completed_at"] = None
+                            agent_data["actual_duration_minutes"] = None
+                            agent_data["error_log"] = None
+                            agent_data["retry_count"] = 0
+                            reset_count += 1
+
+            # Save updated progress tracker
+            with open(progress_tracker_path, 'w', encoding='utf-8') as f:
+                json.dump(progress_data, f, indent=2, ensure_ascii=False)
+
+            console.print(f"\n[bold green][SUCCESS] Reset {reset_count} failed agents![/bold green]")
+            console.print("[green]All failed agents have been reset to 'not_started' status.[/green]")
+            console.print("[green]You can now run Claude Code implementation again (option 13).[/green]")
+
+        except Exception as e:
+            console.print(f"[red]Error resetting failed agents: {e}[/red]")
+            import traceback
+            traceback.print_exc()
+            return 1
 
     else:
         console.print("[red]Invalid choice[/red]")

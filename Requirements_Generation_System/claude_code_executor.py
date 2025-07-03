@@ -582,6 +582,14 @@ class ClaudeCodeExecutor:
             result = await self._run_claude_code(command, log_file_path)
 
             execution_time = time.time() - start_time
+            
+            # Log Claude's response for debugging
+            console.print(f"[dim]Claude execution result: success={result.get('success', False)}, returncode={result.get('returncode', 'unknown')}[/dim]")
+            if result.get("stdout"):
+                stdout_preview = result["stdout"][:500] + ("..." if len(result["stdout"]) > 500 else "")
+                console.print(f"[dim]Claude stdout preview: {stdout_preview}[/dim]")
+            if result.get("stderr"):
+                console.print(f"[yellow]Claude stderr: {result['stderr']}[/yellow]")
 
             if result.get("success", False):
                 console.print(f"[green]✅ {agent_name} completed successfully![/green]")
@@ -646,34 +654,36 @@ class ClaudeCodeExecutor:
                 raise SecurityError(f"File access denied: {instruction_file}")
         
         # Use file-based prompting to avoid shell escaping  
-        # Convert config model to Claude Code model alias
-        model_name = config.get('model', 'claude-sonnet-4-20250514')
-        if 'sonnet-4' in model_name or 'claude-sonnet-4' in model_name:
-            model_flag = 'sonnet'
-        elif 'opus' in model_name:
-            model_flag = 'opus' 
-        elif 'haiku' in model_name:
-            model_flag = 'haiku'
-        else:
-            model_flag = 'sonnet'  # Default fallback
+        # Use the exact model name from config (e.g., claude-4-sonnet-20250514)
+        model_name = config.get('model', 'claude-4-sonnet-20250514')
         
         # Debug: Show environment detection
         console.print(f"[dim]Environment detection: Windows={self.is_windows}, WSL={self.is_wsl}, Needs WSL={self.needs_wsl}[/dim]")
         console.print(f"[dim]Working dir: {working_dir}[/dim]")
         console.print(f"[dim]Instruction file: {full_instruction_path}[/dim]")
+        console.print(f"[dim]Model: {model_name}[/dim]")
         
-        # FIXED: Use proper Claude Code command with -f flag and model
+        # FIXED: Use -p flag with $(cat ...) since -f flag is not supported
         if self.needs_wsl:
             # We will call wrapper through `wsl`, so the inner command must be native to WSL - no extra `wsl`
-            command = f'cd {working_dir} && claude code --model {model_flag} --dangerously-skip-permissions -f {full_instruction_path}'
+            command = f'cd {working_dir} && claude code --model "{model_name}" --dangerously-skip-permissions -p "$(cat {full_instruction_path})"'
             console.print(f"[dim]Using WSL-native command (wrapper will execute in WSL)[/dim]")
         else:
             # Already in WSL or Linux, run Claude Code directly
-            command = f'cd {working_dir} && claude code --model {model_flag} --dangerously-skip-permissions -f {full_instruction_path}'
+            command = f'cd {working_dir} && claude code --model "{model_name}" --dangerously-skip-permissions -p "$(cat {full_instruction_path})"'
             console.print(f"[dim]Using direct command (already in WSL/Linux)[/dim]")
         
         # Debug: Show generated command
         console.print(f"[dim]Generated Claude command: {command}[/dim]")
+        
+        # Log the instruction content for debugging
+        try:
+            with open(instruction_file, 'r', encoding='utf-8') as f:
+                instruction_content = f.read()
+            console.print(f"[dim]Instruction file size: {len(instruction_content)} characters[/dim]")
+            console.print(f"[dim]Instruction preview (first 200 chars): {instruction_content[:200]}...[/dim]")
+        except Exception as e:
+            console.print(f"[yellow]⚠️ Could not read instruction file: {e}[/yellow]")
         
         # Validate command security
         if self.security_manager:

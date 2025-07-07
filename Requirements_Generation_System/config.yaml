@@ -8,22 +8,24 @@ project:
   version: "1.0.0"
   client: "ContractLogix"
 
-# Input/Output Paths (all relative to ByteForge root directory)
+# Input/Output Paths (relative to project root for cross-platform compatibility)
 paths:
-  # Base directory of the project - now uses project folder
-  base_dir: "project"
+  # Universal Path Structure - ALWAYS relative to Requirements_Generation_System
+  # ByteForgePath = {relative_path}\ByteForge (parent directory)
+  byteforge_path: ".."
 
-  # Source requirements directory
-  requirements_dir: "project/requirements"
+  # ByteForgeProjectPath = {ByteForgePath}\project
+  byteforge_project_path: "../project"
 
-  # Prompt templates directory
-  prompts_dir: "Requirements_Generation_Prompts"
+  # All generated content goes under ByteForgeProjectPath
+  requirements_dir: "../project/requirements_artifacts"
+  output_dir: "../project/requirements"
+  status_dir: "../project/generation_status"
+  design_dir: "../project/design"
+  code_dir: "../project/code"
 
-  # Output directory for generated documents
-  output_dir: "project/requirements"
-
-  # Status tracking directory
-  status_dir: "project/generation_status"
+  # Prompt templates directory (relative to Requirements_Generation_System)
+  prompts_dir: "../Requirements_Generation_Prompts"
 
   # Source code directories for full regeneration
   frontend_dir: "FrontEnd"

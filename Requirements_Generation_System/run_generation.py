@@ -56,6 +56,12 @@ def load_config(config_path: Path) -> dict:
         return yaml.safe_load(f)
 
 
+def get_universal_base_path() -> Path:
+    """Get the universal base path (ByteForge directory) for cross-platform compatibility"""
+    script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+    return script_dir.parent  # ByteForge directory
+
+
 def check_environment(config: dict, model_provider: str = None, prompt_for_keys: bool = True) -> bool:
     """Check if environment is properly configured"""
     console.print("\n[cyan]Checking environment...[/cyan]")
@@ -83,13 +89,20 @@ def check_environment(config: dict, model_provider: str = None, prompt_for_keys:
             else:
                 issues.append(f"No API key found for {key_info['name']}")
     
-    # Check paths (resolve relative to ByteForge root)
-    script_dir = Path(__file__).parent  # Requirements_Generation_System directory
-    byteforge_root = script_dir.parent   # ByteForge directory
+    # Check paths - Universal Path Structure (Cross-platform)
+    script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory (absolute)
+    byteforge_path = script_dir.parent  # ByteForge directory
+
+    # Handle relative paths in config (remove ../ prefix for cross-platform compatibility)
+    requirements_dir = config['paths']['requirements_dir']
+    if requirements_dir.startswith('../'):
+        requirements_dir = requirements_dir[3:]  # Remove '../'
+
+    prompts_dir = config['paths']['prompts_dir']
 
     paths_to_check = [
-        ('Requirements Directory', byteforge_root / config['paths']['requirements_dir']),
-        ('Prompts Directory', byteforge_root / config['paths']['prompts_dir'])
+        ('Requirements Directory', byteforge_path / requirements_dir),
+        ('Prompts Directory', script_dir / prompts_dir)
     ]
 
     for name, path in paths_to_check:
@@ -586,12 +599,16 @@ async def full_regeneration_workflow(config_path: Path, model_provider: str = "o
         with open(config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
 
-        # Get paths
-        base_path = Path(config['paths']['base_dir'])
+        # Get paths - Universal Path Structure
+        script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+        byteforge_path = script_dir.parent  # ByteForge directory
+        byteforge_project_path = byteforge_path / "project"  # ByteForgeProjectPath
+
+        base_path = byteforge_path  # For compatibility with existing code
         frontend_dir = Path(config['paths']['frontend_dir'])
         backend_dir = Path(config['paths']['backend_dir'])
-        output_dir = Path(config['paths']['output_dir'])
-        status_dir = Path(config['paths']['status_dir'])
+        output_dir = byteforge_project_path / "requirements"
+        status_dir = byteforge_project_path / "generation_status"
 
         # Resolve relative paths
         if not frontend_dir.is_absolute():
@@ -875,10 +892,14 @@ def main():
     console.print("  7. [bold yellow]Modify Existing Requirement[/bold yellow]")
     console.print("  8. [bold yellow]Introduce New Requirement(s)[/bold yellow]")
     console.print("  9. [bold orange]Resume Downstream Document Generation[/bold orange]")
-    console.print("  10. [bold cyan]Generate Development Plan[/bold cyan]")
+    console.print("")
+    console.print("  [bold yellow]Quick AI Build (Rapid Prototyping):[/bold yellow]")
+    console.print("  10. [bold magenta]Build Application (AI-Driven 4-Pass System)[/bold magenta]")
+    console.print("")
+    console.print("  [bold yellow]Controlled Development (Production Apps):[/bold yellow]")
     console.print("  11. [bold green]Generate AI Agent Design Documents[/bold green]")
-    console.print("  12. [bold blue]Execute Claude Code Implementation[/bold blue]")
-    console.print("  13. [bold magenta]Build Application (AI-Driven 4-Pass System)[/bold magenta]")
+    console.print("  12. [bold cyan]Generate Development Plan[/bold cyan]")
+    console.print("  13. [bold blue]Execute Claude Code Implementation[/bold blue]")
     console.print("")
     console.print("  [bold cyan]Quick Phase Launch:[/bold cyan]")
     console.print("  14. [bold cyan]Phase 1 - All Agents[/bold cyan]")
@@ -900,8 +921,11 @@ def main():
     console.print("  [bold green]Application Templates:[/bold green]")
     console.print("  25. [bold green]Browse Application Templates[/bold green]")
     console.print("  26. [bold green]Create New Project from Template[/bold green]")
+    console.print("")
+    console.print("  [bold red]Troubleshooting:[/bold red]")
+    console.print("  27. [bold red]Reset Failed Claude Code Agents[/bold red]")
 
-    choice = input("\nEnter choice (1-26): ").strip()
+    choice = input("\nEnter choice (1-27): ").strip()
 
     # Model selection for generation modes (UI style options don't need LLM)
     model_provider = None
@@ -1002,7 +1026,7 @@ def main():
             os.environ[key_info["env_var"]] = api_key
 
             from design_document_generator import DesignDocumentGenerator
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
             design_generator = DesignDocumentGenerator(config['project']['name'], base_path, model_provider)
 
             import asyncio
@@ -1208,7 +1232,7 @@ def main():
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator and change manager
-        base_path = Path(config['paths']['base_dir'])
+        base_path = get_universal_base_path()  # Universal Path Structure
         orchestrator = RequirementsOrchestrator(config['project']['name'], base_path, config_path, model_provider=model_provider)
         change_manager = ChangeManager(base_path, orchestrator)
 
@@ -1252,7 +1276,7 @@ def main():
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator and change manager
-        base_path = Path(config['paths']['base_dir'])
+        base_path = get_universal_base_path()  # Universal Path Structure
         orchestrator = RequirementsOrchestrator(config['project']['name'], base_path, config_path, model_provider=model_provider)
         change_manager = ChangeManager(base_path, orchestrator)
 
@@ -1284,7 +1308,7 @@ def main():
             from downstream_resume_manager import run_downstream_resume
             import asyncio
 
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
             success = asyncio.run(run_downstream_resume(base_path, config_path, model_provider))
 
             if success:
@@ -1295,7 +1319,7 @@ def main():
         except Exception as e:
             console.print(f"[red]Error running downstream resume: {e}[/red]")
 
-    elif choice == "10":
+    elif choice == "12":
         # Generate Development Plan
         console.print("\n[bold cyan]Generate Development Plan[/bold cyan]")
         console.print("This will analyze all existing requirements documents and create a comprehensive development plan.")
@@ -1318,7 +1342,7 @@ def main():
         os.environ[key_info["env_var"]] = api_key
 
         # Initialize orchestrator
-        base_path = Path(config['paths']['base_dir'])
+        base_path = get_universal_base_path()  # Universal Path Structure
         orchestrator = RequirementsOrchestrator(config['project']['name'], base_path, config_path, model_provider=model_provider)
 
         try:
@@ -1358,7 +1382,7 @@ def main():
         dev_plan_path = Path(config['paths']['output_dir']) / "dev_plan.md"
         if not dev_plan_path.exists():
             console.print(f"[red]Development plan not found: {dev_plan_path}[/red]")
-            console.print("[red]Please generate the development plan first (option 9)[/red]")
+            console.print("[red]Please generate the development plan first (option 12)[/red]")
             return 1
 
         console.print(f"\n[green][OK] Found development plan: {dev_plan_path}[/green]")
@@ -1382,7 +1406,7 @@ def main():
         try:
             from design_document_generator import DesignDocumentGenerator
 
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
             design_generator = DesignDocumentGenerator(config['project']['name'], base_path, model_provider)
 
             console.print(f"\n[yellow]Generating AI agent design documents...[/yellow]")
@@ -1393,11 +1417,11 @@ def main():
 
             if result.success:
                 console.print(f"\n[bold green][SUCCESS] All AI agent design documents generated successfully![/bold green]")
-                console.print(f"[green][OK] Documents saved to: generated_documents/design/[/green]")
+                console.print(f"[green][OK] Documents saved to: design/[/green]")
                 console.print(f"[green][OK] Total execution time: {result.total_execution_time:.2f} seconds[/green]")
 
                 # List generated files
-                design_dir = base_path / "generated_documents" / "design"
+                design_dir = base_path / "design"
                 if design_dir.exists():
                     design_files = list(design_dir.glob("*.md"))
                     console.print(f"\n[bold]Generated design documents:[/bold]")
@@ -1418,7 +1442,7 @@ def main():
             traceback.print_exc()
             return 1
 
-    elif choice == "12":
+    elif choice == "13":
         # Execute Claude Code Implementation
         console.print("\n[bold blue]Execute Claude Code Implementation[/bold blue]")
         console.print("Choose implementation method:")
@@ -1436,17 +1460,20 @@ def main():
             console.print("  [cyan]• Implements real application code[/cyan]")
             console.print("  [cyan]• Creates pull requests automatically[/cyan]")
 
-            # Check if design documents exist
-            design_dir = Path(config['paths']['base_dir']) / "generated_documents" / "design"
+            # Check if design documents exist - Universal Path Structure (Cross-platform)
+            script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory (absolute)
+            byteforge_path = script_dir.parent  # ByteForge directory
+            byteforge_project_path = byteforge_path / "project"  # ByteForgeProjectPath
+            design_dir = byteforge_project_path / "design"
             if not design_dir.exists():
                 console.print(f"[red]Design documents directory not found: {design_dir}[/red]")
-                console.print("[red]Please generate design documents first (option 10)[/red]")
+                console.print("[red]Please generate design documents first (option 11)[/red]")
                 return 1
 
             design_files = list(design_dir.glob("*-agent-design.md"))
             if not design_files:
                 console.print(f"[red]No agent design documents found in {design_dir}[/red]")
-                console.print("[red]Please generate design documents first (option 10)[/red]")
+                console.print("[red]Please generate design documents first (option 11)[/red]")
                 return 1
 
             console.print(f"\n[green][OK] Found {len(design_files)} agent design documents:[/green]")
@@ -1484,8 +1511,9 @@ def main():
             try:
                 from claude_code_executor import ClaudeCodeExecutor
 
-                base_path = Path(config['paths']['base_dir'])
-                claude_executor = ClaudeCodeExecutor(base_path)
+                # Universal Path Structure - Use Requirements_Generation_System as base
+                script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+                claude_executor = ClaudeCodeExecutor(script_dir)
 
                 console.print(f"\n[yellow]Launching Claude Code implementation...[/yellow]")
 
@@ -1529,17 +1557,20 @@ def main():
             console.print("  [cyan]• Demonstrates branch creation and testing[/cyan]")
             console.print("  [cyan]• Safe demonstration mode (no actual changes)[/cyan]")
 
-            # Check if design documents exist
-            design_dir = Path(config['paths']['base_dir']) / "generated_documents" / "design"
+            # Check if design documents exist - Universal Path Structure (Cross-platform)
+            script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory (absolute)
+            byteforge_path = script_dir.parent  # ByteForge directory
+            byteforge_project_path = byteforge_path / "project"  # ByteForgeProjectPath
+            design_dir = byteforge_project_path / "design"
             if not design_dir.exists():
                 console.print(f"[red]Design documents directory not found: {design_dir}[/red]")
-                console.print("[red]Please generate design documents first (option 10)[/red]")
+                console.print("[red]Please generate design documents first (option 11)[/red]")
                 return 1
 
             design_files = list(design_dir.glob("*-agent-design.md"))
             if not design_files:
                 console.print(f"[red]No agent design documents found in {design_dir}[/red]")
-                console.print("[red]Please generate design documents first (option 10)[/red]")
+                console.print("[red]Please generate design documents first (option 11)[/red]")
                 return 1
 
             console.print(f"\n[green][OK] Found {len(design_files)} agent design documents[/green]")
@@ -1594,7 +1625,7 @@ def main():
             try:
                 from claude_code_simulator import ClaudeCodeSimulator
 
-                base_path = Path(config['paths']['base_dir'])
+                base_path = get_universal_base_path()  # Universal Path Structure
                 simulator = ClaudeCodeSimulator(base_path)
 
                 console.print(f"\n[cyan]🧪 Starting Claude Code simulation...[/cyan]")
@@ -1632,7 +1663,7 @@ def main():
             console.print("[red]Invalid choice. Please select 1 or 2.[/red]")
             return 1
 
-    elif choice == "13":
+    elif choice == "10":
         # AI-Driven Application Builder
         console.print("\n[bold magenta]🚀 AI-Driven Application Builder[/bold magenta]")
         console.print("This will use a 4-pass AI system to build your application based on existing requirements:")
@@ -1701,7 +1732,7 @@ def main():
         try:
             from application_builder import ApplicationBuilder
 
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
             app_builder = ApplicationBuilder(config['project']['name'], base_path, config_path)
 
             console.print(f"\n[yellow]Starting 4-pass AI workflow...[/yellow]")
@@ -1765,8 +1796,11 @@ def main():
         console.print("  [cyan]• Real Claude Code execution[/cyan]")
         console.print("  [cyan]• Automatic dependency resolution[/cyan]")
 
-        # Check if design documents exist
-        design_dir = Path(config['paths']['base_dir']) / "generated_documents" / "design"
+        # Check if design documents exist - Universal Path Structure (Cross-platform)
+        script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory (absolute)
+        byteforge_path = script_dir.parent  # ByteForge directory
+        byteforge_project_path = byteforge_path / "project"  # ByteForgeProjectPath
+        design_dir = byteforge_project_path / "design"
         if not design_dir.exists():
             console.print(f"[red]Design documents directory not found: {design_dir}[/red]")
             console.print("[red]Please generate design documents first (option 10)[/red]")
@@ -1786,8 +1820,8 @@ def main():
             # Auto-detect next available phase
             try:
                 from claude_code_executor import ClaudeCodeExecutor
-                base_path = Path(config['paths']['base_dir'])
-                claude_executor = ClaudeCodeExecutor(base_path)
+                script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+                claude_executor = ClaudeCodeExecutor(script_dir)
 
                 # Check which phases are completed
                 progress_tracker = claude_executor.progress_tracker
@@ -1817,8 +1851,8 @@ def main():
         try:
             from claude_code_executor import ClaudeCodeExecutor
 
-            base_path = Path(config['paths']['base_dir'])
-            claude_executor = ClaudeCodeExecutor(base_path)
+            script_dir = Path(__file__).parent.resolve()  # Requirements_Generation_System directory
+            claude_executor = ClaudeCodeExecutor(script_dir)
 
             console.print(f"\n[yellow]🚀 Quick launching Phase {target_phase} with all agents...[/yellow]")
 
@@ -1859,7 +1893,7 @@ def main():
 
         try:
             # Get the project root path
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
 
             # Handle the UI style choice
             success = handle_ui_style_menu_choice(choice, base_path)
@@ -1883,7 +1917,7 @@ def main():
         try:
             from frontend_test_generator import FrontendTestGenerator
 
-            base_path = Path(config['paths']['base_dir'])
+            base_path = get_universal_base_path()  # Universal Path Structure
 
             # Get API key and set environment
             key_info = get_api_key_info(model_provider)
@@ -2229,16 +2263,99 @@ read
     elif choice == "25":
         # Browse Application Templates
         from template_manager import TemplateManager
-        template_manager = TemplateManager(Path(config['paths']['base_dir']))
+        template_manager = TemplateManager(get_universal_base_path())  # Universal Path Structure
         template_manager.display_template_catalog()
 
     elif choice == "26":
         # Create New Project from Template
         from template_manager import create_new_project_interactive
-        project_name = create_new_project_interactive(Path(config['paths']['base_dir']))
+        project_name = create_new_project_interactive(get_universal_base_path())  # Universal Path Structure
         if project_name:
             console.print(f"\n[green][OK] Project '{project_name}' created successfully![/green]")
             console.print("[dim]You can now navigate to the project directory and run the AI generation system.[/dim]")
+
+    elif choice == "27":
+        # Reset Failed Claude Code Agents
+        console.print("\n[bold red]Reset Failed Claude Code Agents[/bold red]")
+        console.print("This will reset all failed Claude Code agents back to 'not_started' status,")
+        console.print("allowing them to be retried in the next execution.")
+
+        # Check if progress tracker exists
+        script_dir = Path(__file__).parent.resolve()
+        byteforge_path = script_dir.parent
+        byteforge_project_path = byteforge_path / "project"
+        progress_tracker_path = byteforge_project_path / "design" / "claude_instructions" / "progress_tracker.json"
+
+        if not progress_tracker_path.exists():
+            console.print(f"[yellow]No progress tracker found: {progress_tracker_path}[/yellow]")
+            console.print("[yellow]Nothing to reset.[/yellow]")
+            return 0
+
+        try:
+            # Load progress tracker
+            with open(progress_tracker_path, 'r', encoding='utf-8') as f:
+                progress_data = json.load(f)
+
+            # Count all non-not_started agents (failed, completed, in_progress)
+            resetable_agents = []
+            for phase_name, phase_data in progress_data.items():
+                if phase_name == "execution_metadata":
+                    continue
+                
+                if "agents" in phase_data:
+                    for agent_key, agent_data in phase_data["agents"].items():
+                        status = agent_data.get("status")
+                        if status in ["failed", "completed", "in_progress"]:
+                            resetable_agents.append((agent_key, status))
+
+            if not resetable_agents:
+                console.print("[green]All agents are already in 'not_started' status. Nothing to reset.[/green]")
+                return 0
+
+            console.print(f"\n[yellow]Found {len(resetable_agents)} agents that can be reset:[/yellow]")
+            for agent, status in resetable_agents:
+                status_color = "red" if status == "failed" else "green" if status == "completed" else "yellow"
+                console.print(f"  • {agent}: [{status_color}]{status}[/{status_color}]")
+
+            console.print(f"\n[cyan]This will reset all agents back to 'not_started' so they can run again.[/cyan]")
+            console.print(f"[cyan]This is useful when agents completed but didn't actually generate code.[/cyan]")
+
+            confirm = Prompt.ask(f"\nReset {len(resetable_agents)} agents to 'not_started' status?", choices=["y", "n"], default="y")
+            if confirm.lower() != "y":
+                console.print("[yellow]Reset cancelled.[/yellow]")
+                return 0
+
+            # Reset all non-not_started agents
+            reset_count = 0
+            for phase_name, phase_data in progress_data.items():
+                if phase_name == "execution_metadata":
+                    continue
+                
+                if "agents" in phase_data:
+                    for agent_key, agent_data in phase_data["agents"].items():
+                        status = agent_data.get("status")
+                        if status in ["failed", "completed", "in_progress"]:
+                            agent_data["status"] = "not_started"
+                            agent_data["started_at"] = None
+                            agent_data["completed_at"] = None
+                            agent_data["actual_duration_minutes"] = None
+                            agent_data["error_log"] = None
+                            agent_data["retry_count"] = 0
+                            reset_count += 1
+
+            # Save updated progress tracker
+            with open(progress_tracker_path, 'w', encoding='utf-8') as f:
+                json.dump(progress_data, f, indent=2, ensure_ascii=False)
+
+            console.print(f"\n[bold green][SUCCESS] Reset {reset_count} failed agents![/bold green]")
+            console.print("[green]All failed agents have been reset to 'not_started' status.[/green]")
+            console.print("[green]You can now run Claude Code implementation again (option 13).[/green]")
+
+        except Exception as e:
+            console.print(f"[red]Error resetting failed agents: {e}[/red]")
+            import traceback
+            traceback.print_exc()
+            return 1
 
     else:
         console.print("[red]Invalid choice[/red]")

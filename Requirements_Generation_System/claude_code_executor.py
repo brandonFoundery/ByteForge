@@ -8,10 +8,13 @@ parallel execution according to the execution plan.
 
 import asyncio
 import json
+import os
+import platform
 import subprocess
 import time
 import yaml
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -62,35 +65,54 @@ class ClaudeCodeExecutor:
     """Enhanced Claude Code executor using instruction files"""
 
     def __init__(self, base_path: Path):
-        self.base_path = base_path
-        self.instructions_path = base_path / "generated_documents" / "design" / "claude_instructions"
-        self.logs_path = base_path / "logs"
+        # Universal Path Structure - Cross-platform compatible
+        self.base_path = Path(base_path).resolve()  # Requirements_Generation_System directory (absolute)
 
-        # Ensure directories exist
+        # Detect execution environment
+        self.is_windows = platform.system() == "Windows"
+        self.is_wsl = self._is_running_in_wsl()
+
+        # ByteForgePath = {relative_path}\ByteForge (cross-platform)
+        self.byteforge_path = self.base_path.parent  # ByteForge directory (parent of Requirements_Generation_System)
+
+        # ByteForgeProjectPath = {ByteForgePath}\project (cross-platform)
+        self.byteforge_project_path = self.byteforge_path / "project"
+
+        # All generated content goes under ByteForgeProjectPath (cross-platform)
+        self.instructions_path = self.byteforge_project_path / "design" / "claude_instructions"
+        self.code_output_path = self.byteforge_project_path / "code"
+        self.design_path = self.byteforge_project_path / "design"
+        self.requirements_path = self.byteforge_project_path / "requirements"
+
+        # Logs stay in Requirements_Generation_System (cross-platform)
+        self.logs_path = self.base_path / "logs"
+
+        # Load config after paths are established
+        self.temp_config = self._load_claude_config_temp(self.base_path)
+
+        # Complete environment detection
+        self.needs_wsl = self.is_windows and not self.is_wsl
+
+        # Ensure directories exist (cross-platform)
         self.logs_path.mkdir(parents=True, exist_ok=True)
+        self.byteforge_project_path.mkdir(parents=True, exist_ok=True)
+        self.instructions_path.mkdir(parents=True, exist_ok=True)
+        self.code_output_path.mkdir(parents=True, exist_ok=True)
+        
+        console.print(f"[dim]Environment: Windows={self.is_windows}, WSL={self.is_wsl}, Needs WSL={self.needs_wsl}[/dim]")
+        console.print(f"[dim]ByteForge project path: {self.byteforge_path}[/dim]")
+        console.print(f"[dim]Code output path: {self.code_output_path}[/dim]")
 
-        # Load execution plan and progress tracker
+        # Load configuration first
+        self.config = self._load_claude_config()
+
+        # Load agents and phases dynamically from config
+        self.agents = self._load_agents_from_config()
+        self.phases = self._load_phases_from_config()
+
+        # Load execution plan and progress tracker (after agents/phases are loaded)
         self.execution_plan = self._load_execution_plan()
         self.progress_tracker = self._load_progress_tracker()
-
-        # Agent configurations
-        self.agents = {
-            "1": {"id": "backend", "name": "Backend Agent", "dir": "BackEnd"},
-            "2": {"id": "frontend", "name": "Frontend Agent", "dir": "FrontEnd"},
-            "3": {"id": "infrastructure", "name": "Infrastructure Agent", "dir": "Infrastructure"},
-            "4": {"id": "security", "name": "Security Agent", "dir": "BackEnd"},
-            "5": {"id": "integration", "name": "Integration Agent", "dir": "BackEnd"}
-        }
-
-        # Phase configurations
-        self.phases = {
-            "1": {"id": "phase1", "name": "MVP Core Features"},
-            "2": {"id": "phase2", "name": "Advanced Features"},
-            "3": {"id": "phase3", "name": "Production Ready"}
-        }
-
-        # Load configuration
-        self.config = self._load_claude_config()
         
         # Initialize execution optimizer
         if ExecutionOptimizer:
@@ -111,11 +133,35 @@ class ClaudeCodeExecutor:
             self.security_manager = SecurityManager(base_path)
         else:
             self.security_manager = None
+    
+    def _is_running_in_wsl(self) -> bool:
+        """Detect if we're running inside WSL"""
+        try:
+            # Check for WSL indicators
+            if os.path.exists('/proc/version'):
+                with open('/proc/version', 'r') as f:
+                    version_info = f.read().lower()
+                    return 'microsoft' in version_info or 'wsl' in version_info
+            return False
+        except:
+            return False
+    
+    def _load_claude_config_temp(self, base_path: Path) -> Dict:
+        """Temporary method to load config for initialization"""
+        try:
+            config_path = base_path / "config.yaml"
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                return config.get('paths', {})
+        except:
+            pass
+        return {}
 
     def _load_claude_config(self) -> Dict:
         """Load Claude Code configuration from config.yaml"""
         try:
-            config_path = self.base_path / "Requirements_Generation_System" / "config.yaml"
+            config_path = Path(__file__).parent / "config.yaml"
             if config_path.exists():
                 with open(config_path, 'r', encoding='utf-8') as f:
                     config = yaml.safe_load(f)
@@ -143,14 +189,25 @@ class ClaudeCodeExecutor:
         return {"loaded": True}  # Would parse markdown if needed
 
     def _load_progress_tracker(self) -> Dict:
-        """Load the progress tracker"""
+        """Load the progress tracker or generate it dynamically"""
         tracker_file = self.instructions_path / "progress_tracker.json"
+        
         if not tracker_file.exists():
             console.print(f"[yellow]⚠️ Progress tracker not found: {tracker_file}[/yellow]")
-            return {}
+            console.print("[yellow]📝 Generating progress tracker dynamically from configuration...[/yellow]")
+            tracker = self._generate_progress_tracker()
+            self._save_progress_tracker_file(tracker, tracker_file)
+            return tracker
 
-        with open(tracker_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        try:
+            with open(tracker_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            console.print(f"[red]❌ Error loading progress tracker: {e}[/red]")
+            console.print("[yellow]📝 Generating new progress tracker...[/yellow]")
+            tracker = self._generate_progress_tracker()
+            self._save_progress_tracker_file(tracker, tracker_file)
+            return tracker
 
     def _save_progress_tracker(self):
         """Save the progress tracker"""
@@ -242,16 +299,32 @@ class ClaudeCodeExecutor:
 
         console.print(f"[cyan]🔍 Checking available agents for {phase_key}[/cyan]")
 
+        # Configuration for retries
+        max_retries = self.config.get('max_retries', 3)
+
         for agent_id in ["backend", "frontend", "security", "infrastructure", "integration"]:
             agent_key = f"{agent_id}-{phase_id}"
 
             if phase_key in self.progress_tracker and agent_key in self.progress_tracker[phase_key]["agents"]:
-                status = self.progress_tracker[phase_key]["agents"][agent_key]["status"]
-                console.print(f"[dim]Agent {agent_key} status: {status}[/dim]")
+                agent_data = self.progress_tracker[phase_key]["agents"][agent_key]
+                status = agent_data["status"]
+                retry_count = agent_data.get("retry_count", 0)
+                
+                console.print(f"[dim]Agent {agent_key} status: {status}, retries: {retry_count}/{max_retries}[/dim]")
 
-                if status == "not_started" and self._check_dependencies(agent_id, phase_id):
+                # Allow agents that are not_started, pending, or failed (if under retry limit)
+                can_run = False
+                if status in ["not_started", "pending"]:
+                    can_run = True
+                elif status == "failed" and retry_count < max_retries:
+                    can_run = True
+                    console.print(f"[yellow]🔄 {agent_key} failed but can retry ({retry_count}/{max_retries})[/yellow]")
+
+                if can_run and self._check_dependencies(agent_id, phase_id):
                     available.append(agent_id)
                     console.print(f"[green]✅ {agent_id} is available[/green]")
+                elif status == "failed" and retry_count >= max_retries:
+                    console.print(f"[red]❌ {agent_key} permanently failed (max retries exceeded)[/red]")
             else:
                 console.print(f"[yellow]⚠️ Agent {agent_key} not found in {phase_key}[/yellow]")
 
@@ -494,17 +567,29 @@ class ClaudeCodeExecutor:
             # Create log file for this execution
             log_file = self.logs_path / f"{agent_id}_{phase_id}_claude_execution.log"
 
-            # Convert Windows path to WSL path properly
-            wsl_log_file = self._convert_to_wsl_path(str(log_file))
+            # Handle log file path based on execution environment
+            # IMPORTANT: Use absolute path for log file since working directory is ByteForge project
+            if self.needs_wsl:
+                # Windows calling WSL - convert log file path
+                log_file_path = self._convert_to_wsl_path(str(log_file.absolute()))
+                console.print(f"[dim]Using WSL log path: {log_file_path}[/dim]")
+            else:
+                # Already in WSL or Linux - use absolute path
+                log_file_path = str(log_file.absolute())
+                console.print(f"[dim]Using direct log path: {log_file_path}[/dim]")
 
-            # Ensure log directory exists in WSL
-            wsl_logs_dir = self._convert_to_wsl_path(str(self.logs_path))
-            console.print(f"[dim]Creating log directory: {wsl_logs_dir}[/dim]")
-
-            # Execute Claude Code in WSL
-            result = await self._run_claude_code_wsl(command, wsl_log_file)
+            # Execute Claude Code
+            result = await self._run_claude_code(command, log_file_path)
 
             execution_time = time.time() - start_time
+            
+            # Log Claude's response for debugging
+            console.print(f"[dim]Claude execution result: success={result.get('success', False)}, returncode={result.get('returncode', 'unknown')}[/dim]")
+            if result.get("stdout"):
+                stdout_preview = result["stdout"][:500] + ("..." if len(result["stdout"]) > 500 else "")
+                console.print(f"[dim]Claude stdout preview: {stdout_preview}[/dim]")
+            if result.get("stderr"):
+                console.print(f"[yellow]Claude stderr: {result['stderr']}[/yellow]")
 
             if result.get("success", False):
                 console.print(f"[green]✅ {agent_name} completed successfully![/green]")
@@ -551,24 +636,54 @@ class ClaudeCodeExecutor:
 
     def _create_claude_command_from_instruction(self, agent: Dict, phase_id: str, instruction_content: str) -> str:
         """Create Claude Code command using instruction file reference with security validation"""
-        wsl_base_path = self._convert_to_wsl_path(str(self.base_path))
-        
         # Load configuration
         config = self.config
         
-        # Create instruction file path
-        instruction_file_path = f"generated_documents/design/claude_instructions/{agent['id']}-{phase_id}.md"
-        wsl_instruction_path = self._convert_to_wsl_path(str(self.base_path / instruction_file_path))
+        # Universal Path Structure - Cross-platform compatible
+        phase_name = "mvp-core-features" if phase_id == "phase1" else "advanced-features" if phase_id == "phase2" else "production-ready"
+        instruction_file = self.instructions_path / f"{agent['id']}-{phase_id}-{phase_name}.md"
+
+        # Get cross-platform paths for execution
+        # Claude Code should run in the code output directory where it will generate files
+        working_dir = self._get_cross_platform_path(self.code_output_path, for_execution=True)
+        full_instruction_path = self._get_cross_platform_path(instruction_file, for_execution=True)
         
         # Validate file access
         if self.security_manager:
-            if not self.security_manager.validate_file_access(str(self.base_path / instruction_file_path), "read"):
-                raise SecurityError(f"File access denied: {instruction_file_path}")
+            if not self.security_manager.validate_file_access(str(instruction_file), "read"):
+                raise SecurityError(f"File access denied: {instruction_file}")
         
-        # Use file-based prompting to avoid shell escaping
-        model_flag = config.get('model', 'sonnet').replace('claude-', '').replace('-20250514', '')
+        # Use file-based prompting to avoid shell escaping  
+        # Use the exact model name from config (e.g., claude-4-sonnet-20250514)
+        model_name = config.get('model', 'claude-4-sonnet-20250514')
         
-        command = f'cd {wsl_base_path} && claude --model {model_flag} --dangerously-skip-permissions --file {wsl_instruction_path}'
+        # Debug: Show environment detection
+        console.print(f"[dim]Environment detection: Windows={self.is_windows}, WSL={self.is_wsl}, Needs WSL={self.needs_wsl}[/dim]")
+        console.print(f"[dim]Working dir: {working_dir}[/dim]")
+        console.print(f"[dim]Instruction file: {full_instruction_path}[/dim]")
+        console.print(f"[dim]Model: {model_name}[/dim]")
+        
+        # FIXED: Use -p flag with $(cat ...) since -f flag is not supported
+        if self.needs_wsl:
+            # We will call wrapper through `wsl`, so the inner command must be native to WSL - no extra `wsl`
+            command = f'cd {working_dir} && claude code --model "{model_name}" --dangerously-skip-permissions -p "$(cat {full_instruction_path})"'
+            console.print(f"[dim]Using WSL-native command (wrapper will execute in WSL)[/dim]")
+        else:
+            # Already in WSL or Linux, run Claude Code directly
+            command = f'cd {working_dir} && claude code --model "{model_name}" --dangerously-skip-permissions -p "$(cat {full_instruction_path})"'
+            console.print(f"[dim]Using direct command (already in WSL/Linux)[/dim]")
+        
+        # Debug: Show generated command
+        console.print(f"[dim]Generated Claude command: {command}[/dim]")
+        
+        # Log the instruction content for debugging
+        try:
+            with open(instruction_file, 'r', encoding='utf-8') as f:
+                instruction_content = f.read()
+            console.print(f"[dim]Instruction file size: {len(instruction_content)} characters[/dim]")
+            console.print(f"[dim]Instruction preview (first 200 chars): {instruction_content[:200]}...[/dim]")
+        except Exception as e:
+            console.print(f"[yellow]⚠️ Could not read instruction file: {e}[/yellow]")
         
         # Validate command security
         if self.security_manager:
@@ -579,6 +694,15 @@ class ClaudeCodeExecutor:
             command = self.security_manager.sanitize_command_for_wsl(command)
         
         return command
+
+    def _get_cross_platform_path(self, path: Path, for_execution: bool = False) -> str:
+        """Get cross-platform compatible path for the current execution environment"""
+        if for_execution and self.needs_wsl:
+            # Windows calling WSL - convert to WSL format
+            return self._convert_to_wsl_path(str(path.absolute()))
+        else:
+            # Direct execution (WSL, Linux, or Windows native)
+            return str(path.absolute())
 
     def _convert_to_wsl_path(self, windows_path: str) -> str:
         """Convert Windows path to WSL path format"""
@@ -592,8 +716,8 @@ class ClaudeCodeExecutor:
 
         return wsl_path
 
-    async def _run_claude_code_wsl(self, command: str, wsl_log_file: str) -> Dict:
-        """Run Claude Code command in WSL and capture results"""
+    async def _run_claude_code(self, command: str, log_file_path: str) -> Dict:
+        """Run Claude Code command with appropriate execution method"""
         try:
             # Create a wrapper script that includes notification
             wrapper_script = f"""
@@ -601,33 +725,52 @@ class ClaudeCodeExecutor:
 set -e
 
 # Create log directory if it doesn't exist
-mkdir -p "$(dirname "{wsl_log_file}")"
+mkdir -p "$(dirname "{log_file_path}")"
 
-echo "Starting Claude Code execution at $(date)" >> {wsl_log_file}
+echo "Starting Claude Code execution at $(date)" >> {log_file_path}
 
-{command} 2>&1 | tee -a {wsl_log_file}
+{command} 2>&1 | tee -a {log_file_path}
 
 CLAUDE_EXIT_CODE=${{PIPESTATUS[0]}}
-echo "Claude exit code: $CLAUDE_EXIT_CODE" >> {wsl_log_file}
+echo "Claude exit code: $CLAUDE_EXIT_CODE" >> {log_file_path}
 
 if [ $CLAUDE_EXIT_CODE -eq 0 ]; then
-    echo "SUCCESS" >> {wsl_log_file}
+    echo "SUCCESS" >> {log_file_path}
     exit 0
 else
-    echo "FAILED:Exit code $CLAUDE_EXIT_CODE" >> {wsl_log_file}
+    echo "FAILED:Exit code $CLAUDE_EXIT_CODE" >> {log_file_path}
     exit $CLAUDE_EXIT_CODE
 fi
 """
 
-            # Execute the wrapper script with configurable timeout
+            # Execute based on environment
             timeout_seconds = self.config.get('timeout', 600)
-            result = await asyncio.to_thread(
-                subprocess.run,
-                ["wsl", "-d", "Ubuntu", "-e", "bash", "-c", wrapper_script],
-                capture_output=True,
-                text=True,
-                timeout=timeout_seconds
-            )
+            
+            # Force re-check environment for execution path
+            current_platform = platform.system()
+            current_is_wsl = self._is_running_in_wsl()
+            current_needs_wsl = current_platform == "Windows" and not current_is_wsl
+            
+            if current_needs_wsl:
+                # Windows calling WSL
+                console.print("[dim]Executing via WSL...[/dim]")
+                result = await asyncio.to_thread(
+                    subprocess.run,
+                    ["wsl", "-d", "Ubuntu", "-e", "bash", "-c", wrapper_script],
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout_seconds
+                )
+            else:
+                # Already in WSL or Linux - execute directly
+                console.print("[dim]Executing directly with bash...[/dim]")
+                result = await asyncio.to_thread(
+                    subprocess.run,
+                    ["bash", "-c", wrapper_script],
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout_seconds
+                )
 
             return {
                 "success": result.returncode == 0,
@@ -643,3 +786,159 @@ fi
                 "error": str(e),
                 "returncode": -1
             }
+
+    def _load_agents_from_config(self) -> Dict:
+        """Load agent configurations dynamically from config.yaml"""
+        try:
+            config_path = Path(__file__).parent / "config.yaml"
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                
+                # Look for agents in claude_code_execution.agents
+                agents_config = config.get('claude_code_execution', {}).get('agents', {})
+                agents = {}
+                
+                # Convert config format to expected format
+                for i, (agent_id, agent_data) in enumerate(agents_config.items(), 1):
+                    agents[str(i)] = {
+                        "id": agent_id,
+                        "name": agent_data.get("name", f"{agent_id.title()} Agent"),
+                        "dir": agent_data.get("directory", "BackEnd")
+                    }
+                
+                return agents
+            else:
+                console.print("[yellow]⚠️ Config file not found, using default agents[/yellow]")
+                return self._get_default_agents()
+                
+        except Exception as e:
+            console.print(f"[yellow]⚠️ Error loading agents from config: {e}[/yellow]")
+            return self._get_default_agents()
+
+    def _load_phases_from_config(self) -> Dict:
+        """Load phase configurations dynamically from config.yaml"""
+        try:
+            config_path = Path(__file__).parent / "config.yaml"
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                
+                # Look for phases in claude_code_execution.phases
+                phases_config = config.get('claude_code_execution', {}).get('phases', {})
+                phases = {}
+                
+                # Convert config format to expected format
+                for i, (phase_id, phase_data) in enumerate(phases_config.items(), 1):
+                    phases[str(i)] = {
+                        "id": phase_id,
+                        "name": phase_data.get("name", f"{phase_id.title()}")
+                    }
+                
+                return phases
+            else:
+                console.print("[yellow]⚠️ Config file not found, using default phases[/yellow]")
+                return self._get_default_phases()
+                
+        except Exception as e:
+            console.print(f"[yellow]⚠️ Error loading phases from config: {e}[/yellow]")
+            return self._get_default_phases()
+
+    def _get_default_agents(self) -> Dict:
+        """Fallback default agents if config loading fails"""
+        return {
+            "1": {"id": "backend", "name": "Backend Agent", "dir": "BackEnd"},
+            "2": {"id": "frontend", "name": "Frontend Agent", "dir": "FrontEnd"},
+            "3": {"id": "infrastructure", "name": "Infrastructure Agent", "dir": "Infrastructure"},
+            "4": {"id": "security", "name": "Security Agent", "dir": "BackEnd"},
+            "5": {"id": "integration", "name": "Integration Agent", "dir": "BackEnd"}
+        }
+
+    def _get_default_phases(self) -> Dict:
+        """Fallback default phases if config loading fails"""
+        return {
+            "1": {"id": "phase1", "name": "MVP Core Features"},
+            "2": {"id": "phase2", "name": "Advanced Features"},
+            "3": {"id": "phase3", "name": "Production Ready"}
+        }
+
+    def _generate_progress_tracker(self) -> Dict:
+        """Generate progress tracker dynamically from agents and phases configuration"""
+        tracker = {
+            "project": "LSOMigrator",
+            "created": datetime.now().isoformat(),
+            "overall_progress": {
+                "total_phases": len(self.phases),
+                "completed_phases": 0,
+                "current_phase": "phase1_mvp_core_features",
+                "completion_percentage": 0
+            }
+        }
+        
+        # Generate phases with agents
+        for phase_key, phase_config in self.phases.items():
+            phase_id = phase_config["id"]
+            phase_name = phase_config["name"]
+            
+            # Create phase key in expected format
+            phase_tracker_key = f"{phase_id}_mvp_core_features" if phase_id == "phase1" else f"{phase_id}_advanced_features"
+            
+            tracker[phase_tracker_key] = {
+                "name": phase_name,
+                "status": "pending",
+                "agents": {}
+            }
+            
+            # Add agents for this phase
+            for agent_key, agent_config in self.agents.items():
+                agent_id = agent_config["id"]
+                agent_name = agent_config["name"]
+                
+                # Create agent key in expected format
+                agent_tracker_key = f"{agent_id}-{phase_id}"
+                
+                tracker[phase_tracker_key]["agents"][agent_tracker_key] = {
+                    "name": f"{agent_name} - {phase_name}",
+                    "status": "pending",
+                    "instruction_file": f"{agent_id}-{phase_id}-mvp-core-features.md",
+                    "features": [
+                        f"{agent_name} implementation for {phase_name}",
+                        f"Core {agent_id} functionality",
+                        f"Integration and testing"
+                    ],
+                    "dependencies": self._get_agent_dependencies(agent_id, phase_id),
+                    "started_at": None,
+                    "completed_at": None,
+                    "retry_count": 0
+                }
+        
+        return tracker
+
+    def _get_agent_dependencies(self, agent_id: str, phase_id: str) -> List[str]:
+        """Get dependencies for an agent based on logical dependencies"""
+        dependencies = []
+        
+        # Define logical dependencies
+        if agent_id == "frontend":
+            dependencies.append(f"backend-{phase_id}")
+        elif agent_id == "security":
+            dependencies.append(f"infrastructure-{phase_id}")
+        elif agent_id == "integration":
+            dependencies.append(f"security-{phase_id}")
+            if phase_id != "phase1":  # Integration depends on backend in later phases
+                dependencies.append(f"backend-{phase_id}")
+        
+        return dependencies
+
+    def _save_progress_tracker_file(self, tracker: Dict, file_path: Path):
+        """Save progress tracker to file"""
+        try:
+            # Ensure directory exists
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(tracker, f, indent=2, ensure_ascii=False)
+                
+            console.print(f"[green]✅ Progress tracker saved to: {file_path}[/green]")
+        except Exception as e:
+            console.print(f"[red]❌ Error saving progress tracker: {e}[/red]")

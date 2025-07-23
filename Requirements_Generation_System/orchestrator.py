@@ -214,6 +214,7 @@ class ConfigManager:
             "anthropic": "ANTHROPIC_API_KEY",
             "google": "GOOGLE_API_KEY",
             "gemini": "GOOGLE_API_KEY",  # Gemini uses Google API key
+            "grok": "GROK_API_KEY",
             "azure": "AZURE_OPENAI_API_KEY"
         }
 
@@ -296,6 +297,9 @@ class ConfigManager:
         elif provider.lower() in ["google", "gemini"]:
             console.print("1. Get your API key from: https://makersuite.google.com/app/apikey")
             console.print("2. Add to .env file: GOOGLE_API_KEY=your_key_here")
+        elif provider.lower() == "grok":
+            console.print("1. Get your API key from: https://x.ai/api")
+            console.print("2. Add to .env file: GROK_API_KEY=your_key_here")
 
         console.print(f"3. Or set environment variable directly:")
         console.print(f"   export {provider.upper()}_API_KEY=your_key_here")
@@ -358,7 +362,8 @@ class RequirementsOrchestrator:
         default_models = {
             "openai": "o3-mini",
             "anthropic": "claude-3-opus-20240229",
-            "gemini": "gemini-1.5-pro-latest"
+            "gemini": "gemini-1.5-pro-latest",
+            "grok": "grok-beta"
         }
 
         llm_config = self.config.get('llm', {})
@@ -366,6 +371,7 @@ class RequirementsOrchestrator:
             "openai": llm_config.get("openai_model", default_models["openai"]),
             "anthropic": llm_config.get("anthropic_model", default_models["anthropic"]),
             "gemini": llm_config.get("gemini_model", default_models["gemini"]),
+            "grok": llm_config.get("grok_model", default_models["grok"]),
         }
 
         # Load review system configuration
@@ -434,6 +440,11 @@ class RequirementsOrchestrator:
                 raise ValueError("Google Generative AI not available. Please install: pip install google-generativeai")
             genai.configure(api_key=api_key)
             return genai
+        elif provider == "grok":
+            # Grok uses OpenAI-compatible API with custom base URL
+            base_url = "https://api.x.ai/v1"
+            timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+            return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
         elif provider == "azure":
             endpoint = self.config_manager.get_setting("AZURE_OPENAI_ENDPOINT")
             api_version = self.config_manager.get_setting("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
@@ -488,6 +499,11 @@ class RequirementsOrchestrator:
                 return None
             genai.configure(api_key=api_key)
             return genai
+        elif provider == "grok":
+            # Grok uses OpenAI-compatible API with custom base URL
+            base_url = "https://api.x.ai/v1"
+            timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+            return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
         elif provider == "azure":
             endpoint = self.config_manager.get_setting("AZURE_OPENAI_ENDPOINT")
             api_version = self.config_manager.get_setting("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
@@ -580,6 +596,19 @@ Think through this requirements analysis step by step, considering all dependenc
                 else:
                     response = model.generate_content(full_prompt)
                 return response.text
+            elif provider == "grok":
+                # Grok uses OpenAI-compatible API
+                logger.info(f"Using Grok model: {model_name}")
+                response = self.llm_client.chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7,
+                    max_tokens=4000
+                )
+                return response.choices[0].message.content
         except Exception as e:
             logger.error(f"Error generating text with {provider}: {e}")
             raise
@@ -676,6 +705,18 @@ DO NOT make changes just for the sake of change. Only modify content that genuin
                 else:
                     response = model.generate_content(full_prompt)
                 return response.text
+            elif provider == "grok":
+                # Grok uses OpenAI-compatible API for reviewer as well
+                response = self.reviewer_llm_client.chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=temperature,
+                    max_tokens=max_tokens
+                )
+                return response.choices[0].message.content
         except Exception as e:
             logger.error(f"Error generating text with reviewer {provider}: {e}")
             raise

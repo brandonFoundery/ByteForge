@@ -363,7 +363,7 @@ class RequirementsOrchestrator:
             "openai": "o3-mini",
             "anthropic": "claude-3-opus-20240229",
             "gemini": "gemini-1.5-pro-latest",
-            "grok": "grok-beta"
+            "grok": "grok-4-0709"
         }
 
         llm_config = self.config.get('llm', {})
@@ -443,7 +443,10 @@ class RequirementsOrchestrator:
         elif provider == "grok":
             # Grok uses OpenAI-compatible API with custom base URL
             base_url = "https://api.x.ai/v1"
-            timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+            default_timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+            # Grok models need much longer timeout due to reasoning time
+            timeout = int(self.config_manager.get_setting("llm.grok_timeout", 600))  # 10 minutes for Grok
+            console.print(f"[yellow]Using extended timeout ({timeout}s) for Grok model[/yellow]")
             return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
         elif provider == "azure":
             endpoint = self.config_manager.get_setting("AZURE_OPENAI_ENDPOINT")
@@ -502,7 +505,10 @@ class RequirementsOrchestrator:
         elif provider == "grok":
             # Grok uses OpenAI-compatible API with custom base URL
             base_url = "https://api.x.ai/v1"
-            timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+            default_timeout = int(self.config_manager.get_setting("API_TIMEOUT", 60))
+            # Grok models need much longer timeout due to reasoning time
+            timeout = int(self.config_manager.get_setting("llm.grok_timeout", 600))  # 10 minutes for Grok
+            console.print(f"[yellow]Using extended timeout ({timeout}s) for Grok model[/yellow]")
             return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
         elif provider == "azure":
             endpoint = self.config_manager.get_setting("AZURE_OPENAI_ENDPOINT")
@@ -1796,7 +1802,11 @@ This log tracks the batch processing of code files for requirements generation.
         structure_errors = self._validate_content_structure(doc_type, doc.content)
         errors.extend(structure_errors)
 
-        # Check 3: Document-specific validation
+        # Check 3: Document completeness validation
+        completeness_errors = self._validate_document_completeness(doc_type, doc.content)
+        errors.extend(completeness_errors)
+
+        # Check 4: Document-specific validation
         specific_errors = self._validate_document_specific_requirements(doc_type, doc.content)
         errors.extend(specific_errors)
 
@@ -1894,6 +1904,69 @@ This log tracks the batch processing of code files for requirements generation.
         if yaml_block_count > 0 and yaml_close_count % 2 != 0:
             errors.append("Unmatched YAML code blocks (``` markers)")
 
+        return errors
+
+    def _validate_document_completeness(self, doc_type: DocumentType, content: str) -> List[str]:
+        """Validate document completeness to detect truncated/incomplete documents"""
+        errors = []
+        
+        # Check if document ends abruptly (mid-sentence or incomplete line)
+        content_stripped = content.strip()
+        if not content_stripped:
+            errors.append("Document is empty")
+            return errors
+            
+        last_line = content_stripped.split('\n')[-1].strip()
+        
+        # Check for incomplete sentences (ending without proper punctuation)
+        if last_line and not last_line.endswith(('.', '!', '?', ':', '```', '|', ')', ']', '}')):
+            # Allow certain ending patterns that are valid
+            valid_endings = ['---', '##', '###', '####', '#####', '######']
+            if not any(last_line.endswith(ending) for ending in valid_endings):
+                if len(last_line) > 5:  # Only flag if it's a substantial incomplete line
+                    errors.append(f"Document appears to end abruptly: '{last_line}'")
+        
+        # Document-specific completeness checks
+        if doc_type == DocumentType.PRD:
+            # PRD should have key sections
+            required_sections = ['executive summary', 'product vision', 'user personas', 'features', 'metrics']
+            content_lower = content.lower()
+            missing_sections = [section for section in required_sections if section not in content_lower]
+            if len(missing_sections) > 2:  # Allow some flexibility
+                errors.append(f"PRD missing critical sections: {', '.join(missing_sections)}")
+                
+            # Check for incomplete phased roadmap (common truncation point)
+            if 'phase' in content_lower and '(Q' in content and content.count('Phase') > content.count('Phase 1'):
+                # If multiple phases mentioned but last phase description is incomplete
+                # Check if document ends properly with sections like appendices, questions, etc.
+                last_500_chars = content_lower[-500:]
+                has_proper_ending = any(ending in last_500_chars for ending in 
+                    ['production', 'launch', 'appendices', 'glossary', 'questions', 'change log', 'tracker'])
+                if not has_proper_ending:
+                    errors.append("Roadmap section appears incomplete (phases may be truncated)")
+        
+        elif doc_type == DocumentType.BRD:
+            # BRD should have business context and objectives
+            required_sections = ['business context', 'objectives', 'stakeholder', 'requirements']
+            content_lower = content.lower()
+            missing_sections = [section for section in required_sections if section not in content_lower]
+            if len(missing_sections) > 2:
+                errors.append(f"BRD missing critical sections: {', '.join(missing_sections)}")
+        
+        # Check minimum content length for each document type
+        min_lengths = {
+            DocumentType.PRD: 5000,
+            DocumentType.BRD: 3000,
+            DocumentType.FRD: 4000,
+            DocumentType.NFRD: 2000,
+            DocumentType.DRD: 2000,
+            DocumentType.TRD: 3000
+        }
+        
+        min_length = min_lengths.get(doc_type, 1000)
+        if len(content) < min_length:
+            errors.append(f"Document too short ({len(content)} chars, expected at least {min_length} for {doc_type.value})")
+        
         return errors
 
     def _validate_document_specific_requirements(self, doc_type: DocumentType, content: str) -> List[str]:
@@ -4210,7 +4283,7 @@ def main():
     
     parser = argparse.ArgumentParser(description='Requirements Generation Orchestrator')
     parser.add_argument('--config', type=str, required=True, help='Path to config.yaml file')
-    parser.add_argument('--model', type=str, default='openai', choices=['openai', 'anthropic', 'gemini'], 
+    parser.add_argument('--model', type=str, default='openai', choices=['openai', 'anthropic', 'gemini', 'grok'], 
                        help='LLM provider to use')
     parser.add_argument('--documents', type=str, help='Comma-separated list of document types to generate')
     parser.add_argument('--resume', action='store_true', help='Resume from last checkpoint')
@@ -4229,7 +4302,7 @@ def main():
             config = yaml.safe_load(f)
         
         project_name = config['project']['name']
-        base_path = Path(config['paths']['base_dir'])
+        base_path = Path(config['paths']['byteforge_project_path'])
         
         orchestrator = RequirementsOrchestrator(
             project_name=project_name,

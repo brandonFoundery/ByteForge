@@ -3,10 +3,10 @@
 
 # Project Information
 project:
-  name: "LSOMigrator"
-  description: "LSM to CLX Data Migration System"
+  name: "AI-Augmented Development Platform"
+  description: "AI-Augmented Integrated Software Development and Workflow Management Platform"
   version: "1.0.0"
-  client: "ContractLogix"
+  client: "Internal Development"
 
 # Input/Output Paths (relative to project root for cross-platform compatibility)
 paths:
@@ -16,6 +16,9 @@ paths:
 
   # ByteForgeProjectPath = {ByteForgePath}\project
   byteforge_project_path: "../project"
+
+  # Base directory for resolving relative paths
+  base_dir: ".."
 
   # All generated content goes under ByteForgeProjectPath
   requirements_dir: "../project/requirements_artifacts"
@@ -41,19 +44,22 @@ llm:
   openai_model: "o3-mini"
   anthropic_model: "claude-sonnet-4-20250514"
   gemini_model: "gemini-2.5-pro-preview-06-05"
-  grok_model: "grok-beta"
+  grok_model: "grok-4"
 
   # Temperature for generation (0.0-1.0) - optimized for code generation
   temperature: 0.2
 
-  # Maximum tokens per request - increased for better context
-  max_tokens: 8000
+  # Maximum tokens per request - increased for better context and complete documents
+  max_tokens: 16000
 
   # Request timeout in seconds - optimized for claude-sonnet-4
   timeout: 240
 
   # Extended timeout for o3 models (seconds) - o3 models need longer due to reasoning
   o3_timeout: 300
+
+  # Extended timeout for Grok models (seconds) - Grok needs longer for reasoning
+  grok_timeout: 600
 
   # Claude Code specific settings
   claude_code:
@@ -213,7 +219,7 @@ traceability:
 # Monitoring Configuration
 monitoring:
   # Enable real-time monitoring
-  enabled: true
+  enabled: false
   
   # Update frequency in seconds
   refresh_rate: 2
@@ -424,8 +430,9 @@ code_regeneration:
 
   # Directories to purge during full regeneration
   purge_directories:
+    - "../project/requirements"
+    - "../project/generation_status"
     - "generated_documents"
-    - "generation_status"
     - "Requirements/consolidated-requirements"
     - "Requirements/invoice-requirements"
     - "Requirements/logistics-requirements"
@@ -471,7 +478,7 @@ application_builder:
     # Pass 4: Alternative Implementation Phase (Grok)
     grok_implementation:
       model: "grok"
-      model_name: "grok-beta"
+      model_name: "grok-4-0709"
       temperature: 0.1
       max_tokens: 8000
       timeout_seconds: 300

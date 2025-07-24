@@ -9,7 +9,8 @@
       "Bash(./dotnet-install.sh:*)",
       "Bash(export PATH=\"$HOME/.dotnet:$PATH\")",
       "Bash(dotnet --version)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

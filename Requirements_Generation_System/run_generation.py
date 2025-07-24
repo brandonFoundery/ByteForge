@@ -168,6 +168,12 @@ def get_api_key_info(provider: str):
             "url": "https://makersuite.google.com/app/apikey",
             "name": "Google"
         }
+    elif provider == "grok":
+        return {
+            "env_var": "GROK_API_KEY",
+            "url": "https://x.ai/api",
+            "name": "Grok (xAI)"
+        }
     return None
 
 
@@ -522,7 +528,7 @@ def manage_api_keys():
     console.print("\n[bold]API Key Management[/bold]")
     console.print("This will help you set up API keys for all supported LLM providers.")
 
-    providers = ["openai", "anthropic", "gemini"]
+    providers = ["openai", "anthropic", "gemini", "grok"]
     saved_keys = load_api_keys()
 
     for provider in providers:
@@ -929,14 +935,15 @@ def main():
 
     # Model selection for generation modes (UI style options don't need LLM)
     model_provider = None
-    if choice in ["1", "2", "3", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "21", "22", "23", "24"]:
+    if choice in ["0", "1", "2", "3", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "21", "22", "23", "24"]:
         console.print("\n[bold]Select LLM provider:[/bold]")
         console.print("  0. OpenAI o3 with reasoning")
         console.print("  1. OpenAI o3-mini with reasoning (Default)")
         console.print("  2. Anthropic Claude 4 Opus")
         console.print("  3. Google Gemini 2.5 Pro with thinking")
+        console.print("  4. Grok (xAI) with reasoning")
 
-        model_choice = input("\nEnter choice (0-3) or press Enter for default: ").strip()
+        model_choice = input("\nEnter choice (0-4) or press Enter for default: ").strip()
 
         if model_choice == "0":
             model_provider = "openai"
@@ -946,6 +953,8 @@ def main():
             model_provider = "anthropic"
         elif model_choice == "3":
             model_provider = "gemini"
+        elif model_choice == "4":
+            model_provider = "grok"
         else:
             model_provider = "openai"  # Default or explicit choice 1 (o3-mini)
 

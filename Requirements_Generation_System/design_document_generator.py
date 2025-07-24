@@ -87,6 +87,13 @@ class DesignDocumentGenerator:
             self.client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         elif self.model_provider == "anthropic":
             self.client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        elif self.model_provider == "grok":
+            # Grok uses OpenAI-compatible API with custom base URL
+            self.client = openai.OpenAI(
+                api_key=os.getenv("GROK_API_KEY"),
+                base_url="https://api.x.ai/v1",
+                timeout=600  # 10 minutes timeout for Grok
+            )
         else:
             raise ValueError(f"Unsupported model provider: {self.model_provider}")
     
@@ -184,6 +191,19 @@ class DesignDocumentGenerator:
                 ]
             )
             content = response.content[0].text
+            
+        elif self.model_provider == "grok":
+            # Grok uses OpenAI-compatible API
+            response = self.client.chat.completions.create(
+                model="grok-4-0709",
+                messages=[
+                    {"role": "system", "content": "You are an expert software architect creating detailed design documents for AI agents that will implement enterprise software features."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1,
+                max_tokens=4000
+            )
+            content = response.choices[0].message.content
         
         return content
     

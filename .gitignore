@@ -53,6 +53,18 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# .NET 8+ specific
+*.deps.json
+*.runtimeconfig.json
+*.runtimeconfig.dev.json
+
+# Entity Framework
+*.edmx.diagram
+*.edmx.sql
+Migrations/
+!Migrations/*Initial*.cs
+!Migrations/*Create*.cs
+
 # StyleCop
 StyleCopReport.xml
 
@@ -348,6 +360,49 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# User secrets
+**/secrets.json
+secrets/
+
+# Global Assembly Cache
+gac/
+
+# Temporary ASP.NET Core files
+*.runtimeconfig.cache
+project.lock.json
+project.assets.json
+
+# JetBrains Rider
+*.sln.iml
+.idea/
+
+# MonoDevelop/Xamarin Studio
+*.userprefs
+
+# .NET Analyzers
+*.sarif
+
+# Hot Reload
+**/.dotnet/
+
+# NuGet packages (global)
+**/.nuget/packages/
+
+# Publish profiles and settings
+**/Properties/PublishProfiles/
+**/Properties/launchSettings.json
+
+# SignalR TypeScript client
+**/wwwroot/lib/signalr/
+
+# Blazor
+**/bin/Debug/wwwroot/
+**/bin/Release/wwwroot/
+**/_framework/
+
 # ==============================================
 # Next.js Frontend
 # ==============================================
@@ -383,6 +438,11 @@ node_modules/
 # Next.js cache
 .next/
 .swc/
+
+# React/Next.js specific
+.react/
+.next-env
+react-app-env.d.ts
 
 # Misc
 .DS_Store
@@ -442,6 +502,19 @@ pnpm-debug.log*
 
 # Bundle analyzer
 .next/analyze/
+/FrontEnd/.next/analyze/
+
+# Next.js API routes cache
+.next/cache/
+/FrontEnd/.next/cache/
+
+# Webpack
+.webpack/
+webpack-stats.json
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
 
 # IDE and editor files
 .vscode/settings.json
@@ -620,8 +693,9 @@ temp/
 # ==============================================
 # Project Specific
 # ==============================================
-# Local project folder
+# Local project folder (code directory already added)
 /project/
+!/project/code/
 
 # Embedded git repositories
 metronic-react/

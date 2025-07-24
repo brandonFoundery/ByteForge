@@ -1,0 +1,23 @@
+{
+  "total_files": 18,
+  "files": {
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/LLM/LLMProviderFactoryTests.cs": 10,
+    "ByteForgeFrontend/project/code/Tests/Integration/Performance/LoadTestingSuite.cs": 12,
+    "ByteForgeFrontend/project/code/Tests/Integration/E2E/FullWorkflowIntegrationTests.cs": 92,
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/ProjectManagement/ProjectServiceTests.cs": 32,
+    "ByteForgeFrontend/project/code/Tests/TestHelpers/TestDatabaseHelper.cs": 8,
+    "ByteForgeFrontend/project/code/Tests/AIAgents/SpecializedAgentTests.cs": 42,
+    "ByteForgeFrontend/project/code/Tests/Security/Audit/ComplianceTests.cs": 16,
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/RequirementsGeneration/RequirementTraceabilityServiceTests.cs": 14,
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/RequirementsGeneration/RequirementsOrchestrationServiceTests.cs": 32,
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/RequirementsGeneration/BRDGeneratorTests.cs": 30,
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/RequirementsGeneration/PRDGeneratorTests.cs": 34,
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/Templates/TemplateManagementServiceTests.cs": 4,
+    "ByteForgeFrontend/project/code/Tests/Integration/Performance/PerformanceBenchmarkTests.cs": 36,
+    "ByteForgeFrontend/project/code/Tests/Integration/Security/SecurityIntegrationTests.cs": 30,
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/Templates/TemplateGeneratorTests.cs": 2,
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/DocumentGeneration/DocumentGenerationServiceTests.cs": 2,
+    "ByteForgeFrontend/project/code/Tests/Infrastructure/LLM/LLMProviderTests.cs": 18,
+    "ByteForgeFrontend/project/code/Tests/Security/Audit/AuditLoggingTests.cs": 2
+  }
+}
